@@ -1,0 +1,15 @@
+\begin{thebibliography}{xx}
+
+\harvarditem{Computer History~Museum}{2006}{moore2006interview}
+Computer History~Museum, Y.  \harvardyearleft 2006\harvardyearright , `Moore's law 40th anniversary with gordon moore'.
+\newline\harvardurl{https://www.youtube.com/watch?v=MH6jUSjpr-Q}
+
+\harvarditem{Moore}{1965}{moore1965cramming}
+Moore, G.  \harvardyearleft 1965\harvardyearright , `Cramming more components onto integrated circuits'.
+\newline\harvardurl{http://cva.stanford.edu/classes/cs99s/papers/moore-crammingmorecomponents.pdf}
+
+\harvarditem{Zhou}{2020}{zhou2020quantum}
+Zhou, B.  \harvardyearleft 2020\harvardyearright , `Quantum error correction codes'.
+\newline\harvardurl{https://wp.optics.arizona.edu/opti646/wp-content/uploads/sites/55/2020/12/QECC_Boyu_Zhou.pdf}
+
+\end{thebibliography}
