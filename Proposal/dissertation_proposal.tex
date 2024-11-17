@@ -5,7 +5,7 @@
 % before loading rl_project.
 
 % to compile a camera-ready version, add the [final] option, e.g.:
- \usepackage[final]{dissertation}
+\usepackage[final]{dissertation}
 
 % to avoid loading the natbib package, add option nonatbib:
 % \usepackage[nonatbib]{rl_project}
@@ -14,16 +14,21 @@
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
+\urlstyle{same}
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
-\usepackage{natbib}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{pgfgantt}
+\usepackage[english]{babel}
 
+% Set up natbib for Harvard style referencing
+\usepackage{natbib}
+\bibliographystyle{agsm}
+\setcitestyle{authoryear, round}
 
 \title{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems \\ [1ex] \large Project Proposal}
 
@@ -68,13 +73,13 @@ have allowed for improvement in industries such as health care, education, trans
 that have helped create a higher standard of living for many people around the world.
 
 However, researchers have begun to question the sustainability of Moore's Law as the size of transistors approach the
-atomic scale and the physical limits of Moore's law should be reached at some point in the 2020's.
-\citep{zhou2020quantum}
+atomic scale and the physical limits of Moore's law should be reached at some point in the 2020's
+\citep{zhou2020quantum}.
 
 Even Moore himself was quoted in 2006 saying "...the fact that materials are made of atoms is the fundamental limitation
 and it's not that far away...We're pushing up against some fairly fundamental limits so one of these days we're going to 
-have to have to stop making things smaller".
-\citep{moore2006interview}
+have to have to stop making things smaller"
+\citep{moore2006interview}.
 
 This has led to the exploration of alternative computing paradigms such as quantum computing.
 
@@ -104,8 +109,7 @@ Minimising this cost $C$ can be done by differentiating with respect to $R$ and 
 \end{equation}
 
 After removing constants $\log R = 1$ and solving for $R = e = 2.718$. Since as stated above, the radix $R$ must be an 
-integer then we are left with $R = 3$. Therefore, the ternary logic system is the most efficient.
-\citep{jaber2020mvl}
+integer then we are left with $R = 3$. Therefore, the ternary logic system is the most efficient \citep{jaber2020mvl}.
 
 In binary logic the binary set of values is $\mathbb{B} = \{0, 1\}$ while the symbol $\mathbb{T}$ will be used to denote 
 the ternary set. There exists a variety of valid ternary sets with the most natural being an extension of binary called
@@ -302,12 +306,9 @@ design and build a small emulator. It will also go most of the way on deciding o
 particular chip that I would like to emulate:
 
 \begin{itemize}
-  \item QEMU, a Fast and Portable Dynamic Translator (Fabrice Bellard 2005)
-  % \citep{bellard2005qemu}
-  \item Hello, GBA! Journey of making an emulator - part 1 (Michel Heily 2020)
-  % \citep{heily2020gameboy}
-  \item Hardware emulation for functional verification of K5 (Ganapathy 1996)
-  % \citep{ganapathy1996k5}
+  \item QEMU, a Fast and Portable Dynamic Translator \citep{bellard2005qemu}.
+  \item Hello, GBA! Journey of making an emulator - part 1 \citep{heily2020gameboy}.
+  \item Hardware emulation for functional verification of K5 \citep{ganapathy1996k5}.
 \end{itemize}
 
 \subsubsection{Ternary Research Papers}
@@ -316,9 +317,9 @@ In combination with the learning from my emulator research, I will then study re
 logic in order to bring the two fields together:
 
 \begin{itemize}
-  \item CMOS Implementation and Analysis of Ternary Arithmetic Logic (L. Duret Robert 2019)
-  \item Multiple-valued logic—its status and its future. (Hurst 1984)
-  \item Multiple-valued logic circuit design and data transmission intended for embedded design (2020)
+  \item CMOS Implementation and Analysis of Ternary Arithmetic Logic \citep{duret2019ternaryALU}.
+  \item Multiple-valued logic—its status and its future \citep{hurst1984mvl}.
+  \item Multiple-valued logic circuit design and data transmission intended for embedded design \citep{jaber2020mvl}.
 \end{itemize}
 
 \subsection{Development Resources}
@@ -331,25 +332,13 @@ be suitable for this project.
 
 \subsubsection{Hardware}
 
-Both the project report and emulators will be written and run on my personal laptop. The choice of Rust as the 
-programming language is due to its efficiency and memory safety while not being OS or 
-architecture dependant. I also do not anticipate the computation power 
-required to run them to be extensive due to the simple nature of these emulators relative to modern CPU's.
+Both the project report and emulators will be written and run on my personal laptop. I also do not anticipate 
+the computation power required to run them to be extensive due to the simple nature of these emulators 
+relative to modern CPU's.
 
-% \bibliography{references}
-\bibliographystyle{agsm}
+\newpage
 
-
-% \section*{References}
-% \small
-
-% \normalsize
-% \newpage
-% \section*{Appendices}
-% If you have additional content that you would like to include in the appendices, please do so here.
-% There is no limit to the length of your appendices, but we are not obliged to read them in their entirety while marking. The main body of your report should contain all essential information, and content in the appendices should be clearly referenced where it's needed elsewhere.
-% \subsection*{Appendix A: Example Appendix 1}
-% \subsection*{Appendix B: Example Appendix 2}
+\bibliography{references}
 
 % Moore, G.E. (1965) Cramming more components onto integrated circuits. Available at: http://cva.stanford.edu/classes/cs99s/papers/moore-crammingmorecomponents.pdf (Accessed: 14 November 2024). 
 % Duret-Robert, L. (2019) CMOS Implementation and Analysis of Ternary Arithmetic Logic Unit, Ternary alu. Available at: https://louis-dr.github.io/ternalu3.html (Accessed: 15 November 2024).

@@ -7,3 +7,5 @@ Proposal/*.fls
 Proposal/*.log
 Proposal/*.out
 Proposal/*.synctex.gz
+Proposal/*.bbl
+Proposal/*.blg
