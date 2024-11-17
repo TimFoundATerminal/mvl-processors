@@ -6,4 +6,4 @@ Proposal/*.fdb_latexmk
 Proposal/*.fls
 Proposal/*.log
 Proposal/*.out
-Proposal/*.synctex.gzs
+Proposal/*.synctex.gz
