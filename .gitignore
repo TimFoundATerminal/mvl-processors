@@ -1,1 +1,9 @@
 *.pptx
+
+Proposal/*.aux
+Proposal/disseration_proposal.bbl
+Proposal/*.fdb_latexmk
+Proposal/*.fls
+Proposal/*.log
+Proposal/*.out
+Proposal/*.synctex.gzs
