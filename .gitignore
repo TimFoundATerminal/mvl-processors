@@ -1,5 +1,7 @@
 *.pptx
 
+LitReview/examples
+
 Proposal/*.aux
 Proposal/disseration_proposal.bbl
 Proposal/*.fdb_latexmk
