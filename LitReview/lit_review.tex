@@ -1,0 +1,335 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+% Title formatting
+\title{\textbf{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems} \\ [1ex] \large Literature, Technology and Data Survey}
+
+\author{
+    Thomas Timmons\\
+    Bachelor Hons. Computer Science\\
+    \href{mailto:tlt33@bath.ac.uk}{tlt33@bath.ac.uk}
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Binary Logic has been the defacto standard for digital systems since the inception of the transistor. However, due to the 
+imminent end of Moore's Law, researchers have been looking for alternative methods to increase the performance of digital
+systems. This paper will attempt to realise the theoretical performance gains of ternary logic within an emulator. We can 
+then measure and project the performance on the assumption it should be possible to implement these circuits as hardware.
+
+\section{Literature and Technology Survey}
+
+James' Feedback\\
+\\
+Technology Survey:\\
+Ways to implement emulators in software.\\
+Review Tools and explain why implementation by yourself is 
+more comparable.\\
+
+
+This report will provide a comprehensive review of the literature and technology surrounding the following topics:
+\begin{itemize}
+    \item Ternary Algebra
+    \item Ternary Logic Gates
+    \item Previous Ternary Implementations
+    \item Emulation of Circuits
+\end{itemize}
+Each of these areas will be explored in detail while assessing the credibility and motivation for the work. The report will 
+aim to build the foundation on which the project will be based.\\
+
+\subsection{Ternary Algebra}
+
+The cost or complexity of number systems can be evaluated through representation efficiency,
+computational overhead, and implementation requirements.\\
+\\
+Representation efficiency refers to how digits or symbol are required represent any given range of values $N$, with the base of the number system represented 
+by $R$ and the necessary number of digits required is $d$ (rounded upwards to the nearest integer):
+
+\begin{equation}
+  N = R^{d}
+\end{equation}
+
+This directly impacts the memory usage and storage costs in a computing system.\\
+\\
+The computational overhead involves the complexity of performing basic arithmetic operations. Larger bases require the managing of more states, requiring the 
+processing of a larger set of possible combinations. The number of possible combinations is given by:
+
+\begin{equation}
+  C = R^{i}
+\end{equation}
+
+Where $i$ is the number of inputs for the operation and $R$ is the base of the number system as defined before. For example, the number of possible combinations 
+for addition is $C = R^{2}$ which in binary is $C = 2^{2} = 4$ creating the set $\{0+0, 0+1, 1+0, 1+1\}$. 
+In ternary the set would be $C = 3^{2} = \{0+0, 0+1, 0+2, 1+0, 1+1, 1+2, 2+0, 2+1, 2+2\} = 9$ which requires implementing more logic circuits to handle the 
+additional combinations.\\
+\\
+Implementation requirements consider the the practical aspects of building a system that works with a given base. This includes 
+error detection and correction using approaches such as Hamming Code's in binary logic % \citep{hamming1950error}.
+As this paper aims to explore the performance of ternary logic systems in comparison to binary systems within an emulator, we will not be considering 
+the practical challenges of implementing ternary logic in hardware.\\
+\\
+
+TODO: understand how this logic below impacts the performance of the ternary logic system.
+
+The cost or complexity of the system $C$ is directly proportional to the capacity of the digits $(R \cdot d)$.
+Therefore for some constants $k$ and $\log N$
+% \citep{hurst1984mvl}:
+
+\begin{equation}
+  C = k(R \cdot d) = k \left( R \cdot \frac{\log N}{\log R} \right) = k \log N \left(\frac{R}{\log R}\right)
+\end{equation}
+
+Minimising this cost $C$ can be done by differentiating with respect to $R$ and setting the result to $0$:
+
+\begin{equation}
+  \frac{\partial C}{\partial R} = 
+  k\log N\cdot\frac{d}{dR}\left[\frac{R}{\log R}\right] = 
+  k\log N\cdot \frac{\log R -1}{(\log R)^2} = 0
+\end{equation}
+
+After removing constants $\log R = 1$ and solving for $R = e = 2.718$. Since as stated above, the radix $R$ must be an 
+integer then we are left with $R = 3$. Therefore, the ternary logic system is the most efficient.\\
+% \citep{jaber2020mvl}.
+\\
+In binary logic set of possible values is denoted as $\mathbb{B} = \{0, 1\}$. Ternary numeral systems can either unbalanced 
+ternary values $\mathbb{T} = \{0, 1, 2\}$ or balanced ternary values $\mathbb{T} = \{-1, 0, 1\}$ with 
+a variety of glyphs used to represent the values where $\overline{1}$ or $T$ is sometimes used to represent $-1$.\\
+\\
+Balanced ternary has the elegant property that of representing negative numbers intrinsically without the need for a 
+separate signed bit. This leads to more symmetric carry rules due to a more even distribution around zero as shown in 
+Figure \ref{fig:ternary_ops}.\\
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.22\textwidth}
+        \centering   
+        \begin{tabular}{|c||c|c|c|}
+            \hline
+            $+$ & $T$ & $0$ & $1$ \\
+            \hline\hline
+            $T$ & $T1$ & $T$ & $0$ \\
+            \hline
+            $0$ & $T$ & $0$ & $1$ \\
+            \hline
+            $1$ & $0$ & $1$ & $1T$ \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}{0.22\textwidth}
+        \centering   
+        \begin{tabular}{|c||c|c|c|}
+            \hline
+            $-$ & $T$ & $0$ & $1$ \\
+            \hline\hline
+            $T$ & $0$ & $T$ & \textbf{$T1$} \\
+            \hline
+            $0$ & $1$ & $0$ & $T$ \\
+            \hline
+            $1$ & \textbf{$1T$} & $1$ & $0$ \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}{0.22\textwidth}
+        \centering   
+        \begin{tabular}{|c||c|c|c|}
+            \hline
+            $\times$ & $T$ & $0$ & $1$ \\
+            \hline\hline
+            $T$ & $1$ & $0$ & $T$ \\
+            \hline
+            $0$ & $0$ & $0$ & $0$ \\
+            \hline
+            $1$ & $T$ & $0$ & $1$ \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}{0.22\textwidth}
+        \centering   
+        \begin{tabular}{|c||c|c|c|}
+            \hline
+            $\div$ & $T$ & $1$ \\
+            \hline\hline
+            $T$ & $1$ & $T$ \\
+            \hline
+            $0$ & $0$ & $0$ \\
+            \hline
+            $1$ & $T$ & $1$ \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \caption{Balanced Ternary Single-Trit Addition, Subtraction, Multiplication and Division Tables}
+    \label{fig:ternary_ops}
+\end{figure}
+For subtraction and division which are not commutative, the first operand is given to the left of the table and the second at the top.\\
+\\
+Balanced ternary has a range of advantages when it comes to computation over binary logic such as the reduction in the carry rate for 
+addition/subtraction cuts down the carry rate in multi-digit multiplication as demonstrated in Figure \ref{fig:ternary_ops} with 
+the values being $2/9$ and $1/4$ respectively. Also notice that it is possible to perform subtraction by negating the second operand and 
+adding the two values together which will useful for the implementation of the ternary logic gates.\\
+\\
+Therefore, for this paper and emulator we will be using balanced ternary logic and any mention of `ternary logic` is referring to 
+`balanced ternary logic`.\\
+\\
+To calculate the value of a ternary number $T$ with a radix point in decimal we can use the following formula:\\
+TODO: this is not right and needs to be fixed.\\
+\begin{equation}
+    v = (a_{n}a_{n-1} \dotsb a_{0}.c_{1}c_{2}c_{3} \dotsb)_3 = \sum_{i=0}^{n} a_{i} 3^{i} + \sum_{i=1}^{\infty} c_{i} 3^{-i}
+\end{equation}
+Where $n$ and $m$ are the number of digits to the left and right of the radix point respectively and $v$ is the value in decimal given 
+a vector of values containing a radix point.\\
+
+To directly compare between the binary and ternary systems we need to consider how we can encode binary values into ternary values and 
+vice versa. Using continued fractions, the best approximations to rationals are given by convergents to the continued fraction, 
+alternating between overshooting and undershooting the target value.\\
+\\
+Since we are looking for $2^{a} \approx 3^{b}$ where $a,b \in \mathbb{N}$. Taking the logarithm of both sides we get:
+\begin{equation}
+    \frac{a}{b} \approx \frac{\log 3}{\log 2}
+\end{equation}
+Where $2^{a} < 3^{b}$ to ensure that the binary value can be encoded into a ternary value.\\
+
+\subsection{Ternary Logic Gates}
+
+Gates can be represented in matrix form where the following Binary AND truth table has the has the equivalent matrix representation:\\
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.2\textwidth}
+        \centering   
+        \begin{tabular}{|c||c|c|}
+            \hline
+            $A \times B$ & $0$ & $1$ \\
+            \hline\hline
+            $0$ & $0$ & $0$ \\
+            \hline
+            $1$ & $0$ & $1$ \\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}{0.2\textwidth}
+        \centering   
+        $\begin{bmatrix}
+            0 & 0 \\
+            0 & 1 \\
+        \end{bmatrix}$
+    \end{minipage}
+    \caption{Binary AND Gate Truth Table and Matrix Representation}
+    \label{fig:matrix_notation}
+\end{figure}
+
+\subsubsection{Single-Input Gates}
+
+Single-input gates can be represented as a vector of length $2$ for binary logic and length $3$ for ternary logic. Combination theory 
+shows that the number of possible combinations for a single input gate is $n^{n}$ where $n$ is the number of inputs. Therefore, the 
+number of possible combinations for a single input gate is $2^{2} = 4$ and $3^3 = 9$ for binary and ternary logic gates. Most of these 
+are redundant so only the useful gates have been listed in Figure \ref{fig:single_value_gates}.\\
+
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
+        \hline
+        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Identity, Buffer, Pass & Buffer & $A$ \\
+        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
+    \end{tabular}
+    \caption{Useful Single Value Binary Gates}
+    \label{fig:single_value_gates}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
+        \hline
+        $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & BUF & $A$ \\
+        $\begin{bmatrix}1 \\ 0 \\ T \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
+        $\begin{bmatrix}1 \\ 1 \\ T \\\end{bmatrix}$ & Positively Biased Inverter & PNOT & $\hat{A}$ \\
+        $\begin{bmatrix}1 \\ T \\ T \\\end{bmatrix}$ & Negatively Biased Inverter & NNOT & $\check{A}$ \\
+        % $\begin{bmatrix}1 \\ 0 \\ 1 \\\end{bmatrix}$ & Absolute & ABS & $|A|$ \\
+        % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Increment & INC & $A^{+}$ \\
+        % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Decrement & DEC & $A^{-}$ \\
+        % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Is Positive & ISP & $A^{=+}$ \\
+        % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Is Zero & ISZ & $A^{=0}$ \\
+        % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Is Negative & ISN & $A^{=-}$ \\
+    \end{tabular}
+    \caption{Useful Single Value Binary and Ternary Gates}
+    \label{fig:single_value_gates}
+\end{figure}
+
+\subsubsection{Two-Input Gates}
+
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
+        \hline
+        $\begin{bmatrix}0 & 0 \\ 0 & 1 \\\end{bmatrix}$ & And & AND & $A \times B$ \\
+        $\begin{bmatrix}0 & 1 \\ 1 & 1 \\\end{bmatrix}$ & Or & OR & $A + B$ \\
+        $\begin{bmatrix}0 & 1 \\ 1 & 0 \\\end{bmatrix}$ & Exclusive Or & XOR & $A \oplus B$ \\
+    \end{tabular}
+    \caption{Useful Two-Input Binary Gates}
+    \label{fig:two_value_bin_gates}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
+        \hline
+        $\begin{bmatrix}T & T & T \\ T & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & And/Minimum & AND & $A \times B$ \\
+        $\begin{bmatrix}T & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 1 \\\end{bmatrix}$ & Or/Maximum & OR & $A + B$ \\
+        $\begin{bmatrix}T & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \\\end{bmatrix}$ & Consensus & CONS & $A \boxtimes B$ \\
+        $\begin{bmatrix}T & T & 0 \\ T & 0 & 1 \\ 0 & 1 & 1 \\\end{bmatrix}$ & Any & ANY & $A \boxplus B$ \\
+        $\begin{bmatrix}1 & 0 & T \\ 0 & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & Multiplication & MUL & $A \otimes B$ \\
+        $\begin{bmatrix}1 & T & 0 \\ T & 0 & 1 \\ 0 & 1 & T \\\end{bmatrix}$ & Addition & SUM & $A \oplus B$ \\
+    \end{tabular}
+    \caption{Useful Two-Input Ternary Gates}
+    \label{fig:two_value_ter_gates}
+\end{figure}
+
+All of the gates in Figure \ref{fig:two_value_bin_gates} and \ref{fig:two_value_ter_gates} have inverted equivalents that can be
+created by negating the output will be denoted with an N proceeding the gate name. e.g. NAND, NOR, NANY.\\
+
+\subsubsection{Assumptions}
+
+Researchers have attempted to investigate this field using two distinct approaches. One from a more theoretical perspective
+or looking at the theoretical gains of ternary logic while others taking a more practical approach. Ternary test benches
+have been created in order to attempt to validate the theoretical performance gains.
+
+However, the underlying implementations of the basic ternary logic is underpinned by Complementary Metal Oxide 
+Semiconductor (CMOS) along with it's PMOS and MNOS. Thus the fundamental reliance on the binary nature of the underlying 
+hardware limits the performance gains that can be achieved.
+For this project we will assume that comparable binary and ternary logic gates have the same propagation delay. This will allow us to
+to directly compare the performance of the two systems. Implications of this assumption will be discussed in the conclusion.\\
+
+\begin{equation}
+\begin{aligned}
+  AND &\equiv \mathbb{T}AND \\
+  OR &\equiv \mathbb{T}OR \\
+  NOT &\equiv \mathbb{T}NOT
+\end{aligned}
+\end{equation}
+
+This will allow us to create a basic binary and ternary emulator whose performance will be directly comparable.
+
+\subsection{Previous Ternary Implementations}
+
+\subsection{Emulation of Circuits}
+
+\newpage
+
+% \bibliography{references}
+
+\end{document}
