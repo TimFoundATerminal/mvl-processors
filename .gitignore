@@ -1,13 +1,13 @@
 *.pptx
 
 LitReview/examples
+Proposal/examples
 
-Proposal/*.aux
-Proposal/disseration_proposal.bbl
-Proposal/*.fdb_latexmk
-Proposal/*.fls
-Proposal/*.log
-Proposal/*.out
-Proposal/*.synctex.gz
-Proposal/*.bbl
-Proposal/*.blg
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.bbl
+*.blg
