@@ -9,6 +9,8 @@
 \usepackage{color}
 \usepackage{amsfonts}
 \usepackage{amsmath}
+\usepackage{csquotes}
+\usepackage{epigraph}
 
 % Title formatting
 \title{\textbf{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems} \\ [1ex] \large Literature, Technology and Data Survey}
@@ -28,7 +30,8 @@
 Binary Logic has been the defacto standard for digital systems since the inception of the transistor. However, due to the 
 imminent end of Moore's Law, researchers have been looking for alternative methods to increase the performance of digital
 systems. This paper will attempt to realise the theoretical performance gains of ternary logic within an emulator. We can 
-then measure and project the performance on the assumption it should be possible to implement these circuits as hardware.
+then measure and project the performance on the assumption it should be possible to implement these circuits in hardware 
+and discuss possible implications.
 
 \section{Literature and Technology Survey}
 
@@ -38,7 +41,6 @@ Technology Survey:\\
 Ways to implement emulators in software.\\
 Review Tools and explain why implementation by yourself is 
 more comparable.\\
-
 
 This report will provide a comprehensive review of the literature and technology surrounding the following topics:
 \begin{itemize}
@@ -193,13 +195,40 @@ a vector of values containing a radix point.\\
 
 To directly compare between the binary and ternary systems we need to consider how we can encode binary values into ternary values and 
 vice versa. Using continued fractions, the best approximations to rationals are given by convergents to the continued fraction, 
-alternating between overshooting and undershooting the target value.\\
+alternating between overshooting and undershooting the target value
+% \citep{davenport2008arithmetic}.\\
 \\
-Since we are looking for $2^{a} \approx 3^{b}$ where $a,b \in \mathbb{N}$. Taking the logarithm of both sides we get:
+Since we are looking for $2^{a} \approx 3^{b}$ where $a,b \in \mathbb{N}$. We can take the logarithm of both sides to get the following:
 \begin{equation}
     \frac{a}{b} \approx \frac{\log 3}{\log 2}
 \end{equation}
 Where $2^{a} < 3^{b}$ to ensure that the binary value can be encoded into a ternary value.\\
+\\
+This continued fraction expansion can be calculated by computing the convergents which are as follows:
+\begin{equation}
+    \frac{\log 3}{\log 2} = a_0 + \frac{1}{a_1 + \frac{1}{a_2 + \frac{1}{a_3 + \dotsb}}}
+\end{equation}
+\begin{equation}
+    {a_0; a_1, a_2, a_3, a_4 \dotsb} = {1; 1, 1, 2, 2, \dotsb}
+\end{equation}
+
+This gives us:
+\begin{align*}
+    \frac{2}{1} &= 1 + \frac{1}{1} \Rightarrow 2^{2} \approx 3^{1} \text {  } (\text{but ternary worse than binary: } 2^{2} > 3^{1})\\
+    \frac{3}{2} &= 1 + \frac{1}{1 + \frac{1}{1}} \Rightarrow 2^{2} \approx 3^{1} \\
+    \frac{8}{5} &= 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1}}} \Rightarrow 2^{2} \approx 3^{1} \text {  } (\text{but ternary worse than binary: } 2^{2} > 3^{1})\\
+    \frac{19}{12} &= 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{2}}}} \Rightarrow 2^{2} \approx 3^{1}
+\end{align*}
+
+$\frac{19}{12}$ provides a good approximation with an efficiency of 98.65\%. However using a 19 bit word is not practical due to it being 
+too large.\\
+\\
+$\frac{11}{7}$ also provides a good approximation with an efficiency of 93.64\%. This is created by summing the 2nd and 3rd convergents
+$\frac{3+8}{2+5}$ which provides a good balance between efficiency and word size.\\
+\\
+This is the same radio that Micron uses to encode 11 bits of binary data into 7 trits in their GDDR7 memory bus using PAM3.
+% \citep{micron2024gddr7}.\\
+For our emulator we will use the same ratio in an attempt to simulate the performance potential of running this bus directly into a ternary ALU.\\
 
 \subsection{Ternary Logic Gates}
 
@@ -245,7 +274,7 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
         $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
     \end{tabular}
     \caption{Useful Single Value Binary Gates}
-    \label{fig:single_value_gates}
+    \label{fig:single_value_bin_gates}
 \end{figure}
 
 \begin{figure}[h]
@@ -265,7 +294,7 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
         % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Is Negative & ISN & $A^{=-}$ \\
     \end{tabular}
     \caption{Useful Single Value Binary and Ternary Gates}
-    \label{fig:single_value_gates}
+    \label{fig:single_value_tern_gates}
 \end{figure}
 
 \subsubsection{Two-Input Gates}
@@ -304,10 +333,10 @@ created by negating the output will be denoted with an N proceeding the gate nam
 
 \subsubsection{Assumptions}
 
-Researchers have attempted to investigate this field using two distinct approaches. One from a more theoretical perspective
-or looking at the theoretical gains of ternary logic while others taking a more practical approach. Ternary test benches
-have been created in order to attempt to validate the theoretical performance gains.
-
+Researchers have attempted to investigate this field using two distinct approaches. One is from a more theoretical perspective
+where they investigate the potential gains of ternary logic. The other is from a more practical approach where 
+Ternary test benches have been created in order to attempt to validate the theoretical performance gains.\\
+\\
 However, the underlying implementations of the basic ternary logic is underpinned by Complementary Metal Oxide 
 Semiconductor (CMOS) along with it's PMOS and MNOS. Thus the fundamental reliance on the binary nature of the underlying 
 hardware limits the performance gains that can be achieved.
@@ -325,6 +354,57 @@ to directly compare the performance of the two systems. Implications of this ass
 This will allow us to create a basic binary and ternary emulator whose performance will be directly comparable.
 
 \subsection{Previous Ternary Implementations}
+
+Setun was a sequential computer developed in 1958 by Sergei Sobolev and Nikolay Brusentov at Moscow State University. It was the most 
+modern ternary computer using the balanced ternary numeral system consisting of 81 words of memory where each word was 
+composed of 18 trits.  It has a one-address architecture with one index register and was able to handle both positive and 
+negative floating point calculations.\\ 
+% citep{weatherby2018ternary}.\\
+% cite{brousentsov2002development}.\\
+\\
+The instruction set consisted of 24 instructions including performing mantissa normalisation for floating point calculations,
+shift, combined multiplication and addition.
+\\
+In 1970, the Setun-70 was developed that built on idea of its predecessor. It had a short instruction set that was developed 
+and implemented independently from the RISC architecture principles but did implement Dijkstra's ideas of of structured 
+programming. Both of these computers where only used for research purposes and were never used commercially. The interval range 
+for the mantissa value of a normalised number was changed to $\{0.5 < |m| < 1.5\}$ whereas it had been $\{0.1666... < |m| < 0.5\}$ 
+in its predecessor.\\
+% cite{brousentsov2002development}.\\
+\\
+During a thawing period of the Cold War, visits were allowed between scientists from the different nations resulting in 
+TERNAC. This was an emulator written in FORTRAN by the State University of New York at Buffalo and was able to deliver 
+on technical promise of ternary systems. As Setun when implementing the hardware was lacking a switch that could encode 
+the two values in one setting and instead used two separate gates.\\
+%citep{weatherby2018ternary}.\\
+\\
+Weatherby summarises this history with the following statement:
+\begin{displayquote}
+    "Ternary computing, in other words, has always been emulation rather than implementation—its history is in large part imaginary."
+\end{displayquote}
+And while his article is not a scientific paper and is written in a stylised and opinionated manner, it does raise a valid point.  
+Fundamentally it may be impossible to implement a true ternary system in hardware due to fundamental laws around digital logic. 
+However, we need not concern ourselves as we are only looking at the implications of ternary logic should it be possible 
+to implement in hardware.\\
+\\
+Brousentov takes an opposing point of view in his paper where he argues that the Setun computer did realise the theoretical 
+benefits despite the two separate gates:
+% citep{brousentsov2002development}.\\
+\begin{displayquote}
+    "This experience convincingly confirms practical preferences of ternary digital technique."
+\end{displayquote}
+This also should be viewed with caution as the paper was written by Russian scientists in 2002 and while it gives a few details on the 
+architecture of Setun it does not contain any quantitative measures. It does contain a lot uncited claims with a heavy use of adjectives of 
+almost a persuasive nature.\\
+\\
+Ternary logic is used to encode 3 different pulse amplitudes on a single wire on the memory bus of NVIDIA 30 series GPUs and will be used in 
+their next generation of GPUs and is currently in development by Micron.
+% \citep{micron2024gddr7}.\\
+PAM3 encoding is used to increase the single pin throughput 32Gb/s compared to its predecessor GDDR6 which had a throughput of 18Gb/s. This 
+is achieved by encoding the sequential binary values into ternary values represented by 3 different voltage levels. This allows for 3 bits 
+of information to be transmitted on a single wire within two clock cycles (1.5 bits per cycle).\\
+% \citep{micron2024gddr7}.\\
+% \citep{nam2024low}.\\
 
 \subsection{Emulation of Circuits}
 

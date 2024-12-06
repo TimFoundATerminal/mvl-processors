@@ -23,10 +23,6 @@ fn xor_gate(a: bool, b: bool) -> bool {
     a ^ b
 }
 
-// fn not_gate(a: bool) -> bool {
-//     !a
-// }
-
 // 1-bit full adder implementation
 fn full_adder(a: bool, b: bool, carry: bool) -> FullAdderOutput {
     // First XOR to be used in both sum and carry calculations
