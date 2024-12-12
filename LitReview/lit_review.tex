@@ -29,9 +29,9 @@
 
 Binary Logic has been the defacto standard for digital systems since the inception of the transistor. However, due to the 
 imminent end of Moore's Law, researchers have been looking for alternative methods to increase the performance of digital
-systems. This paper will attempt to realise the theoretical performance gains of ternary logic within an emulator. We can 
-then measure and project the performance on the assumption it should be possible to implement these circuits in hardware 
-and discuss possible implications.
+systems. Multi-valued logic (MVL) has emerged as appealing subject where this paper will attempt to realise the theoretical 
+performance gains of ternary logic within an emulator. We can then measure and project the performance on the assumption 
+it should be possible to implement these circuits in hardware and discuss possible implications.
 
 \section{Literature and Technology Survey}
 
@@ -41,12 +41,21 @@ Technology Survey:\\
 Ways to implement emulators in software.\\
 Review Tools and explain why implementation by yourself is 
 more comparable.\\
-
+\\
+Mention the implications of different bases being implemented 
+in optical computing.\\
+\\
+A data transfer vs. computing in ternary. Some logic in optical 
+(potentially arithmetic)\\
+\\
+floating point could be looked to done later.\\
+\\
 This report will provide a comprehensive review of the literature and technology surrounding the following topics:
 \begin{itemize}
     \item Ternary Algebra
     \item Ternary Logic Gates
     \item Previous Ternary Implementations
+    \item Alterative uses of Ternary Values
     \item Emulation of Circuits
 \end{itemize}
 Each of these areas will be explored in detail while assessing the credibility and motivation for the work. The report will 
@@ -215,9 +224,9 @@ This continued fraction expansion can be calculated by computing the convergents
 This gives us:
 \begin{align*}
     \frac{2}{1} &= 1 + \frac{1}{1} \Rightarrow 2^{2} \approx 3^{1} \text {  } (\text{but ternary worse than binary: } 2^{2} > 3^{1})\\
-    \frac{3}{2} &= 1 + \frac{1}{1 + \frac{1}{1}} \Rightarrow 2^{2} \approx 3^{1} \\
-    \frac{8}{5} &= 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1}}} \Rightarrow 2^{2} \approx 3^{1} \text {  } (\text{but ternary worse than binary: } 2^{2} > 3^{1})\\
-    \frac{19}{12} &= 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{2}}}} \Rightarrow 2^{2} \approx 3^{1}
+    \frac{3}{2} &= 1 + \frac{1}{1 + \frac{1}{1}} \Rightarrow 2^{3} \approx 3^{2} \\
+    \frac{8}{5} &= 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1}}} \Rightarrow 2^{8} \approx 3^{5} \text {  } (\text{but ternary worse than binary: } 2^{8} > 3^{5})\\
+    \frac{19}{12} &= 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{2}}}} \Rightarrow 2^{19} \approx 3^{12}
 \end{align*}
 
 $\frac{19}{12}$ provides a good approximation with an efficiency of 98.65\%. However using a 19 bit word is not practical due to it being 
@@ -226,7 +235,7 @@ too large.\\
 $\frac{11}{7}$ also provides a good approximation with an efficiency of 93.64\%. This is created by summing the 2nd and 3rd convergents
 $\frac{3+8}{2+5}$ which provides a good balance between efficiency and word size.\\
 \\
-This is the same radio that Micron uses to encode 11 bits of binary data into 7 trits in their GDDR7 memory bus using PAM3.
+This is the same ratio that Micron uses to encode 11 bits of binary data into 7 trits in their GDDR7 memory bus using PAM3.
 % \citep{micron2024gddr7}.\\
 For our emulator we will use the same ratio in an attempt to simulate the performance potential of running this bus directly into a ternary ALU.\\
 
@@ -397,16 +406,61 @@ This also should be viewed with caution as the paper was written by Russian scie
 architecture of Setun it does not contain any quantitative measures. It does contain a lot uncited claims with a heavy use of adjectives of 
 almost a persuasive nature.\\
 \\
-Ternary logic is used to encode 3 different pulse amplitudes on a single wire on the memory bus of NVIDIA 30 series GPUs and will be used in 
-their next generation of GPUs and is currently in development by Micron.
+A more recent publication by Zahoor et al. in 2024 provides a more favourable view on the possible future of ternary. 
+The paper discusses the benefits and possible implementations of ternary logic using novel post-CMOS devices due to advances in 
+material science and nanotechnology. It cites several researcher who have reported ternary arithmetic logic unit designs which 
+provide increased computation capability along with high energy efficiency and reduced interconnect complexity.\\
+% citep{zahoor2024design}.\\
+\\
+One example of these papers from 2009 by Keshavarzian et al. details the design of a ternary full adder (TALU) 
+using Carbon Nanotube Field Effect Transistors (CNTFET) to get a $53\%$ increase in Power-Delay Product (PDP) 
+at $250$MHz over previous CNTFET designs but does not make a direct comparison to a binary equivalent.\\
+% \citep{keshavarzian2014novel}
+
+\subsection{Alterative Uses of Ternary Values}
+
+The use of multiple values has been implemented in industrial solutions due to limitations in bandwidth because of interconnection difficulties. 
+This relates to the shoreline problem where if you consider a chip of side length $n$ with a perimeter 
+of $4n$ and an area of $n^{2}$. If we double the side length to $2n$ the perimeter becomes $8n$ and the area becomes $4n^{2}$. The perimeter 
+has doubled but the area has quadrupled. This also applies to the number of pins on a chip where you begin to run into interconnection 
+difficulties.\\
+% \citep{zahoor2024design}.
+Inherently increasing the base of a number system will reduce the demand for bandwidth resulting in a smaller necessary interface area 
+due to more information being transmitted per pin.\\
+% \citep{zahoor2024design}.
+\\
+NVIDIA 30 Series GPU's make use of ternary values to encode 3 different pulse amplitudes on a single wire within the memory bus of their cards 
+and will be used in their next generation of GPUs and is currently in development by Micron.
 % \citep{micron2024gddr7}.\\
 PAM3 encoding is used to increase the single pin throughput 32Gb/s compared to its predecessor GDDR6 which had a throughput of 18Gb/s. This 
 is achieved by encoding the sequential binary values into ternary values represented by 3 different voltage levels. This allows for 3 bits 
 of information to be transmitted on a single wire within two clock cycles (1.5 bits per cycle).\\
 % \citep{micron2024gddr7}.\\
 % \citep{nam2024low}.\\
+\\
+TODO: Discuss optical computing and how light can be used to represent ternary values.\\
 
 \subsection{Emulation of Circuits}
+
+There exist many tools that can be used to emulate circuits but the following have been evaluated for this project:
+\begin{itemize}
+    \item \textbf{Circuit Diagram} is a free online tool that allows for the design and simulation of electronic circuits.
+    \item \textbf{Logisim} is a free and open-source software that is available on Windows, Mac and Linux and allows for the design and simulation of digital logic circuits.
+    \item \textbf{QUCS} (Quite Universal Circuit Simulator) is a free software that allows for the simulation of electrical circuits.
+\end{itemize}
+Other propriety tools can be used to emulate circuits but these require licenses and are not free to use, 
+therefore will not be considered for this project.\\
+\\
+Both QUCS and Circuit Diagram are more focused on the simulation of electrical circuits while Logisim is more focused on the implementation of 
+logic gates from a educational perspective. Circuit Diagram is a good tool for creating simple circuits but is not suited to larger 
+projects due to its online nature and lack of features. Within Logisim it is possible to simulate ternary behavior by using multiple binary gates together 
+with multiple bits needed to represent the possible states making the designs more complex than needed. QUCS is more flexible and could also 
+achieve the desired goal using analog components it is again not suited to purpose. Voltage levels for each ternary value along with switching 
+thresholds would create more boilerplate than necessary.\\
+
+HDL (Hardware Description Language) simulators are software tools that allow for the design and verification digital circuit designs. They utalise 
+languages such as VHDL and Verilog to describe the behavior of the circuit. Verilog allows you to define the behavior of a module at 3 different 
+levels of abstraction; Gate Level, Dataflow and Behavioural with the latter being the most abstract.\\
 
 \newpage
 

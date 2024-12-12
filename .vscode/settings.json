@@ -5,11 +5,13 @@
         "CMOS",
         "convergents",
         "GDDR",
+        "Logisim",
         "MNOS",
         "natbib",
         "NNOT",
         "PMOS",
         "PNOT",
+        "QUCS",
         "realised",
         "Setun",
         "summarises",
@@ -20,6 +22,8 @@
         "trits",
         "txor",
         "uncited",
+        "Verilog",
+        "VHDL",
         "Weatherby"
     ]
 }
