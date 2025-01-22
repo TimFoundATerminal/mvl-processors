@@ -14,3 +14,7 @@ Proposal/examples
 
 # add .vscode to ignore list
 .vscode
+
+# Simulation outputs
+*.vvp
+*.vcd
