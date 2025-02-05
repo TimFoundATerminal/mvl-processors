@@ -54,19 +54,19 @@ module unified_system_tb;
 
         @(posedge clock);
         prog_addr = 5'd0;
-        prog_data_in = 8'b11000000;  // LOAD mem[16] to R0
+        prog_data_in = 8'b11011111;  // LOAD mem[16] to R0
         
-        @(posedge clock);
-        prog_addr = 5'd1;
-        prog_data_in = 8'b11000001;  // LOAD mem[17] to R1
+        // @(posedge clock);
+        // prog_addr = 5'd1;
+        // prog_data_in = 8'b11000001;  // LOAD mem[17] to R1
         
-        @(posedge clock);
-        prog_addr = 5'd2;
-        prog_data_in = 8'b00101000;  // ADD R0, R1
+        // @(posedge clock);
+        // prog_addr = 5'd2;
+        // prog_data_in = 8'b00101000;  // ADD R0, R1
         
-        @(posedge clock);
-        prog_addr = 5'd3;
-        prog_data_in = 8'b11110010;  // STORE R0 to mem[18]
+        // @(posedge clock);
+        // prog_addr = 5'd3;
+        // prog_data_in = 8'b11110010;  // STORE R0 to mem[18]
         
         // End program loading
         @(posedge clock);

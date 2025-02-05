@@ -43,18 +43,19 @@ module cpu_core (
                 
                 1: begin // Decode and Execute
                     case (opcode)
-                        3'b000: alu_out <= register_file[reg_dest] - register_file[reg_src];
-                        3'b001: alu_out <= register_file[reg_dest] + register_file[reg_src];
-                        3'b010: alu_out <= register_file[reg_dest] & register_file[reg_src];
-                        3'b011: alu_out <= register_file[reg_dest] | register_file[reg_src];
-                        3'b100: alu_out <= register_file[reg_dest] ^ register_file[reg_src];
+                        3'b000: alu_out <= register_file[reg_dest] - register_file[reg_src]; // MOVE
+                        3'b001: alu_out <= ~register_file[reg_src];                          // NOT (Requires 3 in ternary logic)
+                        3'b010: alu_out <= register_file[reg_dest] & register_file[reg_src]; // AND
+                        3'b011: alu_out <= register_file[reg_dest] | register_file[reg_src]; // OR
+                        3'b100: alu_out <= register_file[reg_dest] ^ register_file[reg_src]; // XOR
+                        // other instructions...
                         3'b110: begin // LOAD
-                            mem_addr <= mem_offset;
+                            mem_addr <= register_file[reg_src][4:0];
                             state <= 4; // Extra state for memory read
                         end
                         3'b111: begin // STORE
-                            mem_addr <= mem_offset;
-                            mem_write_data <= register_file[reg_src];
+                            mem_addr <= register_file[reg_src][4:0];
+                            mem_write_data <= register_file[reg_dest]; 
                             mem_write <= 1;
                         end
                     endcase

@@ -49,10 +49,10 @@ module unified_system (
         .clock(clock),
         .reset(reset),
         .start_execution(start_execution && load_done),
-        .mem_read_data(memory_read_data),
-        .mem_addr(cpu_mem_addr),
-        .mem_write_data(cpu_mem_write_data),
-        .mem_write(cpu_mem_write),
+        .mem_read_data(memory_read_data),                   // Comes from the RAM
+        .mem_addr(cpu_mem_addr),                            // Goes to the RAM
+        .mem_write_data(cpu_mem_write_data),                // Goes to the RAM
+        .mem_write(cpu_mem_write),                          // Goes to the RAM
         .alu_out(alu_out)
     );
 
@@ -60,10 +60,10 @@ module unified_system (
     ram_32x8 memory (
         .clock(clock),
         .reset(reset),
-        .write_enable(memory_write),
-        .address(memory_address),
-        .data_in(memory_write_data),
-        .data_out(memory_read_data)
+        .write_enable(memory_write),                        // Connected to CPU's mem_write
+        .address(memory_address),                           // Connected to CPU's mem_addr
+        .data_in(memory_write_data),                        // Connected to CPU's mem_write_data
+        .data_out(memory_read_data)                         // Connected to CPU's mem_read_data
     );
 
 endmodule
