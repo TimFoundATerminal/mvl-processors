@@ -3,32 +3,51 @@ module cpu_core (
     input wire clock,
     input wire reset,
     input wire start_execution,
-    input wire [7:0] mem_read_data,
+    input wire [15:0] mem_read_data,
     output reg [4:0] mem_addr,
-    output reg [7:0] mem_write_data,
+    output reg [15:0] mem_write_data,
     output reg mem_write,
-    output reg [7:0] alu_out
+    output reg [15:0] alu_out
 );
+    // Instruction types:
+    // R-type: [15:11] opcode, [10:8] Ta, [7:5] Tb, [4:0] unused
+    // I-type: [15:11] opcode, [10:8] Ta, [7:0] immediate
+    // M-type: [15:11] opcode, [10:8] Ta, [7:5] Tb, [4:1] shift, [0] unused
+
+    // Opcodes (3 bits)
+    localparam MV    = 5'b00000;
+    localparam NOT   = 5'b00010; // Double check
+    localparam AND   = 5'b00100;
+    localparam OR    = 5'b00101;
+    localparam XOR   = 5'b00110;
+    localparam ADD   = 5'b00111;
+    localparam SUB   = 5'b01000;
+    localparam COMP  = 5'b01011;
+    localparam LUI   = 5'b10000;
+    localparam LI    = 5'b10001;
+    localparam LOAD  = 5'b10110;
+    localparam STORE = 5'b10111;
 
     // Registers
-    reg [7:0] register_file [0:3];
+    reg [15:0] register_file [0:7];
     reg [2:0] state;
-    reg [4:0] program_counter;
+    reg [15:0] program_counter;
     
     // Instruction decode
-    wire [7:0] instruction = mem_read_data;
-    wire [2:0] opcode = instruction[7:5];
-    wire [1:0] reg_dest = instruction[4:3];
-    wire [1:0] reg_src = instruction[2:1];
-    wire [4:0] mem_offset = {2'b00, instruction[2:0]};
+    wire [15:0] instruction = mem_read_data;
+    wire [4:0] opcode = instruction[15:11];
+    wire [1:0] reg_dest = instruction[10:8];
+    wire [1:0] reg_src = instruction[7:5];
+    wire [7:0] immediate = instruction[7:0];
+    wire [3:0] shift = instruction[4:1];
     
     always @(posedge clock or posedge reset) begin 
         if (reset) begin
             program_counter <= 0;
-            register_file[0] <= 0;
-            register_file[1] <= 0;
-            register_file[2] <= 0;
-            register_file[3] <= 0;
+            // loop through all registers and set them to 0
+            for (i = 0; i < 8; i = i + 1) begin
+                register_file[i] <= 16'b0;
+            end
             alu_out <= 0;
             state <= 0;
             mem_write <= 0;
@@ -43,27 +62,31 @@ module cpu_core (
                 
                 1: begin // Decode and Execute
                     case (opcode)
-                        3'b000: alu_out <= register_file[reg_dest] - register_file[reg_src]; // MOVE
-                        3'b001: alu_out <= ~register_file[reg_src];                          // NOT (Requires 3 in ternary logic)
-                        3'b010: alu_out <= register_file[reg_dest] & register_file[reg_src]; // AND
-                        3'b011: alu_out <= register_file[reg_dest] | register_file[reg_src]; // OR
-                        3'b100: alu_out <= register_file[reg_dest] ^ register_file[reg_src]; // XOR
-                        // other instructions...
-                        3'b110: begin // LOAD
-                            mem_addr <= register_file[reg_src][4:0];
+                        MV: alu_out <= register_file[reg_src]; // MOVE
+                        NOT: alu_out <= ~register_file[reg_src]; // NOT (Requires 3 in ternary logic)
+                        AND: alu_out <= register_file[reg_dest] & register_file[reg_src]; // AND
+                        OR: alu_out <= register_file[reg_dest] | register_file[reg_src]; // OR
+                        XOR: alu_out <= register_file[reg_dest] ^ register_file[reg_src]; // XOR
+                        ADD: alu_out <= register_file[reg_dest] + register_file[reg_src]; // ADD
+                        SUB: alu_out <= register_file[reg_dest] - register_file[reg_src]; // SUB
+                        COMP: alu_out <= register_file[reg_dest] == register_file[reg_src]; // COMPARE
+                        LUI: alu_out <= {immediate, 8'b0}; // Load Upper Immediate
+                        LI: alu_out <= {register_file[reg_dest][15:8], immediate}; // Load Immediate
+                        LOAD: begin // LOAD
+                            mem_addr <= register_file[reg_src] + shift;
                             state <= 4; // Extra state for memory read
                         end
-                        3'b111: begin // STORE
+                        STORE: begin // STORE
                             mem_addr <= register_file[reg_src][4:0];
                             mem_write_data <= register_file[reg_dest]; 
                             mem_write <= 1;
                         end
                     endcase
-                    if (opcode != 3'b110) state <= 2;
+                    if (opcode != LOAD) state <= 2;
                 end
                 
                 2: begin // Write Back
-                    if (opcode <= 3'b100) begin
+                    if (opcode <= LOAD) begin
                         register_file[reg_dest] <= alu_out;
                     end
                     mem_write <= 0;

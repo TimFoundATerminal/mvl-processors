@@ -28,34 +28,34 @@ parameter VSS = -5.0;   // Negative supply
 23 Instructions
 3 trit opcode
 6 trit operand
-2 trit register (8 registers total)
+2 trit register address (8 registers total < 9)
 
-| Type | 9-trit instructions | Operation |
-| ---- | ------------------- | --------- |
-| R | MV Ta,Tb | TRF[Ta] = TRF[Tb] |
-| R | PTI Ta,Tb | TRF[Ta] = PTI(TRF[Tb]) |
-| R | NTI Ta,Tb | TRF[Ta] = NTI(TRF[Tb]) |
-| R | STI Ta,Tb | TRF[Ta] = STI(TRF[Tb]) |
-| R | AND Ta,Tb | TRF[Ta] = TRF[Ta] & TRF[Tb] |
-| R | OR Ta,Tb | TRF[Ta] = TRF[Ta]  TRF[Tb] |
-| R | XOR Ta,Tb | TRF[Ta] = TRF[Ta] +o TRF[Tb] |
-| R | ADD Ta,Tb | TRF[Ta] = TRF[Ta] + TRF[Tb] |
-| R | SUB Ta,Tb | TRF[Ta] = TRF[Ta] - TRF[Tb] |
-| R | SR Ta,Tb | TRF[Ta] = TRF[Ta] >> TRF[Tb][1:0] |
-| R | SL Ta,Tb | TRF[Ta] = TRF[Ta] << TRF[Tb][1:0] |
-| R | COMP Ta,Tb | TRF[Ta] = compare(TRF[Ta],TRF[Tb]) |
-| I | ANDI Ta,imm | TRF[Ta] = TRF[Ta] & imm[2:0] |
-| I | ADDI Ta,imm | TRF[Ta] = TRF[Ta] + imm[2:0] |
-| I | SRI Ta,imm | TRF[Ta] = TRF[Ta] >> imm[1:0] |
-| I | SLI Ta,imm | TRF[Ta] = TRF[Ta] << imm[1:0] |
-| I | LUI Ta,imm | TRF[Ta] = {imm[3:0],00000} |
-| I | LI Ta,imm | TRF[Ta] = {TRF[Ta][8:5],imm[4:0]} |
-| B | BEQ Ta,B,imm | PC = PC + imm[3:0] if TRF[Ta][0] == B |
-| B | BNE Ta,B,imm | PC = PC + imm[3:0] if TRF[Ta][0] != B |
-| B | JAL Ta,imm | TRF[Ta] = PC+1, PC = PC + imm[4:0] |
-| B | JALR Ta,Tb,imm | TRF[Ta] = PC+1, PC = PC + imm[4:0] |
-| M | LOAD Ta,Tb,imm | TRF[Ta] = TDM[TRF[Tb]+imm[2:0]] |
-| M | STORE Ta,Tb,imm | TDM[TRF[Tb]+imm[2:0]] = TRF[Ta] |
+| Num | Type | 9-trit instructions | Operation |
+| --- | ---- | ------------------- | --------- |
+| 0 | R | MV Ta,Tb | TRF[Ta] = TRF[Tb] |
+| 1 | R | PTI Ta,Tb | TRF[Ta] = PTI(TRF[Tb]) |
+| 2 | R | NTI Ta,Tb | TRF[Ta] = NTI(TRF[Tb]) |
+| 3 | R | STI Ta,Tb | TRF[Ta] = STI(TRF[Tb]) |
+| 4 | R | AND Ta,Tb | TRF[Ta] = TRF[Ta] & TRF[Tb] |
+| 5 | R | OR Ta,Tb | TRF[Ta] = TRF[Ta]  TRF[Tb] |
+| 6 | R | XOR Ta,Tb | TRF[Ta] = TRF[Ta] +o TRF[Tb] |
+| 7 | R | ADD Ta,Tb | TRF[Ta] = TRF[Ta] + TRF[Tb] |
+| 8 | R | SUB Ta,Tb | TRF[Ta] = TRF[Ta] - TRF[Tb] |
+| 9 | R | SR Ta,Tb | TRF[Ta] = TRF[Ta] >> TRF[Tb][1:0] |
+| 10 | R | SL Ta,Tb | TRF[Ta] = TRF[Ta] << TRF[Tb][1:0] |
+| 11 | R | COMP Ta,Tb | TRF[Ta] = compare(TRF[Ta],TRF[Tb]) |
+| 12 | I | ANDI Ta,imm | TRF[Ta] = TRF[Ta] & imm[2:0] |
+| 13 | I | ADDI Ta,imm | TRF[Ta] = TRF[Ta] + imm[2:0] |
+| 14 | I | SRI Ta,imm | TRF[Ta] = TRF[Ta] >> imm[1:0] |
+| 15 | I | SLI Ta,imm | TRF[Ta] = TRF[Ta] << imm[1:0] |
+| 16 | I | LUI Ta,imm | TRF[Ta] = {imm[3:0],00000} |
+| 17 | I | LI Ta,imm | TRF[Ta] = {TRF[Ta][8:5],imm[4:0]} |
+| 18 | B | BEQ Ta,B,imm | PC = PC + imm[3:0] if TRF[Ta][0] == B |
+| 19 | B | BNE Ta,B,imm | PC = PC + imm[3:0] if TRF[Ta][0] != B |
+| 20 | B | JAL Ta,imm | TRF[Ta] = PC+1, PC = PC + imm[4:0] |
+| 21 | B | JALR Ta,Tb,imm | TRF[Ta] = PC+1, PC = PC + imm[4:0] |
+| 22 | M | LOAD Ta,Tb,imm | TRF[Ta] = TDM[TRF[Tb]+imm[2:0]] | How is there space for opcode (3) + 2x Register Address (4) + Imm (3) within 9 trits?
+| 23 | M | STORE Ta,Tb,imm | TDM[TRF[Tb]+imm[2:0]] = TRF[Ta] |
 
 Decoding Patterns
 - INS Ta,Tb
@@ -69,22 +69,24 @@ $9ln3/ln2 = 14.25 2.s.f.$
 
 Plan
 - 5 bit opcode
-- 3 bit register (Ta,Tb)
+- 3 bit register address (Ta,Tb)
 
-- 10 bit operand
+- 11 bit operand
 
-| Type | 15-bit instructions | Operation |
-| ---- | ------------------- | --------- |
-| R | MV Ta,Tb | TRF[Ta] = TRF[Tb] |
-| R | NOT Ta,Tb | TRF[Ta] = NOT(TRF[Tb]) |
-| R | AND Ta,Tb | TRF[Ta] = TRF[Ta] & TRF[Tb] |
-| R | OR Ta,Tb | TRF[Ta] = TRF[Ta]  TRF[Tb] |
-| R | XOR Ta,Tb | TRF[Ta] = TRF[Ta] +o TRF[Tb] |
-| R | ADD Ta,Tb | TRF[Ta] = TRF[Ta] + TRF[Tb] |
-| R | SUB Ta,Tb | TRF[Ta] = TRF[Ta] - TRF[Tb] |
-| R | COMP Ta,Tb | TRF[Ta] = compare(TRF[Ta],TRF[Tb]) |
-| I | LUI Ta,imm | TRF[Ta] = {imm[3:0],00000} |
-| I | LI Ta,imm | TRF[Ta] = {TRF[Ta][8:5],imm[4:0]} |
+| Num | Type | 16-bit instructions | Operation |
+| --- | ---- | ------------------- | --------- |
+| 0 | R | MV Ta,Tb | TRF[Ta] = TRF[Tb] |
+| 2 | R | NOT Ta,Tb | TRF[Ta] = NOT(TRF[Tb]) |
+| 4 | R | AND Ta,Tb | TRF[Ta] = TRF[Ta] & TRF[Tb] |
+| 5 | R | OR Ta,Tb | TRF[Ta] = TRF[Ta]  TRF[Tb] |
+| 6 | R | XOR Ta,Tb | TRF[Ta] = TRF[Ta] +o TRF[Tb] |
+| 7 | R | ADD Ta,Tb | TRF[Ta] = TRF[Ta] + TRF[Tb] |
+| 8 | R | SUB Ta,Tb | TRF[Ta] = TRF[Ta] - TRF[Tb] |
+| 11 | R | COMP Ta,Tb | TRF[Ta] = compare(TRF[Ta],TRF[Tb]) |
+| 16 | I | LUI Ta,imm | TRF[Ta] = {imm[7:0],00000000} |
+| 17 | I | LI Ta,imm | TRF[Ta] = {TRF[Ta][15:8],imm[7:0]} |
+| 22 | M | LOAD Ta,Tb,imm | TRF[Ta] = TDM[TRF[Tb]+imm[4:0]] |
+| 23 | M | STORE Ta,Tb,imm | TDM[TRF[Tb]+imm[4:0]] = TRF[Ta] |
 <!-- | R | SR Ta,Tb | TRF[Ta] = TRF[Ta] >> TRF[Tb][1:0] |
 | R | SL Ta,Tb | TRF[Ta] = TRF[Ta] << TRF[Tb][1:0] | -->
 <!-- | I | ANDI Ta,imm | TRF[Ta] = TRF[Ta] & imm[2:0] |

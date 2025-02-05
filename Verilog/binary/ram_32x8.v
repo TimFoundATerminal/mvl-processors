@@ -3,12 +3,12 @@ module ram_32x8(
     input wire reset,
     input wire write_enable,
     input wire [4:0] address,     // 5 bits for 32 locations
-    input wire [7:0] data_in,     // 8-bit data input
-    output reg [7:0] data_out     // 8-bit data output
+    input wire [15:0] data_in,     // 16-bit data input
+    output reg [15:0] data_out     // 16-bit data output
 );
 
-    // Memory array: 32 locations of 8 bits each
-    reg [7:0] memory [0:31];
+    // Memory array: 32 locations of 16 bits each
+    reg [15:0] memory [0:31];
     integer i;
 
     // Reset and write operations
@@ -16,9 +16,9 @@ module ram_32x8(
         if (reset) begin
             // Clear all memory locations on reset
             for (i = 0; i < 32; i = i + 1) begin
-                memory[i] <= 8'b0;
+                memory[i] <= 16'b0;
             end
-            data_out <= 8'b0;
+            data_out <= 16'b0;
         end else begin
             if (write_enable) begin
                 memory[address] <= data_in;
