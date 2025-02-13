@@ -2,28 +2,28 @@
 module unified_system (
     input wire clock,
     input wire reset,
-    input wire [7:0] prog_data_in,
+    input wire [15:0] prog_data_in,
     input wire [4:0] prog_addr,
     input wire prog_write_enable,
     input wire start_execution,
-    output wire [7:0] alu_out,
+    output wire [15:0] alu_out,
     output wire load_done
 );
 
     // Internal signals
-    wire [7:0] memory_read_data;
+    wire [15:0] memory_read_data;
     wire [4:0] memory_address;
-    wire [7:0] memory_write_data;
+    wire [15:0] memory_write_data;
     wire memory_write;
     
     // Loader signals
     wire [4:0] loader_mem_addr;
-    wire [7:0] loader_mem_data;
+    wire [15:0] loader_mem_data;
     wire loader_mem_write;
     
     // CPU signals
     wire [4:0] cpu_mem_addr;
-    wire [7:0] cpu_mem_write_data;
+    wire [15:0] cpu_mem_write_data;
     wire cpu_mem_write;
 
     // Memory address and data multiplexing
@@ -57,7 +57,7 @@ module unified_system (
     );
 
     // Unified Memory Instance
-    ram_32x8 memory (
+    ram_32x16 memory (
         .clock(clock),
         .reset(reset),
         .write_enable(memory_write),                        // Connected to CPU's mem_write

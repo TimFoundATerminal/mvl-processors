@@ -3,13 +3,13 @@ REM Clean up any previous simulation files
 del /F validate_cpu.vvp binary_test.vcd 2>nul
 
 REM Compile the Verilog files
-iverilog -o validate_cpu.vvp ram_32x16.v program_loader.v cpu_core.v unified_system.v unified_system_tb.v
+iverilog -o run.vvp ram_32x16.v cpu_core.v unified_system.v program_loader_tb.v
 
 REM Run the simulation
-vvp validate_cpu.vvp
+vvp run.vvp
 
 @REM REM View waveforms
 @REM start gtkwave binary_test.vcd
 
-REM Pause to keep the window open if there are errors
-pause
+@REM REM Pause to keep the window open if there are errors
+@REM pause

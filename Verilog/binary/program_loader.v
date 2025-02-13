@@ -2,14 +2,14 @@
 module program_loader (
     input wire clock,
     input wire reset,
-    input wire [7:0] data_in,
+    input wire [15:0] data_in,
     input wire [4:0] addr,
     input wire write_enable,
     output reg load_done,
     // Memory interface
     output reg mem_write,
     output reg [4:0] mem_addr,
-    output reg [7:0] mem_data
+    output reg [15:0] mem_data
 );
 
     // States for the loader

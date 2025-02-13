@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage{csquotes}
 \usepackage{epigraph}
+\usepackage{pgfgantt}
 
 % Title formatting
 \title{\textbf{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems} \\ [1ex] \large Literature, Technology and Data Survey}
@@ -470,6 +471,77 @@ abstractions of ternary logic but implementing this in our own custom system wou
 including a plethora of performance metrics to directly compare the produced emulators. Therefore, we will be using Verilog to implement the ternary logic gates and the binary
 equivalents.\\
 
+\newpage
+
+\begin{table}[h]
+    \begin{tabular}{|c|c|l|l|}
+    \hline
+    Num & Type & 9-trit instructions & Operation \\
+    \hline
+    0 & R & MV Ta,Tb & TRF[Ta] = TRF[Tb] \\
+    1 & R & PTI Ta,Tb & TRF[Ta] = PTI(TRF[Tb]) \\
+    2 & R & NTI Ta,Tb & TRF[Ta] = NTI(TRF[Tb]) \\
+    3 & R & STI Ta,Tb & TRF[Ta] = STI(TRF[Tb]) \\
+    4 & R & AND Ta,Tb & TRF[Ta] = TRF[Ta] $\wedge$ TRF[Tb] \\
+    5 & R & OR Ta,Tb & TRF[Ta] = TRF[Ta] $\vee$ TRF[Tb] \\
+    6 & R & XOR Ta,Tb & TRF[Ta] = TRF[Ta] $\oplus$ TRF[Tb] \\
+    7 & R & ADD Ta,Tb & TRF[Ta] = TRF[Ta] $+$ TRF[Tb] \\
+    8 & R & SUB Ta,Tb & TRF[Ta] = TRF[Ta] $-$ TRF[Tb] \\
+    9 & R & SR Ta,Tb & TRF[Ta] = TRF[Ta] $\gg$ TRF[Tb][1:0] \\
+    10 & R & SL Ta,Tb & TRF[Ta] = TRF[Ta] $\ll$ TRF[Tb][1:0] \\
+    11 & R & COMP Ta,Tb & TRF[Ta] = compare(TRF[Ta],TRF[Tb]) \\
+    12 & I & ANDI Ta,imm & TRF[Ta] = TRF[Ta] $\wedge$ imm[2:0] \\
+    13 & I & ADDI Ta,imm & TRF[Ta] = TRF[Ta] $+$ imm[2:0] \\
+    14 & I & SRI Ta,imm & TRF[Ta] = TRF[Ta] $\gg$ imm[1:0] \\
+    15 & I & SLI Ta,imm & TRF[Ta] = TRF[Ta] $\ll$ imm[1:0] \\
+    16 & I & LUI Ta,imm & TRF[Ta] = \{imm[3:0],00000\} \\
+    17 & I & LI Ta,imm & TRF[Ta] = \{TRF[Ta][8:5],imm[4:0]\} \\
+    18 & B & BEQ Ta,B,imm & PC = PC + imm[3:0] if TRF[Ta][0] $=$ B \\
+    19 & B & BNE Ta,B,imm & PC = PC + imm[3:0] if TRF[Ta][0] $\neq$ B \\
+    20 & B & JAL Ta,imm & TRF[Ta] = PC+1, PC = PC + imm[4:0] \\
+    21 & B & JALR Ta,Tb,imm & TRF[Ta] = PC+1, PC = PC + imm[4:0] \\
+    22 & M & LOAD Ta,Tb,imm & TRF[Ta] = TDM[TRF[Tb]+imm[2:0]] \\
+    23 & M & STORE Ta,Tb,imm & TDM[TRF[Tb]+imm[2:0]] = TRF[Ta] \\
+    \hline
+    \end{tabular}
+    \caption{9-trit Instruction Set Architecture}
+\end{table}
+
+\begin{table}[h]
+    \begin{tabular}{|c|c|l|l|}
+    \hline
+    Num & Type & 16-bit instructions & Operation \\
+    \hline
+    0 & R & MV a,b & RF[a] = RF[b] \\
+    2 & R & NOT a,b & RF[a] = NOT(RF[b]) \\
+    4 & R & AND a,b & RF[a] = RF[a] $\wedge$ RF[b] \\
+    5 & R & OR a,b & RF[a] = RF[a] $\vee$ RF[b] \\
+    6 & R & XOR a,b & RF[a] = RF[a] $\oplus$ RF[b] \\
+    7 & R & ADD a,b & RF[a] = RF[a] $+$ RF[b] \\
+    8 & R & SUB a,b & RF[a] = RF[a] $-$ RF[b] \\
+    11 & R & COMP a,b & RF[a] = compare(RF[a],RF[b]) \\
+    16 & I & LUI a,imm & RF[a] = \{imm[7:0],00000000\} \\
+    17 & I & LI a,imm & RF[a] = \{RF[a][15:8],imm[7:0]\} \\
+    22 & M & LOAD a,b,imm & RF[a] = TDM[RF[b]+imm[4:0]] \\
+    23 & M & STORE a,b,imm & TDM[RF[b]+imm[4:0]] = RF[a] \\
+    \hline
+    \end{tabular}
+    \caption{16-bit Instruction Set Architecture}
+\end{table}
+
+\begin{center}
+    \begin{ganttchart}[vgrid, hgrid]{1}{16}
+      \gantttitle{Project Plan}{16} \\
+      \gantttitlelist{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}{1} \\
+    \ganttbar{Design Binary Emulator}{4}{6} \\
+    \ganttlinkedbar{Translate Architecture}{5}{7} \ganttnewline
+    \ganttlinkedbar{Implement Binary Emulator}{6}{9} \ganttnewline
+    \ganttlinkedbar{Implement Ternary Emulator}{9}{12} \ganttnewline
+    \ganttlinkedbar{Compiler}{11}{13} \ganttnewline
+    \ganttlinkedbar{Evaluation}{12}{13} \ganttnewline
+    \ganttlinkedbar{Final Write-Up}{12}{16}
+    \end{ganttchart}
+\end{center}
 
 \newpage
 

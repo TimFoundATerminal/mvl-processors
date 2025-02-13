@@ -40,6 +40,9 @@ module cpu_core (
     wire [1:0] reg_src = instruction[7:5];
     wire [7:0] immediate = instruction[7:0];
     wire [3:0] shift = instruction[4:1];
+
+    // Temporary variables
+    integer i;
     
     always @(posedge clock or posedge reset) begin 
         if (reset) begin
@@ -62,16 +65,46 @@ module cpu_core (
                 
                 1: begin // Decode and Execute
                     case (opcode)
-                        MV: alu_out <= register_file[reg_src]; // MOVE
-                        NOT: alu_out <= ~register_file[reg_src]; // NOT (Requires 3 in ternary logic)
-                        AND: alu_out <= register_file[reg_dest] & register_file[reg_src]; // AND
-                        OR: alu_out <= register_file[reg_dest] | register_file[reg_src]; // OR
-                        XOR: alu_out <= register_file[reg_dest] ^ register_file[reg_src]; // XOR
-                        ADD: alu_out <= register_file[reg_dest] + register_file[reg_src]; // ADD
-                        SUB: alu_out <= register_file[reg_dest] - register_file[reg_src]; // SUB
-                        COMP: alu_out <= register_file[reg_dest] == register_file[reg_src]; // COMPARE
-                        LUI: alu_out <= {immediate, 8'b0}; // Load Upper Immediate
-                        LI: alu_out <= {register_file[reg_dest][15:8], immediate}; // Load Immediate
+                        MV: begin
+                            register_file[reg_dest] <= register_file[reg_src]; // MOVE
+                            state <= 3;
+                        end
+                        NOT: begin
+                            alu_out <= ~register_file[reg_src]; // NOT (Requires 3 in ternary logic)
+                            state <= 2;
+                        end
+                        AND: begin
+                            alu_out <= register_file[reg_dest] & register_file[reg_src]; // AND
+                            state <= 2;
+                        end
+                        OR: begin
+                            alu_out <= register_file[reg_dest] | register_file[reg_src]; // OR
+                            state <= 2;
+                        end
+                        XOR: begin
+                            alu_out <= register_file[reg_dest] ^ register_file[reg_src]; // XOR
+                            state <= 2;
+                        end
+                        ADD: begin
+                            alu_out <= register_file[reg_dest] + register_file[reg_src]; // ADD
+                            state <= 2;
+                        end
+                        SUB: begin
+                            alu_out <= register_file[reg_dest] - register_file[reg_src]; // SUB
+                            state <= 2;
+                        end
+                        COMP: begin
+                            alu_out <= register_file[reg_dest] == register_file[reg_src]; // COMPARE
+                            state <= 2;
+                        end
+                        LUI: begin
+                            register_file[reg_dest] <= {immediate, 8'b0}; // Load Upper Immediate
+                            state <= 3;
+                        end
+                        LI: begin
+                            register_file[reg_dest] <= {register_file[reg_dest][15:8], immediate}; // Load Immediate
+                            state <= 3;
+                        end
                         LOAD: begin // LOAD
                             mem_addr <= register_file[reg_src] + shift;
                             state <= 4; // Extra state for memory read
@@ -82,7 +115,6 @@ module cpu_core (
                             mem_write <= 1;
                         end
                     endcase
-                    if (opcode != LOAD) state <= 2;
                 end
                 
                 2: begin // Write Back

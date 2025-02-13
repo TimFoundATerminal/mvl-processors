@@ -1,4 +1,4 @@
-`include "ram_32x8.v"
+`include "ram_32x16.v"
 
 // Program Loader Module
 module program_loader (
@@ -200,7 +200,7 @@ module unified_system (
     );
 
     // Unified Memory Instance
-    ram_32x8 memory (
+    ram_32x16 memory (
         .clock(clock),
         .reset(reset),
         .write_enable(memory_write),

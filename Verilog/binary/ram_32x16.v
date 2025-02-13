@@ -1,4 +1,4 @@
-module ram_32x8(
+module ram_32x16(
     input wire clock,
     input wire reset,
     input wire write_enable,
@@ -31,7 +31,7 @@ module ram_32x8(
 endmodule
 
 // // Testbench
-// module ram_32x8_tb;
+// module ram_32x16_tb;
 //     reg clock;
 //     reg reset;
 //     reg write_enable;
@@ -40,7 +40,7 @@ endmodule
 //     wire [7:0] data_out;
 
 //     // Instantiate the RAM
-//     ram_32x8 ram (
+//     ram_32x16 ram (
 //         .clock(clock),
 //         .reset(reset),
 //         .write_enable(write_enable),
