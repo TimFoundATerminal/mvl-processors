@@ -17,7 +17,8 @@ class InstructionParser:
             'LUI':   0b10000,
             'LI':    0b10001,
             'LOAD':  0b10110,
-            'STORE': 0b10111
+            'STORE': 0b10111,
+            'HALT':  0b11111
         }
 
     def parse_registers(self, reg1, reg2):
@@ -92,6 +93,10 @@ class InstructionParser:
                 raise ValueError(f"Unknown instruction: {instruction}")
                 
             opcode = self.instructions[instruction]
+
+            # Halt instruction
+            if instruction == 'HALT':
+                return (opcode << 11)
             
             # R-type instructions
             if instruction in ['MV', 'NOT', 'AND', 'OR', 'XOR', 'ADD', 'SUB', 'COMP']:

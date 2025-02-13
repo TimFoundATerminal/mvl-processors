@@ -1,4 +1,3 @@
-// cpu_core.v
 module cpu_core (
     input wire clock,
     input wire reset,
@@ -7,7 +6,8 @@ module cpu_core (
     output reg [4:0] mem_addr,
     output reg [15:0] mem_write_data,
     output reg mem_write,
-    output reg [15:0] alu_out
+    output reg [15:0] alu_out,
+    output reg halted    // New output signal to indicate halt state
 );
     // Instruction types:
     // R-type: [15:11] opcode, [10:8] Ta, [7:5] Tb, [4:0] unused
@@ -16,7 +16,7 @@ module cpu_core (
 
     // Opcodes (3 bits)
     localparam MV    = 5'b00000;
-    localparam NOT   = 5'b00010; // Double check
+    localparam NOT   = 5'b00010;
     localparam AND   = 5'b00100;
     localparam OR    = 5'b00101;
     localparam XOR   = 5'b00110;
@@ -27,6 +27,7 @@ module cpu_core (
     localparam LI    = 5'b10001;
     localparam LOAD  = 5'b10110;
     localparam STORE = 5'b10111;
+    localparam HALT  = 5'b11111;
 
     // Registers
     reg [15:0] register_file [0:7];
@@ -55,7 +56,9 @@ module cpu_core (
             state <= 0;
             mem_write <= 0;
             mem_addr <= 0;
-        end else if (start_execution) begin
+            halted <= 0;
+        end else if (start_execution && !halted) begin
+            $display("State: %d", state); // this will throw a compilation error
             case (state)
                 0: begin // Fetch
                     mem_addr <= program_counter;
@@ -65,62 +68,68 @@ module cpu_core (
                 
                 1: begin // Decode and Execute
                     case (opcode)
+                        HALT: begin
+                            halted <= 1;  // Set halted flag
+                            state <= state;  // Stay in current state
+                        end
                         MV: begin
-                            register_file[reg_dest] <= register_file[reg_src]; // MOVE
+                            register_file[reg_dest] <= register_file[reg_src];
                             state <= 3;
                         end
                         NOT: begin
-                            alu_out <= ~register_file[reg_src]; // NOT (Requires 3 in ternary logic)
+                            alu_out <= ~register_file[reg_src];
                             state <= 2;
                         end
                         AND: begin
-                            alu_out <= register_file[reg_dest] & register_file[reg_src]; // AND
+                            alu_out <= register_file[reg_dest] & register_file[reg_src];
                             state <= 2;
                         end
                         OR: begin
-                            alu_out <= register_file[reg_dest] | register_file[reg_src]; // OR
+                            alu_out <= register_file[reg_dest] | register_file[reg_src];
                             state <= 2;
                         end
                         XOR: begin
-                            alu_out <= register_file[reg_dest] ^ register_file[reg_src]; // XOR
+                            alu_out <= register_file[reg_dest] ^ register_file[reg_src];
                             state <= 2;
                         end
                         ADD: begin
-                            alu_out <= register_file[reg_dest] + register_file[reg_src]; // ADD
+                            alu_out <= register_file[reg_dest] + register_file[reg_src];
                             state <= 2;
                         end
                         SUB: begin
-                            alu_out <= register_file[reg_dest] - register_file[reg_src]; // SUB
+                            alu_out <= register_file[reg_dest] - register_file[reg_src];
                             state <= 2;
                         end
                         COMP: begin
-                            alu_out <= register_file[reg_dest] == register_file[reg_src]; // COMPARE
+                            alu_out <= register_file[reg_dest] == register_file[reg_src];
                             state <= 2;
                         end
                         LUI: begin
-                            register_file[reg_dest] <= {immediate, 8'b0}; // Load Upper Immediate
+                            register_file[reg_dest] <= {immediate, 8'b0};
                             state <= 3;
                         end
                         LI: begin
-                            register_file[reg_dest] <= {register_file[reg_dest][15:8], immediate}; // Load Immediate
+                            register_file[reg_dest] <= {register_file[reg_dest][15:8], immediate};
                             state <= 3;
                         end
-                        LOAD: begin // LOAD
+                        LOAD: begin
                             mem_addr <= register_file[reg_src] + shift;
-                            state <= 4; // Extra state for memory read
+                            state <= 4;
                         end
-                        STORE: begin // STORE
+                        STORE: begin
                             mem_addr <= register_file[reg_src][4:0];
                             mem_write_data <= register_file[reg_dest]; 
                             mem_write <= 1;
+                            state <= 3;
                         end
                     endcase
                 end
                 
                 2: begin // Write Back
-                    if (opcode <= LOAD) begin
-                        register_file[reg_dest] <= alu_out;
-                    end
+                    // if (opcode <= LOAD) begin
+                    $display("ALU Result: %h", alu_out);
+                    register_file[reg_dest] <= alu_out;
+                    // end
                     mem_write <= 0;
                     state <= 3;
                 end
