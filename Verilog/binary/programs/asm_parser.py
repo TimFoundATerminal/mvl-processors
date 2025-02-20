@@ -1,3 +1,6 @@
+import argparse
+
+
 class InstructionParser:
     def __init__(self):
         # Program memory to store instructions (256 16-bit words)
@@ -137,10 +140,21 @@ class InstructionParser:
         except Exception as e:
             print(f"Error during assembly: {str(e)}")
 
+
 def main():
+    parser = argparse.ArgumentParser(description="Assembler for custom ISA")
+
+    # Add filepath arguments
+    parser.add_argument("--filepath", type=str, default="program", help="Input assembly filepath")
+    parser.add_argument("--output", type=str, default="program", help="Output hex filepath")
+
+    args = parser.parse_args()
+    args.filepath = "programs/" + args.filepath + ".asm"
+    args.output = "programs/" + args.output + ".hex"
+
     parser = InstructionParser()
-    parser.assemble("programs/simple_addition.asm", "programs/program.hex")
-    # parser.assemble("programs/program.asm", "programs/program.hex")
+    parser.assemble(args.filepath, args.output)
+
 
 if __name__ == "__main__":
     main()

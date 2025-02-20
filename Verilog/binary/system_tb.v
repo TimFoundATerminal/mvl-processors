@@ -32,6 +32,8 @@ module system_tb;
     wire [15:0] r3 = uut.cpu.register_file[3];
     wire [15:0] r4 = uut.cpu.register_file[4];
     wire [15:0] r5 = uut.cpu.register_file[5];
+    wire [15:0] r6 = uut.cpu.register_file[6];
+    wire [15:0] r7 = uut.cpu.register_file[7];
     
     // Test sequence
     initial begin
@@ -66,8 +68,7 @@ module system_tb;
             // Display register values on each clock cycle
             @(posedge clock);
             $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
-            $display("R0=%h R1=%h R2=%h R3=%h R4=%h R5=%h",
-                    r0, r1, r2, r3, r4, r5);
+            $display("R0=%h R1=%h R2=%h R3=%h R4=%h R5=%h", r0, r1, r2, r3, r4, r5);
             
             // Display memory operations
             if (uut.cpu.mem_write)
@@ -76,7 +77,7 @@ module system_tb;
             
             // Display ALU operations
             if (uut.cpu.state == 2)  // Write Back state
-                $display("ALU Result=%h", uut.cpu.alu_out);
+                $display("ALU Result=%d", uut.cpu.alu_out);
                 
             // Check if program counter has stopped changing
             if (prev_pc == uut.cpu.program_counter && uut.cpu.state == 0) begin
@@ -92,14 +93,16 @@ module system_tb;
         
         // Display final register values
         $display("\nFinal Register Values:");
-        $display("R0=%h R1=%h R2=%h R3=%h R4=%h R5=%h",
-                r0, r1, r2, r3, r4, r5);
-        
-        // Display final memory values
-        $display("\nFinal Memory Values (first 8 locations):");
         for (integer i = 0; i < 8; i = i + 1) begin
-            $display("Mem[%0d]=%h", i, uut.ram.memory[i]);
+            // Display the values in decimal
+            $display("R%0d=%d", i, uut.cpu.register_file[i]);
         end
+        
+        // // Display final memory values
+        // $display("\nFinal Memory Values (first 8 locations):");
+        // for (integer i = 0; i < 8; i = i + 1) begin
+        //     $display("Mem[%0d]=%h", i, uut.ram.memory[i]);
+        // end
         
         #100;
         $finish;
