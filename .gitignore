@@ -21,3 +21,6 @@ Proposal/examples
 
 # Ignore large files
 *.mp4
+
+# Ignore all files in the output directory
+bin/
