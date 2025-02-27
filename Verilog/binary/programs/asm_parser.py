@@ -1,6 +1,25 @@
 import argparse
 
 
+def input_to_hex(string):
+    """Convert a hex string to binary."""
+    if string.startswith('0x'):
+        return string[2:]
+    # Convert decimal to hex
+    return hex(int(string))[2:]
+
+
+def decimal_to_7bit_signed(decimal):
+    """Convert a decimal number to 7-bit signed binary."""
+    if not (-64 <= decimal <= 63):
+        raise ValueError("Value must be in range [-64, 63] for 7-bit signed representation")
+        
+    if decimal < 0:
+        # Perform two's complement by adding 128 which
+        decimal = decimal + (1 << 7)
+    return decimal
+
+
 class InstructionParser:
     def __init__(self):
         # Program memory to store instructions (256 16-bit words)
@@ -17,8 +36,14 @@ class InstructionParser:
             'ADD':   0b00111,
             'SUB':   0b01000,
             'COMP':  0b01011,
+            'ANDI':  0b01100,
+            'ADDI':  0b01101,
+            'SRI':   0b01110,
+            'SLI':   0b01111,
             'LUI':   0b10000,
             'LI':    0b10001,
+            'BEQ':   0b10010,
+            'BNE':   0b10011,
             'LOAD':  0b10110,
             'STORE': 0b10111,
             'HALT':  0b11111
@@ -75,6 +100,27 @@ class InstructionParser:
             return r1_num, r2_num, offset
         except:
             raise ValueError(f"Invalid memory instruction format: {reg1}, {reg2}, {offset}")
+        
+    def parse_branch_instruction(self, reg1, b, immediate):
+        """Parse branch instruction format (register, immediate)."""
+        try:
+            r1_num = int(reg1.strip()[1:])  # Remove 'R' and convert to int
+            b_val = int(b.strip())
+            imm_val = int(immediate.strip())
+                
+            if not (0 <= r1_num <= 7):
+                raise ValueError("Register numbers must be between 0 and 7")
+            if not (0 <= b_val <= 1):
+                raise ValueError("Branch value must be 0 or 1")
+            if not (-64 <= imm_val <= 63):
+                raise ValueError("Immediate value must be between -64 and 63")
+                
+            return r1_num, b_val, decimal_to_7bit_signed(imm_val)
+        
+        except ValueError as e:
+            raise e
+        except:
+            raise ValueError(f"Invalid branch instruction format: {reg1}, {b}, {immediate}")
 
     def parse_line(self, line):
         """Parse a single line of assembly."""
@@ -107,9 +153,14 @@ class InstructionParser:
                 return (opcode << 11) | (reg_a << 8) | (reg_b << 5)
                 
             # I-type instructions
-            elif instruction in ['LUI', 'LI']:
+            elif instruction in ['ANDI', 'ADDI', 'SRI', 'SLI', 'LUI', 'LI']:
                 reg_a, imm = self.parse_register_immediate(tokens[1], tokens[2])
                 return (opcode << 11) | (reg_a << 8) | imm
+            
+            # Branch instructions
+            elif instruction in ['BEQ', 'BNE']:
+                reg_a, b, immediate = self.parse_branch_instruction(tokens[1], tokens[2], tokens[3])
+                return (opcode << 11) | (reg_a << 8) | (b << 7) | immediate
                 
             # M-type instructions
             elif instruction in ['LOAD', 'STORE']:
@@ -150,7 +201,7 @@ def main():
 
     args = parser.parse_args()
     args.filepath = "programs/" + args.filepath + ".asm"
-    args.output = "programs/" + args.output + ".hex"
+    args.output = "programs/bin/" + args.output + ".hex"
 
     parser = InstructionParser()
     parser.assemble(args.filepath, args.output)

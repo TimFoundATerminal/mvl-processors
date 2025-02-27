@@ -26,7 +26,7 @@ module program_loader (
             case (state)
                 0: begin // Wait for start signal
                     if (start_load) begin
-                        file_handle = $fopen("programs/program.hex", "r");
+                        file_handle = $fopen("programs/bin/program.hex", "r");
                         if (file_handle == 0) begin
                             $display("Error: Could not open program.hex");
                             state <= 4; // Go to error state
