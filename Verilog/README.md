@@ -75,23 +75,25 @@ Plan
 
 | Num | Type | 16-bit instructions | Operation |
 | --- | ---- | ------------------- | --------- |
-| 0 | R | MV Ta,Tb | TRF[Ta] = TRF[Tb] |
-| 2 | R | NOT Ta,Tb | TRF[Ta] = NOT(TRF[Tb]) |
-| 4 | R | AND Ta,Tb | TRF[Ta] = TRF[Ta] & TRF[Tb] |
-| 5 | R | OR Ta,Tb | TRF[Ta] = TRF[Ta]  TRF[Tb] |
-| 6 | R | XOR Ta,Tb | TRF[Ta] = TRF[Ta] +o TRF[Tb] |
-| 7 | R | ADD Ta,Tb | TRF[Ta] = TRF[Ta] + TRF[Tb] |
-| 8 | R | SUB Ta,Tb | TRF[Ta] = TRF[Ta] - TRF[Tb] |
+| 0  | R | MV Ta,Tb | TRF[Ta] = TRF[Tb] |
+| 2  | R | NOT Ta,Tb | TRF[Ta] = NOT(TRF[Tb]) |
+| 4  | R | AND Ta,Tb | TRF[Ta] = TRF[Ta] & TRF[Tb] |
+| 5  | R | OR Ta,Tb | TRF[Ta] = TRF[Ta]  TRF[Tb] |
+| 6  | R | XOR Ta,Tb | TRF[Ta] = TRF[Ta] +o TRF[Tb] |
+| 7  | R | ADD Ta,Tb | TRF[Ta] = TRF[Ta] + TRF[Tb] |
+| 8  | R | SUB Ta,Tb | TRF[Ta] = TRF[Ta] - TRF[Tb] |
 | 11 | R | COMP Ta,Tb | TRF[Ta] = compare(TRF[Ta],TRF[Tb]) |
+| 12 | I | ANDI Ta,imm | TRF[Ta] = TRF[Ta] & imm[4:0] |
+| 13 | I | ADDI Ta,imm | TRF[Ta] = TRF[Ta] + imm[4:0] |
+| 14 | I | SRI Ta,imm | TRF[Ta] = TRF[Ta] >> imm[3:1] |
+| 15 | I | SLI Ta,imm | TRF[Ta] = TRF[Ta] << imm[3:1] |
 | 16 | I | LUI Ta,imm | TRF[Ta] = {imm[7:0],00000000} |
 | 17 | I | LI Ta,imm | TRF[Ta] = {TRF[Ta][15:8],imm[7:0]} |
+| 18 | B | BEQ Ta,B,imm | PC = PC + imm[6:0] if TRF[Ta][0] == B |
+| 19 | B | BNE Ta,B,imm | PC = PC + imm[6:0] if TRF[Ta][0] != B |
 | 22 | M | LOAD Ta,Tb,imm | TRF[Ta] = TDM[TRF[Tb]+imm[4:0]] |
 | 23 | M | STORE Ta,Tb,imm | TDM[TRF[Tb]+imm[4:0]] = TRF[Ta] |
 <!-- | R | SR Ta,Tb | TRF[Ta] = TRF[Ta] >> TRF[Tb][1:0] |
 | R | SL Ta,Tb | TRF[Ta] = TRF[Ta] << TRF[Tb][1:0] | -->
-<!-- | I | ANDI Ta,imm | TRF[Ta] = TRF[Ta] & imm[2:0] |
-| I | ADDI Ta,imm | TRF[Ta] = TRF[Ta] + imm[2:0] |
-| I | SRI Ta,imm | TRF[Ta] = TRF[Ta] >> imm[1:0] |
-| I | SLI Ta,imm | TRF[Ta] = TRF[Ta] << imm[1:0] | -->
 
 
