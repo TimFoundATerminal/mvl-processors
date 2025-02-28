@@ -17,7 +17,8 @@
 \usepackage{pgfgantt}
 
 % Title formatting
-\title{\textbf{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems} \\ [1ex] \large Literature, Technology and Data Survey}
+\title{\textbf{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems}}
+% \title{\textbf{A Comparative Analysis of the Performance of Emulated Ternary vs Binary Logic Systems} \\ [1ex] \large Final Report}
 
 \author{
     Thomas Timmons\\
@@ -29,6 +30,23 @@
 
 \maketitle
 
+\begin{abstract}
+    Here I will provide an informative and concise summary of the report and it's findings.
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section*{Acknowledgements}
+
+Thank you to my Supervisor, Dr. James Davenport, for his guidance and support throughout this project along with 
+Dr. Paola Bruscoli whose feedback has significantly enhanced the quality of this work.\\
+
+\newpage
+
 \section{Introduction}
 
 Binary Logic has been the defacto standard for digital systems since the inception of the transistor. However, due to the 
@@ -37,35 +55,14 @@ systems. Multi-valued logic (MVL) has emerged as appealing subject where this pa
 performance gains of ternary logic within an emulator. We can then measure and project the performance on the assumption 
 it should be possible to implement these circuits in hardware and discuss possible implications.
 
-\section{Literature and Technology Survey}
-
-% James' Feedback\\
-% \\
-% Technology Survey:\\
-% Ways to implement emulators in software.\\
-% Review Tools and explain why implementation by yourself is 
-% more comparable.\\
-% \\
-% Mention the implications of different bases being implemented 
-% in optical computing.\\
-% \\
-% A data transfer vs. computing in ternary. Some logic in optical 
-% (potentially arithmetic)\\
-% \\
-% floating point could be looked to done later.\\
-% \\
-This report will provide a comprehensive review of the literature and technology surrounding the following topics:
-\begin{itemize}
-    \item Ternary Algebra
-    \item Ternary Logic Gates
-    \item Previous Ternary Implementations
-    \item Alterative uses of Ternary Values
-    \item Emulation of Circuits
-\end{itemize}
-Each of these areas will be explored in detail while assessing the credibility and motivation for the work. The report will 
-aim to build the foundation on which the project will be based.\\
 
 \subsection{Ternary Algebra}
+
+\textbf{Points}
+\begin{itemize}
+    \item Discuss the relationship between computing in different bases and complexity theory/turing machines.
+    \item Critically compare this fields such as quantum computing with recent advances.
+\end{itemize}
 
 The cost or complexity of number systems can be evaluated through representation efficiency,
 computational overhead, and implementation requirements.\\
@@ -357,13 +354,22 @@ Ternary test benches have been created in order to attempt to validate the theor
 For this project we will assume that comparable binary and ternary logic gates have the same propagation delay. This will allow us to
 to directly compare the performance of the two systems. Implications of this assumption will be discussed in the conclusion.
 \begin{equation}
-\begin{aligned}
-  AND &\equiv \mathbb{T}AND \\
-  OR &\equiv \mathbb{T}OR \\
+    \begin{aligned}
+        AND &\equiv \mathbb{T}AND \\
+        OR &\equiv \mathbb{T}OR \\
   NOT &\equiv \mathbb{T}NOT
 \end{aligned}
 \end{equation}
 This will allow us to create a basic binary and ternary emulator whose performance will be directly comparable.
+
+\section{Literature and Technology Survey}
+
+\textbf{Points}
+\begin{itemize}
+    \item Research into the polish school of logic and see what's going on there?
+    \item Relationship to other areas of research such as symbolic ternary system models?
+    \item Discuss relevance of these other areas of research to the project and possible implications.
+\end{itemize}
 
 \subsection{Previous Ternary Implementations}
 
@@ -473,6 +479,50 @@ equivalents.\\
 
 \newpage
 
+\section{Experimental Hypotheses}
+
+\textbf{Points}
+\begin{itemize}
+    \item Theoretical performance gains of ternary logic have been shown in the literature.
+    \item Can we achieve these performance gains in practice?
+    \item Lots of research has been done into producing MVL logic gates, can we show if these endeavors are worth it?
+    \item Expect a performance gain of around 40\% for napkin maths but how will the extra circuitry affect the complexity/number of gates required?
+    \item Analysing complexity which algorithms will benefit from these performance gains?
+\end{itemize}
+
+\section{Experimental Design}
+
+\subsection{Specification}
+
+\begin{itemize}
+    \item Discuss goals and objectives of the project and why they have been included and why certain goals have been excluded.
+\end{itemize}
+
+\subsection{Design}
+
+\begin{itemize}
+    \item Design two CPU architectures, one using binary logic and the other using ternary logic.
+    \item Discuss in detail the design choices for each split of opcode, operand and their respective efficiencies. (Be Critical)
+    \item Discuss clamping the ranges of min of both the binary and ternary systems to allow for direct comparison. (Be Critical)
+    \item Demonstrate how you will compile assembly language into machine code for both systems and discuss design choices.
+\end{itemize}
+
+\subsection{Implementation}
+
+\begin{itemize}
+    \item Implement high level behavioral logic for both systems (these will be similar) along with design choices.
+    \item Implement the low level logic gates for computationally expensive ALU operations for both systems e.g. Addition.
+    \item Discuss which circuits were implemented and which were not in the interest of time. Justify these decisions.
+\end{itemize}
+
+\subsection{Testing}
+
+\begin{itemize}
+    \item Discuss the testing strategy for the project and how you will ensure that the results are valid.
+    \item Discuss the metrics you will be using to quantify the performance of the two systems. e.g. number of gates, propagation delay.
+    \item Discuss the expected results and how you will analyse the data to draw conclusions.
+\end{itemize}
+
 \begin{table}[h]
     \begin{tabular}{|c|c|l|l|}
     \hline
@@ -529,6 +579,30 @@ equivalents.\\
     \caption{16-bit Instruction Set Architecture}
 \end{table}
 
+\begin{table}[h]
+    \begin{tabular}{|c|c|c|c|c|c|c|}
+    \hline
+    Breakdown & Bits & Binary Range & Trits & Ternary Range & $\mathbb{T} \cup \mathbb{B}$ Range & Efficiency \\
+    \hline
+    Opcode & $5$ & $[0-31]$ & $3$ & $[0-26]$ & $[0-26]$ & $84.38\%$ \\
+    Register & $3$ & $[0-7]$ & $2$ & $[0-8]$ & $[0-7]$ & $88.89\%$ \\
+    Immediate & $8$ & $[0-255]$ & $4$ & $[0-80]$ & $[0-80]$ & $68.75\%$ \\
+    Shift & $2$ & $[0-3]$ & $2$ & $[0-8]$ & $[0-3]$ & $37.50\%$ \\
+    \hline
+    \end{tabular}
+    \caption{16-bit Instruction Set Architecture}
+\end{table}
+
+\newpage
+
+% \printbibliography
+\bibliographystyle{agsm}
+\bibliography{references}
+
+\newpage
+
+\section{Appendix}
+
 \begin{center}
     \begin{ganttchart}[vgrid, hgrid]{1}{16}
       \gantttitle{Project Plan}{16} \\
@@ -539,14 +613,9 @@ equivalents.\\
     \ganttlinkedbar{Implement Ternary Emulator}{9}{12} \ganttnewline
     \ganttlinkedbar{Compiler}{11}{13} \ganttnewline
     \ganttlinkedbar{Evaluation}{12}{13} \ganttnewline
-    \ganttlinkedbar{Final Write-Up}{12}{16}
+    \ganttlinkedbar{Final Write-Up}{8}{16}
     \end{ganttchart}
 \end{center}
 
-\newpage
-
-% \printbibliography
-\bibliographystyle{agsm}
-\bibliography{references}
 
 \end{document}

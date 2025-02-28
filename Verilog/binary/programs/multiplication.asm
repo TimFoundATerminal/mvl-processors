@@ -11,7 +11,7 @@ ADD R2, R0    ; Add R0 to R2 (accumulate the product)
 ADDI R3, 01   ; Increment counter
 MV R4, R3   ; Copy into R4 to perform the compare
 COMP R4, R1   ; Compare counter with multiplier
-BNE R4, 1, 5 ; If counter != multiplier, loop back 5 instructions
+BNE R4, 1, -5 ; If counter != multiplier, loop back 4 instructions
 
-LUI R7, 00    ; Initialize R0 to 0
 HALT          ; End program
+LUI R5, ff    ; Initialize R0 to 256

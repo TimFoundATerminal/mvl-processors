@@ -7,12 +7,10 @@ module cpu_core (
     output reg [15:0] mem_write_data,
     output reg mem_write,
     output reg [15:0] alu_out,
-    output reg halted    // New output signal to indicate halt state
+    output reg halted
 );
-    // Instruction types:
-    // R-type: [15:11] opcode, [10:8] Ta, [7:5] Tb, [4:0] unused
-    // I-type: [15:11] opcode, [10:8] Ta, [7:0] immediate
-    // M-type: [15:11] opcode, [10:8] Ta, [7:5] Tb, [4:1] shift, [0] unused
+    // Instruction types and opcodes remain the same
+    // ...
 
     // Opcodes (3 bits)
     localparam MV    = 5'b00000; // 0
@@ -57,6 +55,14 @@ module cpu_core (
     reg signed [6:0] signed_immediate;
     reg [3:0] current_shift;
 
+    // States
+    localparam FETCH = 3'd0;
+    localparam DECODE = 3'd1;
+    localparam EXECUTE = 3'd2;
+    localparam WRITE_BACK = 3'd3;
+    localparam NEXT_INSTRUCTION = 3'd4;
+    localparam MEMORY_READ = 3'd5;
+    
     // Temporary variables
     integer i;
     
@@ -68,28 +74,32 @@ module cpu_core (
                 register_file[i] <= 16'b0;
             end
             alu_out <= 0;
-            state <= 0;
+            state <= FETCH;
             mem_write <= 0;
             mem_addr <= 0;
             halted <= 0;
         end else if (start_execution && !halted) begin
             case (state)
-                0: begin // Fetch
-                    if (mem_read_data != 0) begin // Save the current instruction for future states
-                        current_instruction <= mem_read_data;
-                        current_opcode <= mem_read_data[15:11];
-                        current_reg_dest <= mem_read_data[10:8];
-                        current_reg_src <= mem_read_data[7:5];
-                        current_immediate <= mem_read_data[7:0];
-                        // current_signed_immediate <= $signed(mem_read_data[6:0]);
-                        current_shift <= mem_read_data[4:1];
-                    end
+                FETCH: begin // State 0: Fetch
+                    $display("Fetching instruction at address %d", program_counter);
                     mem_addr <= program_counter;
                     mem_write <= 0;
-                    state <= 1;
+                    state <= DECODE;
+                end
+
+                DECODE: begin // State 1: Decode instruction
+                    // Save instruction components for execution stage
+                    current_instruction <= mem_read_data;
+                    current_opcode <= mem_read_data[15:11];
+                    current_reg_dest <= mem_read_data[10:8];
+                    current_reg_src <= mem_read_data[7:5];
+                    current_immediate <= mem_read_data[7:0];
+                    current_shift <= mem_read_data[4:1];
+                    
+                    state <= EXECUTE;
                 end
                 
-                1: begin // Decode and Execute
+                EXECUTE: begin // State 1: Decode and Execute
                     case (opcode)
                         HALT: begin
                             halted <= 1;  // Set halted flag
@@ -97,108 +107,107 @@ module cpu_core (
                         end
                         MV: begin
                             register_file[current_reg_dest] <= register_file[current_reg_src];
-                            state <= 3;
+                            state <= NEXT_INSTRUCTION;
                         end
                         NOT: begin
                             alu_out <= ~register_file[current_reg_src];
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         AND: begin
                             alu_out <= register_file[current_reg_dest] & register_file[current_reg_src];
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         OR: begin
                             alu_out <= register_file[current_reg_dest] | register_file[current_reg_src];
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         XOR: begin
                             alu_out <= register_file[current_reg_dest] ^ register_file[current_reg_src];
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         ADD: begin
                             alu_out <= register_file[current_reg_dest] + register_file[current_reg_src];
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         SUB: begin
                             alu_out <= register_file[current_reg_dest] - register_file[current_reg_src];
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         COMP: begin
                             alu_out <= (register_file[current_reg_dest] == register_file[current_reg_src]);
-                            state <= 2;
+                            state <= WRITE_BACK;
                         end
                         ANDI: begin
-                            register_file[current_reg_dest] <= register_file[current_reg_dest] & immediate;
-                            state <= 3;
+                            register_file[current_reg_dest] <= register_file[current_reg_dest] & current_immediate;
+                            state <= NEXT_INSTRUCTION;
                         end
                         ADDI: begin
-                            register_file[current_reg_dest] <= register_file[current_reg_dest] + immediate;
-                            state <= 3;
+                            register_file[current_reg_dest] <= register_file[current_reg_dest] + current_immediate;
+                            state <= NEXT_INSTRUCTION;
                         end
                         SRI: begin
-                            register_file[current_reg_dest] <= register_file[current_reg_dest] >> shift;
-                            state <= 3;
+                            register_file[current_reg_dest] <= register_file[current_reg_dest] >> current_shift;
+                            state <= NEXT_INSTRUCTION;
                         end
                         SLI: begin
-                            register_file[current_reg_dest] <= register_file[current_reg_dest] << shift;
-                            state <= 3;
+                            register_file[current_reg_dest] <= register_file[current_reg_dest] << current_shift;
+                            state <= NEXT_INSTRUCTION;
                         end
                         LUI: begin
-                            register_file[current_reg_dest] <= {immediate, 8'b0};
-                            state <= 3;
+                            register_file[current_reg_dest] <= {current_immediate, 8'b0};
+                            state <= NEXT_INSTRUCTION;
                         end
                         LI: begin
-                            register_file[current_reg_dest] <= {register_file[current_reg_dest][15:8], immediate};
-                            state <= 3;
+                            register_file[current_reg_dest] <= {register_file[current_reg_dest][15:8], current_immediate};
+                            state <= NEXT_INSTRUCTION;
                         end
                         BEQ: begin
-                            // If the register address's last bit is bit B first immediate, then apply the immediate value to the PC
+                            // Check if branch condition is met
                             if (register_file[current_reg_dest][0] == 1'b1) begin
-                                // convert 7 bit immediate using 2's complement
-                                signed_immediate = $signed(immediate[6:0]);
-                                $display("PC: %d, Signed Imm: %d", program_counter, signed_immediate);
-                                program_counter <= program_counter - signed_immediate;
+                                // Convert 7 bit immediate using 2's complement
+                                signed_immediate = $signed(current_immediate[6:0]);
+                                program_counter = program_counter - signed_immediate;
+                                $display("Branching to %d", program_counter);
                             end
-                            state <= 0;
+                            state <= FETCH;
                         end
                         BNE: begin
-                            // If the register address's last bit is not equal to the immediate value, then apply the immediate value to the PC
-                            // check if the register does not equal 1
+                            // Check if branch condition is met
                             if (register_file[current_reg_dest][0] == 1'b0) begin
-                                // convert 7 bit immediate using 2's complement
-                                signed_immediate = $signed(immediate[6:0]);
-                                $display("PC: %d, Signed Imm: %d", program_counter, signed_immediate);
-                                program_counter <= program_counter - signed_immediate;
+                                // Convert 7 bit immediate using 2's complement
+                                signed_immediate = $signed(current_immediate[6:0]);
+                                program_counter = program_counter - signed_immediate;
+                                $display("Branching to %d", program_counter);
                             end
-                            state <= 0;
+                            state <= FETCH;
                         end
                         LOAD: begin
-                            mem_addr <= register_file[current_reg_src] + shift;
-                            state <= 4;
+                            mem_addr <= register_file[current_reg_src] + current_shift;
+                            state <= MEMORY_READ;
                         end
                         STORE: begin
                             mem_addr <= register_file[current_reg_src][4:0];
                             mem_write_data <= register_file[current_reg_dest]; 
                             mem_write <= 1;
-                            state <= 3;
+                            state <= NEXT_INSTRUCTION;
                         end
                     endcase
                 end
                 
-                2: begin // Write Back
+                WRITE_BACK: begin // State 2: Write Back
                     register_file[current_reg_dest] <= alu_out;
                     mem_write <= 0;
-                    state <= 3;
+                    state <= NEXT_INSTRUCTION;
                 end
                 
-                3: begin // Next Instruction
+                NEXT_INSTRUCTION: begin // State 3: Next Instruction
                     program_counter <= program_counter + 1;
-                    state <= 0;
+                    state <= FETCH;
                 end
                 
-                4: begin // Memory Read Complete
+                MEMORY_READ: begin // State 4: Memory Read Complete
                     register_file[current_reg_dest] <= mem_read_data;
-                    state <= 3;
+                    state <= NEXT_INSTRUCTION;
                 end
             endcase
         end
