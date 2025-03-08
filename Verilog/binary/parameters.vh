@@ -1,5 +1,5 @@
 parameter OPCODE_SIZE = 5;
-parameter WORD_SIZE = 8;
+parameter WORD_SIZE = 16;
 parameter MEM_SIZE = 32;
 parameter MEM_ADDR_SIZE = 5;
 parameter INS_ADDR_SIZE = 11;
