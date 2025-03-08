@@ -7,31 +7,10 @@ module cpu_core (
     output reg [15:0] mem_write_data,
     output reg mem_write,
     output reg [15:0] alu_out,
-    output reg halted
+    output reg halted // Contains a halted flag
 );
-    // Instruction types and opcodes remain the same
-    // ...
 
-    // Opcodes (3 bits)
-    localparam MV    = 5'b00000; // 0
-    localparam NOT   = 5'b00010; // 2
-    localparam AND   = 5'b00100; // 4
-    localparam OR    = 5'b00101; // 5
-    localparam XOR   = 5'b00110; // 6
-    localparam ADD   = 5'b00111; // 7
-    localparam SUB   = 5'b01000; // 8
-    localparam COMP  = 5'b01011; // 11
-    localparam ANDI  = 5'b01100; // 12
-    localparam ADDI  = 5'b01101; // 13
-    localparam SRI   = 5'b01110; // 14
-    localparam SLI   = 5'b01111; // 15
-    localparam LUI   = 5'b10000; // 16
-    localparam LI    = 5'b10001; // 17
-    localparam BEQ   = 5'b10010; // 18
-    localparam BNE   = 5'b10011; // 19
-    localparam LOAD  = 5'b10110; // 22
-    localparam STORE = 5'b10111; // 23
-    localparam HALT  = 5'b11111; // 31
+    `include "parameters.vh"
 
     // Registers
     reg [15:0] register_file [0:7];
@@ -101,67 +80,67 @@ module cpu_core (
                 
                 EXECUTE: begin // State 1: Decode and Execute
                     case (opcode)
-                        HALT: begin
+                        `HALT: begin
                             halted <= 1;  // Set halted flag
                             state <= state;  // Stay in current state
                         end
-                        MV: begin
+                        `MV: begin
                             register_file[current_reg_dest] <= register_file[current_reg_src];
                             state <= NEXT_INSTRUCTION;
                         end
-                        NOT: begin
+                        `NOT: begin
                             alu_out <= ~register_file[current_reg_src];
                             state <= WRITE_BACK;
                         end
-                        AND: begin
+                        `AND: begin
                             alu_out <= register_file[current_reg_dest] & register_file[current_reg_src];
                             state <= WRITE_BACK;
                         end
-                        OR: begin
+                        `OR: begin
                             alu_out <= register_file[current_reg_dest] | register_file[current_reg_src];
                             state <= WRITE_BACK;
                         end
-                        XOR: begin
+                        `XOR: begin
                             alu_out <= register_file[current_reg_dest] ^ register_file[current_reg_src];
                             state <= WRITE_BACK;
                         end
-                        ADD: begin
+                        `ADD: begin
                             alu_out <= register_file[current_reg_dest] + register_file[current_reg_src];
                             state <= WRITE_BACK;
                         end
-                        SUB: begin
+                        `SUB: begin
                             alu_out <= register_file[current_reg_dest] - register_file[current_reg_src];
                             state <= WRITE_BACK;
                         end
-                        COMP: begin
+                        `COMP: begin
                             alu_out <= (register_file[current_reg_dest] == register_file[current_reg_src]);
                             state <= WRITE_BACK;
                         end
-                        ANDI: begin
+                        `ANDI: begin
                             register_file[current_reg_dest] <= register_file[current_reg_dest] & current_immediate;
                             state <= NEXT_INSTRUCTION;
                         end
-                        ADDI: begin
+                        `ADDI: begin
                             register_file[current_reg_dest] <= register_file[current_reg_dest] + current_immediate;
                             state <= NEXT_INSTRUCTION;
                         end
-                        SRI: begin
+                        `SRI: begin
                             register_file[current_reg_dest] <= register_file[current_reg_dest] >> current_shift;
                             state <= NEXT_INSTRUCTION;
                         end
-                        SLI: begin
+                        `SLI: begin
                             register_file[current_reg_dest] <= register_file[current_reg_dest] << current_shift;
                             state <= NEXT_INSTRUCTION;
                         end
-                        LUI: begin
+                        `LUI: begin
                             register_file[current_reg_dest] <= {current_immediate, 8'b0};
                             state <= NEXT_INSTRUCTION;
                         end
-                        LI: begin
+                        `LI: begin
                             register_file[current_reg_dest] <= {register_file[current_reg_dest][15:8], current_immediate};
                             state <= NEXT_INSTRUCTION;
                         end
-                        BEQ: begin
+                        `BEQ: begin
                             // Check if branch condition is met
                             if (register_file[current_reg_dest][0] == 1'b1) begin
                                 // Convert 7 bit immediate using 2's complement
@@ -171,7 +150,7 @@ module cpu_core (
                             end
                             state <= FETCH;
                         end
-                        BNE: begin
+                        `BNE: begin
                             // Check if branch condition is met
                             if (register_file[current_reg_dest][0] == 1'b0) begin
                                 // Convert 7 bit immediate using 2's complement
@@ -181,11 +160,11 @@ module cpu_core (
                             end
                             state <= FETCH;
                         end
-                        LOAD: begin
+                        `LOAD: begin
                             mem_addr <= register_file[current_reg_src] + current_shift;
                             state <= MEMORY_READ;
                         end
-                        STORE: begin
+                        `STORE: begin
                             mem_addr <= register_file[current_reg_src][4:0];
                             mem_write_data <= register_file[current_reg_dest]; 
                             mem_write <= 1;
