@@ -45,7 +45,7 @@ module system (
     );
     
     // Instantiate RAM
-    ram_32x16 ram (
+    memory ram (
         .clock(clock),
         .reset(reset),
         .write_enable(mem_write),

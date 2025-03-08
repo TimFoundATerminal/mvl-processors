@@ -3,7 +3,7 @@ REM Clean up any previous simulation files
 del /F run.vvp system_tb.vcb 2>nul
 
 REM Compile the Verilog files
-iverilog -o run.vvp ram_32x16.v cpu_core.v program_loader.v system.v system_tb.v
+iverilog -o run.vvp memory.v cpu_core.v program_loader.v system.v system_tb.v
 
 REM Run the simulation
 vvp run.vvp
