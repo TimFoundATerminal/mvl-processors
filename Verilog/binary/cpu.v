@@ -1,10 +1,15 @@
-module cpu(clock,
-    ...
+module cpu(
+    clock, reset, execute, halted,
+    mem_address, mem_read_data, mem_write_data, mem_read, mem_write
+    // state, opcode // debug outputs
 );
 
     `include "parameters.vh"
 
     input wire clock;
+    input wire reset;
+    input wire execute;
+    output wire halted;
 
     // Memory interface
     input wire [WORD_SIZE-1:0] mem_read_data;
@@ -13,16 +18,15 @@ module cpu(clock,
     output wire mem_read, mem_write;
 
     // Debug Outputs
-    output wire [3:0] state;
-    output wire [OPCODE_SIZE-1:0] opcode;
-
+    // output wire [3:0] state;
+    // output wire [OPCODE_SIZE-1:0] opcode;
 
     // Control signals
-    wire fetch_, reg_load_, alu_, mem_load_, mem_store_, reg_store_, next_, reset_ halt_;
+    wire do_fetch, do_reg_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset do_halt;
 
     // Internal signals
     // Internal signals for program counter
-    wire update_pc, set_pc;
+    wire update_pc;
     wire [WORD_SIZE-1:0] pc_value;
     wire [MEM_ADDR_SIZE-1:0] program_counter;
 
@@ -32,16 +36,14 @@ module cpu(clock,
     wire [WORD_SIZE-1:0] reg_val;
     wire [WORD_SIZE-1:0] reg_out1, reg_out2;
 
-
     // Program counter
     program_counter pc (
         .clock(clock),
-        .reset_enable(reset_),
-        .update_enable(next_),
+        .reset_enable(do_reset),
+        .update_enable(do_next),
         .value(pc_value),
         .out(program_counter)
     );
-
 
     // Register file
     registers regs (
@@ -57,11 +59,11 @@ module cpu(clock,
     );
 
     // Instruction fetching
-    assign mem_address = fetch_ ? program_counter : 
-        (mem_load_ || mem_store_) ? reg_out1 : 5'b0; // 5'b0 is the default value for memory address.
-    assign mem_write_data = mem_store_ ? reg_out2 : 16'h0000; // 16'h0000 is the default value for memory data.
-    assign mem_read = fetch_ || mem_load_;
-    assign mem_write = mem_store_;
+    assign mem_address = do_fetch ? program_counter : 
+        (do_mem_load || do_mem_store) ? reg_out1 : 5'b0; // 5'b0 is the default value for memory address.
+    assign mem_write_data = do_mem_store ? reg_out2 : 16'h0000; // 16'h0000 is the default value for memory data.
+    assign mem_read = do_fetch || do_mem_load;
+    assign mem_write = do_mem_store;
 
     // Instruction decode
     output wire [OPCODE_SIZE-1:0] opcode;
@@ -85,8 +87,8 @@ module cpu(clock,
         .clock(clock),
         .reset(reset),
         .opcode(opcode),
-        .input1(reg_dest),
-        .input2(reg_src),
+        .input1(reg_out1),
+        .input2(reg_out2),
         .alu_enable(is_alu_operation),
         .alu_out(alu_out)
     );
@@ -104,16 +106,31 @@ module cpu(clock,
 
     // Control unit with state machine
     output wire [3:0] state;
-    control ctrl(clock,
-        opcode, is_alu_operation,
-        fetch_, reg_load_, alu_, mem_load_, mem_store_, reg_store_, next_, reset_, halt_,
-        state);
+    control ctrl(
+        .clock(clock),
+        .opcode(opcode),
+        .is_alu_operation(is_alu_operation),
+        .fetch_(do_fetch),
+        .reg_load_(do_reg_load),
+        .alu_(do_alu),
+        .mem_load_(do_mem_load),
+        .mem_store_(do_mem_store),
+        .reg_store_(do_reg_store),
+        .next_(do_next),
+        .reset_(do_reset),
+        .halt_(do_halt),
+        .state(state)
+    )
 
     // Branching
-    wire branch = (opcode == `BEQ && reg_out1 == reg_out2) || (opcode == `BNE && reg_out1 != reg_out2);
+    wire branch = (opcode == `HALT) ? 0 :
+        ((opcode == `BEQ && reg_out1 == reg_out2) || (opcode == `BNE && reg_out1 != reg_out2));
     // Check if small_immediate is negative
     wire small_immediate_negative = small_immediate[SMALL_IMM_SIZE-1];
     // Check if instruction is a branch and then apply 2's complement if needed
     assign pc_value = branch ? (small_immediate_negative ? (~small_immediate+1): small_immediate) : 1; // Add 1 to PC if not branching
+
+    // Halt
+    assign halted = do_halt;
 
 endmodule

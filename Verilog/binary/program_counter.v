@@ -1,4 +1,4 @@
-module program_counter(clock, reset_enable, update_enable, set_enable, value, out);
+module program_counter(clock, reset_enable, update_enable, value, out);
 
     /* Program Counter
 

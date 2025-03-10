@@ -58,9 +58,10 @@ module cpu_core (
             mem_addr <= 0;
             halted <= 0;
         end else if (start_execution && !halted) begin
+            // Display current state and opcode
+            $display("State: %d, Opcode: %d", state, current_opcode);
             case (state)
                 FETCH: begin // State 0: Fetch
-                    $display("Fetching instruction at address %d", program_counter);
                     mem_addr <= program_counter;
                     mem_write <= 0;
                     state <= DECODE;
@@ -69,12 +70,17 @@ module cpu_core (
                 DECODE: begin // State 1: Decode instruction
                     // Save instruction components for execution stage
                     current_instruction <= mem_read_data;
-                    current_opcode <= mem_read_data[15:11];
-                    current_reg_dest <= mem_read_data[10:8];
-                    current_reg_src <= mem_read_data[7:5];
-                    current_immediate <= mem_read_data[7:0];
-                    current_shift <= mem_read_data[4:1];
-                    
+                    current_opcode <= opcode;
+                    current_reg_dest <= reg_dest;
+                    current_reg_src <= reg_src;
+                    current_immediate <= immediate;
+                    current_shift <= shift;
+                    // Display the decoded instruction broken down into its components
+                    $display("Current Opcode: %d, %d", current_opcode, opcode);
+                    $display("Current Reg Dest: %d", current_reg_dest);
+                    $display("Current Reg Src: %d", current_reg_src);
+                    $display("Current Big Immediate: %d", current_immediate);
+                    $display("Current Small Immediate: %d", current_shift);
                     state <= EXECUTE;
                 end
                 
@@ -133,10 +139,12 @@ module cpu_core (
                             state <= NEXT_INSTRUCTION;
                         end
                         `LUI: begin
+                            $display("Loading upper immediate %d into register %d", current_immediate, current_reg_dest);
                             register_file[current_reg_dest] <= {current_immediate, 8'b0};
                             state <= NEXT_INSTRUCTION;
                         end
                         `LI: begin
+                            $display("Loading lower immediate %d into register %d", current_immediate, current_reg_dest);
                             register_file[current_reg_dest] <= {register_file[current_reg_dest][15:8], current_immediate};
                             state <= NEXT_INSTRUCTION;
                         end

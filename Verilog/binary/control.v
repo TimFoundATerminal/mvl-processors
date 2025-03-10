@@ -1,6 +1,6 @@
-module control(clock,
+module control(clock, 
     opcode, is_alu_operation,
-    fetch_, reg_load_, alu_, mem_load_, mem_store_, reg_store_, next_, reset_, halt_,
+    do_fetch, do_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset, do_halt,
     state);
 
     /* 
@@ -16,7 +16,7 @@ module control(clock,
     input wire [OPCODE_SIZE-1:0] opcode;
     input wire is_alu_operation;
 
-    output wire fetch_, reg_load_, alu_, mem_load_, mem_store_, reg_store_, next_, reset_, halt_;
+    output wire do_fetch, do_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset, do_halt;
 
     output reg [3:0] state = `STATE_INSMEM_LOAD;
 
@@ -74,18 +74,23 @@ module control(clock,
                 state <= `STATE_FETCH;
             end
 
+            // explicit declaration of halt state
+            `STATE_HALT: begin
+                state <= `STATE_HALT;
+            end
+
         endcase
     end
 
     // Control the CPU with the following signals
-    assign fetch_ = (state == `STATE_FETCH);
-    assign reg_load_ = (state == `STATE_REGLOAD);
-    assign alu_ = (state == `STATE_ALU);
-    assign mem_load_ = (state == `STATE_LOAD);
-    assign mem_store_ = (state == `STATE_STORE);
-    assign reg_store_ = (state == `STATE_REGSTORE);
-    assign next_ = (state == `STATE_NEXT);
-    assign reset_ = (state == `STATE_RESET);
-    assign halt_ = (state == `STATE_HALT);
+    assign do_fetch = (state == `STATE_FETCH);
+    assign do_load = (state == `STATE_REGLOAD);
+    assign do_alu = (state == `STATE_ALU);
+    assign do_mem_load = (state == `STATE_LOAD);
+    assign do_mem_store = (state == `STATE_STORE);
+    assign do_reg_store = (state == `STATE_REGSTORE);
+    assign do_next = (state == `STATE_NEXT);
+    assign do_reset = (state == `STATE_RESET);
+    assign do_halt = (state == `STATE_HALT);
 
 endmodule
