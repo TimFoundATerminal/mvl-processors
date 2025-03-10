@@ -1,8 +1,13 @@
-parameter OPCODE_SIZE = 5;
 parameter WORD_SIZE = 16;
+
+parameter OPCODE_SIZE = 5;
+parameter REG_ADDR_SIZE = 3;
+parameter BIG_IMM_SIZE = 8;
+parameter SMALL_IMM_SIZE = 5;
+parameter INS_ADDR_SIZE = 8; // TODO: understand this value more
+
 parameter MEM_SIZE = 32;
 parameter MEM_ADDR_SIZE = 5;
-parameter INS_ADDR_SIZE = 11;
 
 parameter REG_NUM = 8;
 
@@ -28,15 +33,16 @@ parameter REG_NUM = 8;
 `define HALT  5'b11111 // 31
 
 // Processor States
-// `define STATE_INSMEM_LOAD 4'h0
-// `define STATE_RESET 4'h1
-// `define STATE_FETCH 4'h2
-// `define STATE_REGLOAD 4'h3
-// `define STATE_ALUOP 4'h4
-// `define STATE_LOAD 4'h5
-// `define STATE_STORE 4'h6
-// `define STATE_REGSTORE 4'h7
-// `define STATE_NEXT 4'h8
+`define STATE_INSMEM_LOAD 4'h0
+`define STATE_RESET 4'h1
+`define STATE_FETCH 4'h2
+`define STATE_REGLOAD 4'h3
+`define STATE_ALUOP 4'h4
+`define STATE_LOAD 4'h5
+`define STATE_STORE 4'h6
+`define STATE_REGSTORE 4'h7
+`define STATE_NEXT 4'h8
+`define STATE_HALT 4'h9
 
 // `define CTRL_CPU_STATE 8'h00
 // `define CTRL_INSMEM_POS 8'h02
