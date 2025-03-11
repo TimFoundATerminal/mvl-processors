@@ -1,12 +1,12 @@
 @echo off
 REM Clean up any previous simulation files
-del /F run.vvp system_tb.vcb 2>nul
+del /F testbenches/alu_tb.vvp system_tb.vcb 2>nul
 
 REM Compile the Verilog files
-iverilog -o run.vvp memory.v cpu_core.v program_loader.v system.v system_tb.v
+iverilog -o testbenches/alu_tb.vvp alu.v testbenches/alu_tb.v
 
 REM Run the simulation
-vvp run.vvp
+vvp testbenches/alu_tb.vvp
 
 @REM REM View waveforms
 @REM start gtkwave system_tb.vcd

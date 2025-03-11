@@ -4,23 +4,25 @@ module system (
     input wire start
 );
 
+    `include "parameters.vh"
+
     // Internal signals for memory interface
-    wire [4:0] mem_addr;
-    wire [15:0] mem_write_data;
-    wire [15:0] mem_read_data;
+    wire [MEM_ADDR_SIZE-1:0] mem_addr;
+    wire [WORD_SIZE-1:0] mem_write_data;
+    wire [WORD_SIZE-1:0] mem_read_data;
     wire mem_write;
-    wire cpu_halted;  // signal from CPU
+    wire cpu_halted;
     
     // Control signals
     reg start_execution;
     wire load_complete;
     
     // Multiplexed memory control signals
-    wire [4:0] cpu_mem_addr;
-    wire [15:0] cpu_mem_write_data;
+    wire [MEM_ADDR_SIZE-1:0] cpu_mem_addr;
+    wire [WORD_SIZE-1:0] cpu_mem_write_data;
     wire cpu_mem_write;
-    wire [4:0] loader_mem_addr;
-    wire [15:0] loader_mem_write_data;
+    wire [MEM_ADDR_SIZE-1:0] loader_mem_addr;
+    wire [WORD_SIZE-1:0] loader_mem_write_data;
     wire loader_mem_write;
     
     // State machine for system control
@@ -28,18 +30,18 @@ module system (
     localparam IDLE = 2'b00;
     localparam LOADING = 2'b01;
     localparam EXECUTING = 2'b10;
-    localparam HALTED = 2'b11; 
+    localparam HALTED = 2'b11;
     
     // Instantiate CPU Core
-    cpu_core cpu (
+    cpu cpu (
         .clock(clock),
         .reset(reset),
         .execute(start_execution),
         .mem_read_data(mem_read_data),
-        .mem_addr(cpu_mem_addr),
+        .mem_address(cpu_mem_addr),
         .mem_write_data(cpu_mem_write_data),
         .mem_write(cpu_mem_write),
-        .halted(cpu_halted) 
+        .halted(cpu_halted)
     );
     
     // Instantiate RAM

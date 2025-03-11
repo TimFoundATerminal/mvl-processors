@@ -26,14 +26,14 @@ module system_tb;
     );
     
     // Monitor CPU registers for debugging
-    wire [15:0] r0 = uut.cpu.register_file[0];
-    wire [15:0] r1 = uut.cpu.register_file[1];
-    wire [15:0] r2 = uut.cpu.register_file[2];
-    wire [15:0] r3 = uut.cpu.register_file[3];
-    wire [15:0] r4 = uut.cpu.register_file[4];
-    wire [15:0] r5 = uut.cpu.register_file[5];
-    wire [15:0] r6 = uut.cpu.register_file[6];
-    wire [15:0] r7 = uut.cpu.register_file[7];
+    wire [15:0] r0 = uut.cpu.regs.regs[0];
+    wire [15:0] r1 = uut.cpu.regs.regs[1];
+    wire [15:0] r2 = uut.cpu.regs.regs[2];
+    wire [15:0] r3 = uut.cpu.regs.regs[3];
+    wire [15:0] r4 = uut.cpu.regs.regs[4];
+    wire [15:0] r5 = uut.cpu.regs.regs[5];
+    wire [15:0] r6 = uut.cpu.regs.regs[6];
+    wire [15:0] r7 = uut.cpu.regs.regs[7];
     
     // Test sequence
     initial begin
@@ -45,7 +45,7 @@ module system_tb;
         wait_cycles = 0;
         
         // Setup waveform dumping
-        $dumpfile("system_tb.vcd");
+        $dumpfile("testbenches/system_tb.vcd");
         $dumpvars(0, system_tb);
         
         // Apply reset
@@ -73,7 +73,7 @@ module system_tb;
             // Display memory operations
             if (uut.cpu.mem_write)
                 $display("Memory Write: Addr=%h Data=%h",
-                        uut.cpu.mem_addr, uut.cpu.mem_write_data);
+                        uut.cpu.mem_address, uut.cpu.mem_write_data);
             
             // Display ALU operations
             if (uut.cpu.state == 2)  // Write Back state
@@ -95,7 +95,7 @@ module system_tb;
         $display("\nFinal Register Values:");
         for (integer i = 0; i < 8; i = i + 1) begin
             // Display the values in decimal
-            $display("R%0d=%d", i, uut.cpu.register_file[i]);
+            $display("R%0d=%d", i, uut.cpu.regs.regs[i]);
         end
         
         // // Display final memory values

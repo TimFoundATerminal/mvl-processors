@@ -30,7 +30,7 @@ endmodule
 
 module ripple_carry_adder #(parameter WIDTH = 16)(
     input wire [WIDTH-1:0] a, b,
-    output wire [WIDTH-1:0] sum,
+    output wire [WIDTH-1:0] sum
 );
     wire [WIDTH:0] carry; // Extra bit for the carry out
 

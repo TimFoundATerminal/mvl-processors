@@ -1,7 +1,6 @@
 parameter WORD_SIZE = 16;
 
 parameter OPCODE_SIZE = 5;
-parameter REG_ADDR_SIZE = 3;
 parameter BIG_IMM_SIZE = 8;
 parameter SMALL_IMM_SIZE = 5;
 parameter INS_ADDR_SIZE = 8; // TODO: understand this value more
@@ -10,6 +9,7 @@ parameter MEM_SIZE = 32;
 parameter MEM_ADDR_SIZE = 5;
 
 parameter REG_NUM = 8;
+parameter REG_ADDR_SIZE = 3;
 
 // Opcodes (5 bits)
 `define MV    5'b00000 // 0
@@ -37,7 +37,7 @@ parameter REG_NUM = 8;
 `define STATE_RESET 4'h1
 `define STATE_FETCH 4'h2
 `define STATE_REGLOAD 4'h3
-`define STATE_ALUOP 4'h4
+`define STATE_ALU 4'h4
 `define STATE_LOAD 4'h5
 `define STATE_STORE 4'h6
 `define STATE_REGSTORE 4'h7

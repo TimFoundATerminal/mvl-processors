@@ -21,9 +21,9 @@ module decode_instruction(
     assign {opcode, reg_dest, reg_src, small_immediate} = instruction;
     assign big_immediate = {reg_src, small_immediate};
 
-    // If opcode is in the following list, it is an ALU operation: ADD, SUB, AND, OR, XOR, NOT, SHL, SHR
+    // If opcode is in the following list, it is an ALU operation
     assign is_alu_operation = (opcode == `NOT) || (opcode == `AND) || (opcode == `OR) || 
-        (opcode == `XOR) || (opcode == `ADD) || (opcode == `SUB) ||
-        (opcode == `COMP) || (opcode == `SHL) || (opcode == `SHR);
+        (opcode == `XOR) || (opcode == `ADD) || (opcode == `SUB) || (opcode == `COMP) || 
+        (opcode == `ANDI) || (opcode == `ADDI) || (opcode == `SRI) || (opcode == `SLI);
 
 endmodule

@@ -1,12 +1,11 @@
 module cpu_core (
     input wire clock,
     input wire reset,
-    input wire start_execution,
+    input wire execute,
     input wire [15:0] mem_read_data,
     output reg [4:0] mem_addr,
     output reg [15:0] mem_write_data,
     output reg mem_write,
-    output reg [15:0] alu_out,
     output reg halted // Contains a halted flag
 );
 
@@ -16,6 +15,7 @@ module cpu_core (
     reg [15:0] register_file [0:7];
     reg [2:0] state;
     reg [15:0] program_counter;
+    reg [15:0] alu_out;
     
     // Instruction decode
     wire [15:0] instruction = mem_read_data;
@@ -57,7 +57,7 @@ module cpu_core (
             mem_write <= 0;
             mem_addr <= 0;
             halted <= 0;
-        end else if (start_execution && !halted) begin
+        end else if (execute && !halted) begin
             // Display current state and opcode
             $display("State: %d, Opcode: %d", state, current_opcode);
             case (state)

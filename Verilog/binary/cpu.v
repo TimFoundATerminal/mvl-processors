@@ -22,7 +22,7 @@ module cpu(
     // output wire [OPCODE_SIZE-1:0] opcode;
 
     // Control signals
-    wire do_fetch, do_reg_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset do_halt;
+    wire do_fetch, do_reg_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset, do_halt;
 
     // Internal signals
     // Internal signals for program counter
@@ -85,7 +85,6 @@ module cpu(
     wire [WORD_SIZE-1:0] alu_out;
     alu arithmetic_logic_unit (
         .clock(clock),
-        .reset(reset),
         .opcode(opcode),
         .input1(reg_out1),
         .input2(reg_out2),
@@ -93,11 +92,6 @@ module cpu(
         .alu_out(alu_out)
     );
 
-    // Memory Interface
-    output wire [MEM_ADDR_SIZE-1:0] mem_address;
-    output wire [WORD_SIZE-1:0] mem_data;
-    output wire mem_read, mem_write;
-    input wire [WORD_SIZE-1:0] mem_out;
 
     assign reg_val = (opcode == `LOAD) ? mem_read_data 
         : (opcode == `LUI) ? {big_immediate, {WORD_SIZE-BIG_IMM_SIZE{1'b0}}}
@@ -108,23 +102,24 @@ module cpu(
     output wire [3:0] state;
     control ctrl(
         .clock(clock),
+        .execute(execute),
+        .reset(reset),
         .opcode(opcode),
         .is_alu_operation(is_alu_operation),
-        .fetch_(do_fetch),
-        .reg_load_(do_reg_load),
-        .alu_(do_alu),
-        .mem_load_(do_mem_load),
-        .mem_store_(do_mem_store),
-        .reg_store_(do_reg_store),
-        .next_(do_next),
-        .reset_(do_reset),
-        .halt_(do_halt),
+        .do_fetch(do_fetch),
+        .do_reg_load(do_reg_load),
+        .do_alu(do_alu),
+        .do_mem_load(do_mem_load),
+        .do_mem_store(do_mem_store),
+        .do_reg_store(do_reg_store),
+        .do_next(do_next),
+        .do_reset(do_reset),
+        .do_halt(do_halt),
         .state(state)
-    )
+    );
 
     // Branching
-    wire branch = (opcode == `HALT) ? 0 :
-        ((opcode == `BEQ && reg_out1 == reg_out2) || (opcode == `BNE && reg_out1 != reg_out2));
+    wire branch = (opcode == `HALT) ? 1'b0 : (((opcode == `BEQ) && (reg_out1 == reg_out2)) || ((opcode == `BNE) && (reg_out1 != reg_out2)));
     // Check if small_immediate is negative
     wire small_immediate_negative = small_immediate[SMALL_IMM_SIZE-1];
     // Check if instruction is a branch and then apply 2's complement if needed

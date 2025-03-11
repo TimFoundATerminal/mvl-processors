@@ -9,20 +9,20 @@ module program_counter(clock, reset_enable, update_enable, value, out);
     
     input wire clock, reset_enable, update_enable;
     input wire [WORD_SIZE-1:0] value;
-    output reg [WORD_SIZE-1:0] out = 0;
+    output reg [MEM_ADDR_SIZE-1:0] out = 0;
     
     always @(posedge clock) begin
         if (reset_enable) begin
             $display("Resetting program counter");
             out <= 0;
         end
-        if (update_enable) begin
+        else if (update_enable) begin
             // $display("Updating program counter by %d", update);
             // TODO: Allow for negative updates to the program counter
             out <= out + value;
         end
-        if (set_enable) begin
-            out <= value;
+        else begin
+            out <= out;
         end
     end
 endmodule
