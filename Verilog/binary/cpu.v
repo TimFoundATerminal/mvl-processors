@@ -24,33 +24,27 @@ module cpu(
     // Control signals
     wire do_fetch, do_reg_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset, do_halt;
 
-    // Internal signals
-    // Internal signals for program counter
+    // Program counter
     wire update_pc;
     wire [WORD_SIZE-1:0] pc_value;
     wire [MEM_ADDR_SIZE-1:0] program_counter;
-
-    // Internal signals for register file
-    wire get_regs, set_regs;
-    wire [REG_ADDR_SIZE-1:0] reg_dest, reg_src;
-    wire [WORD_SIZE-1:0] reg_val;
-    wire [WORD_SIZE-1:0] reg_out1, reg_out2;
-
-    // Program counter
     program_counter pc (
         .clock(clock),
-        .reset_enable(do_reset),
+        .reset_enable(reset),  // may need to be connected to do_reset
         .update_enable(do_next),
         .value(pc_value),
         .out(program_counter)
     );
 
     // Register file
+    wire [REG_ADDR_SIZE-1:0] reg_dest, reg_src;
+    wire [WORD_SIZE-1:0] reg_val;
+    wire [WORD_SIZE-1:0] reg_out1, reg_out2;
     registers regs (
         .clock(clock),
-        .get_enable(get_regs),
-        .set_enable(set_regs),
-        .reset_enable(reset),
+        .get_enable(do_reg_load),
+        .set_enable(do_reg_store),
+        .reset_enable(reset),  // may need to be connected to do_reset
         .num1(reg_dest),
         .num2(reg_src),
         .set_val(reg_val),
@@ -59,11 +53,13 @@ module cpu(
     );
 
     // Instruction fetching
-    assign mem_address = do_fetch ? program_counter : 
-        (do_mem_load || do_mem_store) ? reg_out1 : 5'b0; // 5'b0 is the default value for memory address.
-    assign mem_write_data = do_mem_store ? reg_out2 : 16'h0000; // 16'h0000 is the default value for memory data.
-    assign mem_read = do_fetch || do_mem_load;
-    assign mem_write = do_mem_store;
+    wire [WORD_SIZE-1:0] instruction;
+    fetch_instruction fetch (
+        .clock(clock),
+        .instruction_memory(mem_read_data),
+        .fetch_enable(do_fetch),
+        .instruction(instruction)
+    );
 
     // Instruction decode
     output wire [OPCODE_SIZE-1:0] opcode;
@@ -72,7 +68,7 @@ module cpu(
     wire [BIG_IMM_SIZE-1:0] big_immediate;
     wire [SMALL_IMM_SIZE-1:0] small_immediate;
     decode_instruction decode (
-        .instruction(mem_read_data), // Does this need to connected here?
+        .instruction(instruction),
         .opcode(opcode),
         .is_alu_operation(is_alu_operation),
         .reg_dest(reg_dest),
@@ -81,7 +77,17 @@ module cpu(
         .small_immediate(small_immediate)
     );
 
+    // Attach decoded register addresses to register file
+    assign reg_dest = reg1;
+    assign reg_src = reg2;
+    assign reg_val = (opcode == `LOAD) ? mem_read_data 
+        // : (opcode == `MV) ? reg_out2
+        : (opcode == `LUI) ? {big_immediate, {WORD_SIZE-BIG_IMM_SIZE{1'b0}}} // Zero the lower 8 bits after the big immediate
+        : (opcode == `LI) ? ((reg_out1 & {{WORD_SIZE-BIG_IMM_SIZE{1'b1}}, {BIG_IMM_SIZE{1'b0}}}) | big_immediate) // Keep the upper 8 bits of reg_out1 and update lower 8 bits
+        : alu_out;
+
     // ALU
+    wire [WORD_SIZE-1:0] alu_in_1, alu_in_2;
     wire [WORD_SIZE-1:0] alu_out;
     alu arithmetic_logic_unit (
         .clock(clock),
@@ -92,11 +98,9 @@ module cpu(
         .alu_out(alu_out)
     );
 
-
-    assign reg_val = (opcode == `LOAD) ? mem_read_data 
-        : (opcode == `LUI) ? {big_immediate, {WORD_SIZE-BIG_IMM_SIZE{1'b0}}}
-        : (opcode == `LI) ? {{WORD_SIZE-BIG_IMM_SIZE{1'b0}}, big_immediate}
-        : alu_out;
+    // attach ALU inputs to register outputs
+    assign alu_in_1 = reg_out1;
+    assign alu_in_2 = reg_out2;
 
     // Control unit with state machine
     output wire [3:0] state;
@@ -117,6 +121,12 @@ module cpu(
         .do_halt(do_halt),
         .state(state)
     );
+
+    // Memory interface
+    assign mem_address = do_fetch ? program_counter : reg_out1;
+    assign mem_write_data = reg_out1;
+    assign mem_read = do_fetch || do_mem_load;
+    assign mem_write = do_mem_store; 
 
     // Branching
     wire branch = (opcode == `HALT) ? 1'b0 : (((opcode == `BEQ) && (reg_out1 == reg_out2)) || ((opcode == `BNE) && (reg_out1 != reg_out2)));

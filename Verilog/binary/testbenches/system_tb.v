@@ -9,9 +9,6 @@ module system_tb;
     reg [15:0] prev_pc;
     integer wait_cycles;
     
-    // Monitor signals
-    wire [15:0] alu_result;
-    
     // Clock generation
     initial begin
         clock = 0;
@@ -61,13 +58,14 @@ module system_tb;
         // Wait for program to load and execute
         // Monitor system state
         wait(uut.system_state == uut.EXECUTING);
-        $display("Program execution started");
+        $display("Program Execution Started");
         
         // Monitor execution
         while (!execution_done && uut.system_state == uut.EXECUTING) begin
             // Display register values on each clock cycle
             @(posedge clock);
-            $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
+            $display("PC=%0d", uut.cpu.program_counter);
+            // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
             $display("R0=%h R1=%h R2=%h R3=%h R4=%h R5=%h", r0, r1, r2, r3, r4, r5);
             
             // Display memory operations
@@ -76,7 +74,7 @@ module system_tb;
                         uut.cpu.mem_address, uut.cpu.mem_write_data);
             
             // Display ALU operations
-            if (uut.cpu.state == 2)  // Write Back state
+            if (uut.cpu.state == 4)  // Write Back state
                 $display("ALU Result=%d", uut.cpu.alu_out);
                 
             // Check if program counter has stopped changing

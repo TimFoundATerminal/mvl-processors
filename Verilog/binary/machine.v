@@ -21,6 +21,7 @@ module system (
     wire [MEM_ADDR_SIZE-1:0] cpu_mem_addr;
     wire [WORD_SIZE-1:0] cpu_mem_write_data;
     wire cpu_mem_write;
+    wire cpu_mem_read;
     wire [MEM_ADDR_SIZE-1:0] loader_mem_addr;
     wire [WORD_SIZE-1:0] loader_mem_write_data;
     wire loader_mem_write;
@@ -41,6 +42,7 @@ module system (
         .mem_address(cpu_mem_addr),
         .mem_write_data(cpu_mem_write_data),
         .mem_write(cpu_mem_write),
+        .mem_read(cpu_mem_read),
         .halted(cpu_halted)
     );
     
@@ -49,6 +51,7 @@ module system (
         .clock(clock),
         .reset(reset),
         .write_enable(mem_write),
+        .read_enable(mem_read),
         .address(mem_addr),
         .data_in(mem_write_data),
         .data_out(mem_read_data)
@@ -69,6 +72,7 @@ module system (
     assign mem_addr = (system_state == LOADING) ? loader_mem_addr : cpu_mem_addr;
     assign mem_write_data = (system_state == LOADING) ? loader_mem_write_data : cpu_mem_write_data;
     assign mem_write = (system_state == LOADING) ? loader_mem_write : cpu_mem_write;
+    assign mem_read = cpu_mem_read;
     
     // System control state machine
     always @(posedge clock or posedge reset) begin

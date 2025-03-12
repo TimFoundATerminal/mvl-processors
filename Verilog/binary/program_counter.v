@@ -17,7 +17,7 @@ module program_counter(clock, reset_enable, update_enable, value, out);
             out <= 0;
         end
         else if (update_enable) begin
-            // $display("Updating program counter by %d", update);
+            $display("Updating program counter by %d", value);
             // TODO: Allow for negative updates to the program counter
             out <= out + value;
         end

@@ -28,12 +28,12 @@ module control(clock, execute, reset,
     reg halt_latch = 1'b0;
 
     always @(posedge clock or posedge reset) begin
-        $display("State: %d, Opcode: %d", state, opcode);
+        // $display("State: %d, Opcode: %d", state, opcode);
         if (reset) begin
             state <= `STATE_RESET;
             halt_latch <= 1'b0;
         end
-        else begin
+        else if (execute) begin
             case (state)
                 `STATE_RESET: begin
                     state <= `STATE_FETCH;
@@ -65,6 +65,7 @@ module control(clock, execute, reset,
                         default: begin
                             $display("Invalid opcode: %d", opcode);
                             $display("Halting CPU");
+                            halt_latch <= 1'b1;
                             state <= `STATE_HALT;
                         end
                     endcase
@@ -93,6 +94,7 @@ module control(clock, execute, reset,
                 // explicit declaration of halt state
                 `STATE_HALT: begin
                     state <= `STATE_HALT;
+                    halt_latch <= 1'b1;
                 end
             endcase
         end

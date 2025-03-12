@@ -1,10 +1,11 @@
 @echo off
 REM Clean up any previous simulation files
-del /F testbenches/main.vvp system_tb.vcb 2>nul
+cd testbenches
+del /f main.vvp
+cd ../
 
 REM Compile the Verilog files
-iverilog -o testbenches/main.vvp program_counter.v registers.v decode_instruction.v alu.v control.v memory.v cpu.v program_loader.v machine.v testbenches/system_tb.v
-@REM iverilog -o main.vvp alu.v
+iverilog -o testbenches/main.vvp program_counter.v registers.v fetch_instruction.v decode_instruction.v alu.v control.v memory.v cpu.v program_loader.v machine.v testbenches/system_tb.v
 
 REM Run the simulation
 vvp testbenches/main.vvp
