@@ -81,7 +81,7 @@ module cpu(
     assign reg_dest = reg1;
     assign reg_src = reg2;
     assign reg_val = (opcode == `LOAD) ? mem_read_data 
-        // : (opcode == `MV) ? reg_out2
+        : (opcode == `MV) ? reg_out2
         : (opcode == `LUI) ? {big_immediate, {WORD_SIZE-BIG_IMM_SIZE{1'b0}}} // Zero the lower 8 bits after the big immediate
         : (opcode == `LI) ? ((reg_out1 & {{WORD_SIZE-BIG_IMM_SIZE{1'b1}}, {BIG_IMM_SIZE{1'b0}}}) | big_immediate) // Keep the upper 8 bits of reg_out1 and update lower 8 bits
         : alu_out;

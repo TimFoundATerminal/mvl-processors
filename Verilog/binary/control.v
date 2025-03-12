@@ -47,7 +47,8 @@ module control(clock, execute, reset,
                     if (is_alu_operation) 
                         state <= `STATE_ALU;
                     else case (opcode)
-                        // TODO MV operation
+                        `MV:
+                            state <= `STATE_REGSTORE;
                         `LOAD:
                             state <= `STATE_LOAD;
                         `STORE:
