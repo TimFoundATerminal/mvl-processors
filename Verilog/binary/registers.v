@@ -1,4 +1,4 @@
-module registers(clock, num1, num2, set_num, set_val, get_enable, set_enable, reset_enable, out1, out2);
+module registers(clock, num1, num2, set_val, get_enable, set_enable, reset_enable, out1, out2);
 
     /* Registers
 
@@ -11,7 +11,7 @@ module registers(clock, num1, num2, set_num, set_val, get_enable, set_enable, re
 
     input wire clock;
     input wire get_enable, set_enable, reset_enable;
-    input wire [REG_ADDR_SIZE-1:0] num1, num2, set_num;
+    input wire [REG_ADDR_SIZE-1:0] num1, num2;
     input wire [WORD_SIZE-1:0] set_val;
     output reg [WORD_SIZE-1:0] out1, out2;
 
@@ -19,13 +19,15 @@ module registers(clock, num1, num2, set_num, set_val, get_enable, set_enable, re
 
     integer i;
     always @(posedge clock) begin
+        $display("Get Enable: %d, Set Enable: %d", get_enable, set_enable);
         if (reset_enable) begin
             for (i = 0; i < REG_NUM; i = i + 1) begin
                 regs[i] <= 0;
             end
         end
         if (set_enable) begin
-            regs[set_num] <= set_val;
+            $display("Setting register %d to %d", num1, set_val);
+            regs[num1] <= set_val;
         end
         if (get_enable) begin
             out1 <= regs[num1];
