@@ -28,25 +28,25 @@ class InstructionParser:
         
         # Instruction opcodes
         self.instructions = {
-            'MV':    0b00000,
-            'NOT':   0b00010,
-            'AND':   0b00100,
-            'OR':    0b00101,
-            'XOR':   0b00110,
-            'ADD':   0b00111,
-            'SUB':   0b01000,
-            'COMP':  0b01011,
-            'ANDI':  0b01100,
-            'ADDI':  0b01101,
-            'SRI':   0b01110,
-            'SLI':   0b01111,
-            'LUI':   0b10000,
-            'LI':    0b10001,
-            'BEQ':   0b10010,
-            'BNE':   0b10011,
-            'LOAD':  0b10110,
-            'STORE': 0b10111,
-            'HALT':  0b11111
+            'MV':    0b00000, # 0
+            'NOT':   0b00010, # 2
+            'AND':   0b00100, # 4
+            'OR':    0b00101, # 5
+            'XOR':   0b00110, # 6
+            'ADD':   0b00111, # 7
+            'SUB':   0b01000, # 8
+            'COMP':  0b01011, # 11
+            'ANDI':  0b01100, # 12
+            'ADDI':  0b01101, # 13
+            'SRI':   0b01110, # 14
+            'SLI':   0b01111, # 15
+            'LUI':   0b10000, # 16
+            'LI':    0b10001, # 17
+            'BEQ':   0b10010, # 18
+            'BNE':   0b10011, # 19
+            'LOAD':  0b10110, # 22
+            'STORE': 0b10111, # 23
+            'HALT':  0b11111  # 31
         }
 
     def parse_registers(self, reg1, reg2):
@@ -82,7 +82,38 @@ class InstructionParser:
                 raise ValueError("Immediate value must be between 0 and 255")
                 
             return r1_num, imm_val
-        except:
+        except ValueError as e:
+            raise e
+        except Exception as e:
+            raise ValueError(f"Invalid register/immediate format: {reg1}, {imm}")
+        
+    def parse_register_neg_immediate(self, reg1, imm):
+        """Parse register and immediate value."""
+        try:
+            r1_num = int(reg1.strip()[1:])  # Remove 'R' and convert to int
+            
+            # Handle hex values prefixed with 0x or not
+            if isinstance(imm, str):
+                if imm.startswith('0x'):
+                    imm_val = int(imm, 16)
+                else:
+                    imm_val = int(imm, 16)
+            else:
+                imm_val = int(imm)
+                
+            if not (0 <= r1_num <= 7):
+                raise ValueError("Register numbers must be between 0 and 7")
+            if not (-128 <= imm_val <= 127):
+                raise ValueError("Immediate value must be between 0 and 255")
+            
+            # If negative, convert to 8-bit signed by adding 2**7
+            if imm_val < 0:
+                imm_val = imm_val + (1 << 8)
+                
+            return r1_num, imm_val
+        except ValueError as e:
+            raise e
+        except Exception as e:
             raise ValueError(f"Invalid register/immediate format: {reg1}, {imm}")
 
     def parse_memory_instruction(self, reg1, reg2, offset):
@@ -157,10 +188,15 @@ class InstructionParser:
                 reg_a, imm = self.parse_register_immediate(tokens[1], tokens[2])
                 return (opcode << 11) | (reg_a << 8) | imm
             
-            # Branch instructions
+            # Negative I-type instructions
             elif instruction in ['BEQ', 'BNE']:
-                reg_a, b, immediate = self.parse_branch_instruction(tokens[1], tokens[2], tokens[3])
-                return (opcode << 11) | (reg_a << 8) | (b << 7) | immediate
+                reg_a, imm = self.parse_register_neg_immediate(tokens[1], tokens[2])
+                return (opcode << 11) | (reg_a << 8) | imm
+            
+            # # Branch instructions
+            # elif instruction in ['BEQ', 'BNE']:
+            #     reg_a, b, immediate = self.parse_branch_instruction(tokens[1], tokens[2], tokens[3])
+            #     return (opcode << 11) | (reg_a << 8) | (b << 7) | immediate
                 
             # M-type instructions
             elif instruction in ['LOAD', 'STORE']:

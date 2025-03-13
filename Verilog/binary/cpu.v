@@ -1,7 +1,7 @@
 module cpu(
     clock, reset, execute, halted,
-    mem_address, mem_read_data, mem_write_data, mem_read, mem_write
-    // state, opcode // debug outputs
+    mem_address, mem_read_data, mem_write_data, mem_read, mem_write,
+    state, opcode // debug outputs
 );
 
     `include "parameters.vh"
@@ -16,10 +16,6 @@ module cpu(
     output wire [MEM_ADDR_SIZE-1:0] mem_address;
     output wire [WORD_SIZE-1:0] mem_write_data;
     output wire mem_read, mem_write;
-
-    // Debug Outputs
-    // output wire [3:0] state;
-    // output wire [OPCODE_SIZE-1:0] opcode;
 
     // Control signals
     wire do_fetch, do_reg_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset, do_halt;
@@ -62,7 +58,7 @@ module cpu(
     );
 
     // Instruction decode
-    output wire [OPCODE_SIZE-1:0] opcode;
+    output wire [OPCODE_SIZE-1:0] opcode; // for debugging
     wire [REG_ADDR_SIZE-1:0] reg1, reg2;
     wire is_alu_operation;
     wire [BIG_IMM_SIZE-1:0] big_immediate;
@@ -92,18 +88,18 @@ module cpu(
     alu arithmetic_logic_unit (
         .clock(clock),
         .opcode(opcode),
-        .input1(reg_out1),
-        .input2(reg_out2),
+        .input1(alu_in_1),
+        .input2(alu_in_2),
         .alu_enable(is_alu_operation),
         .alu_out(alu_out)
     );
 
-    // attach ALU inputs to register outputs
+    // attach ALU inputs to register outputs/immediate
     assign alu_in_1 = reg_out1;
-    assign alu_in_2 = reg_out2;
+    assign alu_in_2 = (opcode == `ADDI) || (opcode == `ANDI) ? {{WORD_SIZE-BIG_IMM_SIZE{1'b0}}, big_immediate} : reg_out2;
 
     // Control unit with state machine
-    output wire [3:0] state;
+    output wire [3:0] state; // for debugging
     control ctrl(
         .clock(clock),
         .execute(execute),
@@ -129,11 +125,21 @@ module cpu(
     assign mem_write = do_mem_store; 
 
     // Branching
-    wire branch = (opcode == `HALT) ? 1'b0 : (((opcode == `BEQ) && (reg_out1 == reg_out2)) || ((opcode == `BNE) && (reg_out1 != reg_out2)));
+    // wire branch = (opcode == `HALT) ? 1'b0 : (((opcode == `BEQ) && (reg_out1 == reg_out2)) || ((opcode == `BNE) && (reg_out1 != reg_out2)));
+    // Check if final bit of reg_out1 is 1
+    wire branch = (((opcode == `BEQ) && (reg_out1[0] == 1'b1)) || ((opcode == `BNE) && (reg_out1[0] == 1'b0))); 
+    // wire branch = ((opcode == `BNE) && (reg_out1[0] == 1'b0));
+    // wire branch = (opcode == `BNE); 
+    // wire branch = 1; 
+    // begin 
+    //     $display("Branching: %d, Opcode: %d", branch, opcode);
+    // end
     // Check if small_immediate is negative
-    wire small_immediate_negative = small_immediate[SMALL_IMM_SIZE-1];
+    // wire small_immediate_negative = small_immediate[SMALL_IMM_SIZE-1];
     // Check if instruction is a branch and then apply 2's complement if needed
-    assign pc_value = branch ? (small_immediate_negative ? (~small_immediate+1): small_immediate) : 1; // Add 1 to PC if not branching
+    // assign pc_value = branch ? (small_immediate_negative ? (~small_immediate+1): small_immediate) : 1; // Add 1 to PC if not branching
+    assign pc_value = branch ? big_immediate : 1; // Add 1 to PC if not branching
+    // assign pc_value = branch ? 2 : 1; // Add 1 to PC if not branching
 
     // Halt
     assign halted = do_halt;

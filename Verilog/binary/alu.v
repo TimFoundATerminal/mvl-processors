@@ -53,7 +53,6 @@ module ripple_carry_adder #(parameter WIDTH = 16)(
 endmodule
 
 
-
 module alu(clock, opcode, input1, input2, alu_enable, alu_out);
 
     `include "parameters.vh"
@@ -84,6 +83,7 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= input1 ^ input2;
                 end
                 `ADD, `ADDI: begin
+                    // $display("Adding %d and %d", input1, input2);
                     alu_out <= adder_out;
                     // alu_out <= input1 + input2;
                 end

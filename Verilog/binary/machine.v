@@ -32,6 +32,10 @@ module system (
     localparam LOADING = 2'b01;
     localparam EXECUTING = 2'b10;
     localparam HALTED = 2'b11;
+
+    // Debug/monitoring signals
+    wire [3:0] state;
+    wire [OPCODE_SIZE-1:0] opcode;
     
     // Instantiate CPU Core
     cpu cpu (
@@ -43,7 +47,9 @@ module system (
         .mem_write_data(cpu_mem_write_data),
         .mem_write(cpu_mem_write),
         .mem_read(cpu_mem_read),
-        .halted(cpu_halted)
+        .halted(cpu_halted),
+        .state(state),
+        .opcode(opcode)
     );
     
     // Instantiate RAM
@@ -80,6 +86,8 @@ module system (
             system_state <= IDLE;
             start_execution <= 0;
         end else begin
+            $display("System State: %d", system_state);
+            $display("Opcode: %d", opcode);
             case (system_state)
                 IDLE: begin
                     if (start) begin
