@@ -1,8 +1,37 @@
+// Static gate count calculator
+module gate_counter #(parameter WIDTH = 16); // Get the width of ripple-carry adder
+
+  // Static gate counts
+  integer and_gates, or_gates, xor_gates;
+  
+  initial begin
+    // In half_adder:
+    // - 1 XOR gate for sum
+    // - 1 AND gate for carry
+    
+    // In full_adder:
+    // - 2 half_adders = 2 XOR + 2 AND
+    // - 1 OR gate for final carry_out
+    
+    // In ripple_carry_adder with WIDTH bits:
+    // - WIDTH full_adders
+    
+    // Calculate total gates:
+    and_gates = WIDTH * 2;     // 2 AND gates per full_adder
+    or_gates = WIDTH * 1;      // 1 OR gate per full_adder
+    xor_gates = WIDTH * 2;     // 2 XOR gates per full_adder
+    
+    $display("Static gate count for %0d-bit ripple-carry adder:", WIDTH);
+    $display("AND gates: %0d", and_gates);
+    $display("OR gates: %0d", or_gates);
+    $display("XOR gates: %0d", xor_gates);
+    $display("Total gates: %0d", and_gates + or_gates + xor_gates);
+  end
+endmodule
 
 module half_adder(a, b, sum, carry);
     input a, b;
     output sum, carry;
-    // TODO: Implement a global counter for the number of gates used
 
     // XOR gate for sum
     assign sum = a ^ b;
@@ -58,7 +87,7 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
     `include "parameters.vh"
 
     input wire clock, alu_enable;
-    input wire [4:0] opcode;
+    input wire [OPCODE_SIZE-1:0] opcode;
     input wire [WORD_SIZE-1:0] input1, input2;
     output reg [WORD_SIZE-1:0] alu_out;
 
@@ -83,9 +112,8 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= input1 ^ input2;
                 end
                 `ADD, `ADDI: begin
-                    // $display("Adding %d and %d", input1, input2);
-                    alu_out <= adder_out;
-                    // alu_out <= input1 + input2;
+                    // alu_out <= adder_out;
+                    alu_out <= input1 + input2;
                 end
                 `SUB: begin
                     alu_out <= input1 - input2;

@@ -11,7 +11,7 @@ REM Run the simulation
 vvp testbenches/main.vvp
 
 @REM REM View waveforms
-@REM start gtkwave system_tb.vcd
+@REM start gtkwave main.vcd
 
 @REM REM Pause to keep the window open if there are errors
 @REM pause

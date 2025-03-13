@@ -30,7 +30,7 @@ parameter REG_ADDR_SIZE = 3;
 `define BNE   5'b10011 // 19
 `define LOAD  5'b10110 // 22
 `define STORE 5'b10111 // 23
-`define HALT  5'b11111 // 31
+`define HALT  5'b11010 // 26
 
 // Processor States
 `define STATE_INSMEM_LOAD 4'h0
@@ -43,7 +43,3 @@ parameter REG_ADDR_SIZE = 3;
 `define STATE_REGSTORE 4'h7
 `define STATE_NEXT 4'h8
 `define STATE_HALT 4'h9
-
-// `define CTRL_CPU_STATE 8'h00
-// `define CTRL_INSMEM_POS 8'h02
-// `define CTRL_INSMEM_DATA 8'h03

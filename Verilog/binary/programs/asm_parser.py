@@ -132,26 +132,26 @@ class InstructionParser:
         except:
             raise ValueError(f"Invalid memory instruction format: {reg1}, {reg2}, {offset}")
         
-    def parse_branch_instruction(self, reg1, b, immediate):
-        """Parse branch instruction format (register, immediate)."""
-        try:
-            r1_num = int(reg1.strip()[1:])  # Remove 'R' and convert to int
-            b_val = int(b.strip())
-            imm_val = int(immediate.strip())
+    # def parse_branch_instruction(self, reg1, b, immediate):
+    #     """Parse branch instruction format (register, immediate)."""
+    #     try:
+    #         r1_num = int(reg1.strip()[1:])  # Remove 'R' and convert to int
+    #         b_val = int(b.strip())
+    #         imm_val = int(immediate.strip())
                 
-            if not (0 <= r1_num <= 7):
-                raise ValueError("Register numbers must be between 0 and 7")
-            if not (0 <= b_val <= 1):
-                raise ValueError("Branch value must be 0 or 1")
-            if not (-64 <= imm_val <= 63):
-                raise ValueError("Immediate value must be between -64 and 63")
+    #         if not (0 <= r1_num <= 7):
+    #             raise ValueError("Register numbers must be between 0 and 7")
+    #         if not (0 <= b_val <= 1):
+    #             raise ValueError("Branch value must be 0 or 1")
+    #         if not (-64 <= imm_val <= 63):
+    #             raise ValueError("Immediate value must be between -64 and 63")
                 
-            return r1_num, b_val, decimal_to_7bit_signed(imm_val)
+    #         return r1_num, b_val, decimal_to_7bit_signed(imm_val)
         
-        except ValueError as e:
-            raise e
-        except:
-            raise ValueError(f"Invalid branch instruction format: {reg1}, {b}, {immediate}")
+    #     except ValueError as e:
+    #         raise e
+    #     except:
+    #         raise ValueError(f"Invalid branch instruction format: {reg1}, {b}, {immediate}")
 
     def parse_line(self, line):
         """Parse a single line of assembly."""
