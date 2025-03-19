@@ -11,6 +11,7 @@ Proposal/examples
 *.synctex.gz
 *.bbl
 *.blg
+*.toc
 
 # add .vscode to ignore list
 .vscode
