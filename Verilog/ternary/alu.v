@@ -37,7 +37,7 @@ module ternary_adder_1bit(
         input [1:0] trit1, trit2;
         begin
             case({trit1, trit2})
-                {`_1, `_1}: ternary_add_step = {`_1, `_1_};   // -1 + -1 = -2 = carry -1, sum 1
+                {`_1, `_1}: ternary_add_step = {`_1, `_1_};  // -1 + -1 = -2 = carry -1, sum 1
                 {`_1, `_0}: ternary_add_step = {`_0, `_1};   // -1 + 0 = -1
                 {`_1, `_1_}: ternary_add_step = {`_0, `_0};  // -1 + 1 = 0
                 {`_0, `_1}: ternary_add_step = {`_0, `_1};   // 0 + -1 = -1
@@ -51,28 +51,30 @@ module ternary_adder_1bit(
         end
     endfunction
     
-    // Helper function for ternary addition with carry
-    function [1:0] ternary_add_with_carry;
-        input [1:0] trit1, trit2, carry_in;
-        reg [3:0] first_add;
-        reg [3:0] second_add;
-        begin
-            first_add = ternary_add_step(trit1, trit2);
-            second_add = ternary_add_step(first_add[1:0], carry_in);
-            ternary_add_with_carry = second_add[1:0];
-        end
-    endfunction
+    // First add a and b, then add the result to carry_in
+    wire [3:0] step1, step2;
     
-    wire [3:0] add_step;
+    // First addition: a + b
+    assign step1 = ternary_add_step(a, b);
     
-    assign add_step = ternary_add_step(a, b);
-    assign sum = ternary_add_with_carry(a, b, carry_in);
-    assign carry_out = add_step[3:2];
+    // Second addition: (a+b result) + carry_in
+    assign step2 = ternary_add_step(step1[1:0], carry_in);
+    
+    // Final sum is the result of the second addition
+    assign sum = step2[1:0];
+    
+    // Combine the carries from both addition steps
+    assign carry_out = (step1[3:2] == `_0) ? step2[3:2] :
+                       (step2[3:2] == `_0) ? step1[3:2] :
+                       (step1[3:2] == `_1_ && step2[3:2] == `_1_) ? `_1 :  // 1+1=-1 with carry 1
+                       (step1[3:2] == `_1 && step2[3:2] == `_1) ? `_1_ :   // -1+-1=1 with carry -1
+                       `_0;  // Otherwise carries cancel out
 endmodule
 
-// Ternary ripple carry adder
+// Ternary ripple carry adder - fixed for 9 trits
 module ternary_ripple_carry_adder(input1, input2, result);
-    parameter WORD_SIZE = 8;
+    // Fixed word size of 9 trits
+    parameter WORD_SIZE = 9;
     
     input [2*WORD_SIZE-1:0] input1, input2;
     output [2*WORD_SIZE-1:0] result;
@@ -82,7 +84,7 @@ module ternary_ripple_carry_adder(input1, input2, result);
     
     assign carry[0] = `_0; // Initial carry is 0
     
-    // Generate adder stages using individual bit adders
+    // Explicitly instantiate all 9 adder stages
     ternary_adder_1bit adder0(
         .a(input1[1:0]),
         .b(input2[1:0]),
@@ -115,66 +117,55 @@ module ternary_ripple_carry_adder(input1, input2, result);
         .carry_out(carry[4])
     );
     
-    // Add more stages if WORD_SIZE > 4
-    generate
-        if (WORD_SIZE > 4) begin
-            ternary_adder_1bit adder4(
-                .a(input1[9:8]),
-                .b(input2[9:8]),
-                .carry_in(carry[4]),
-                .sum(result[9:8]),
-                .carry_out(carry[5])
-            );
-        end
-    endgenerate
+    ternary_adder_1bit adder4(
+        .a(input1[9:8]),
+        .b(input2[9:8]),
+        .carry_in(carry[4]),
+        .sum(result[9:8]),
+        .carry_out(carry[5])
+    );
     
-    generate
-        if (WORD_SIZE > 5) begin
-            ternary_adder_1bit adder5(
-                .a(input1[11:10]),
-                .b(input2[11:10]),
-                .carry_in(carry[5]),
-                .sum(result[11:10]),
-                .carry_out(carry[6])
-            );
-        end
-    endgenerate
+    ternary_adder_1bit adder5(
+        .a(input1[11:10]),
+        .b(input2[11:10]),
+        .carry_in(carry[5]),
+        .sum(result[11:10]),
+        .carry_out(carry[6])
+    );
     
-    generate
-        if (WORD_SIZE > 6) begin
-            ternary_adder_1bit adder6(
-                .a(input1[13:12]),
-                .b(input2[13:12]),
-                .carry_in(carry[6]),
-                .sum(result[13:12]),
-                .carry_out(carry[7])
-            );
-        end
-    endgenerate
+    ternary_adder_1bit adder6(
+        .a(input1[13:12]),
+        .b(input2[13:12]),
+        .carry_in(carry[6]),
+        .sum(result[13:12]),
+        .carry_out(carry[7])
+    );
     
-    generate
-        if (WORD_SIZE > 7) begin
-            ternary_adder_1bit adder7(
-                .a(input1[15:14]),
-                .b(input2[15:14]),
-                .carry_in(carry[7]),
-                .sum(result[15:14]),
-                .carry_out(carry[8])
-            );
-        end
-    endgenerate
+    ternary_adder_1bit adder7(
+        .a(input1[15:14]),
+        .b(input2[15:14]),
+        .carry_in(carry[7]),
+        .sum(result[15:14]),
+        .carry_out(carry[8])
+    );
     
-    // Add more conditional instantiations if WORD_SIZE > 8
+    ternary_adder_1bit adder8(
+        .a(input1[17:16]),
+        .b(input2[17:16]),
+        .carry_in(carry[8]),
+        .sum(result[17:16]),
+        .carry_out(carry[9])
+    );
 endmodule
 
 // Main ternary ALU module
 module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
-
-    parameter WORD_SIZE = 8;
+    // Fixed word size of 9 trits
+    parameter WORD_SIZE = 9;
     
     input wire clock, alu_enable;
     input wire [5:0] opcode;  // 3 trits = 6 bits
-    input wire [2*WORD_SIZE-1:0] input1, input2;  // Each trit requires 2 bits
+    input wire [2*WORD_SIZE-1:0] input1, input2;  // Each trit requires 2 bits (18 bits total)
     output reg [2*WORD_SIZE-1:0] alu_out;
 
     // Helper function to perform ternary NOT operation on a single trit
@@ -249,7 +240,7 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
 
     // Instantiate the ternary ripple carry adder
     wire [2*WORD_SIZE-1:0] adder_out;
-    ternary_ripple_carry_adder #(.WORD_SIZE(WORD_SIZE)) adder(
+    ternary_ripple_carry_adder adder(
         .input1(input1),
         .input2(input2),
         .result(adder_out)
@@ -273,7 +264,7 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     5: current_trit = ternary_val[11:10];
                     6: current_trit = ternary_val[13:12];
                     7: current_trit = ternary_val[15:14];
-                    // Add more cases if WORD_SIZE > 8
+                    8: current_trit = ternary_val[17:16];
                     default: current_trit = 2'b00;
                 endcase
                 
@@ -306,7 +297,7 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     5: begin a_trit = a[11:10]; b_trit = b[11:10]; end
                     6: begin a_trit = a[13:12]; b_trit = b[13:12]; end
                     7: begin a_trit = a[15:14]; b_trit = b[15:14]; end
-                    // Add more cases if WORD_SIZE > 8
+                    8: begin a_trit = a[17:16]; b_trit = b[17:16]; end
                     default: begin a_trit = 2'b00; b_trit = 2'b00; end
                 endcase
                 
@@ -328,69 +319,49 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
     reg [2*WORD_SIZE-1:0] sri_result;
     reg [2*WORD_SIZE-1:0] sli_result;
     
-    // NOT operation - avoid variable indexing
+    // NOT operation
     assign not_result[1:0] = ternary_not(input1[1:0]);
     assign not_result[3:2] = ternary_not(input1[3:2]);
     assign not_result[5:4] = ternary_not(input1[5:4]);
     assign not_result[7:6] = ternary_not(input1[7:6]);
+    assign not_result[9:8] = ternary_not(input1[9:8]);
+    assign not_result[11:10] = ternary_not(input1[11:10]);
+    assign not_result[13:12] = ternary_not(input1[13:12]);
+    assign not_result[15:14] = ternary_not(input1[15:14]);
+    assign not_result[17:16] = ternary_not(input1[17:16]);
     
-    // Add more NOT assignments for larger word sizes
-    generate
-        if (WORD_SIZE > 4) begin
-            assign not_result[9:8] = ternary_not(input1[9:8]);
-            assign not_result[11:10] = ternary_not(input1[11:10]);
-            assign not_result[13:12] = ternary_not(input1[13:12]);
-            assign not_result[15:14] = ternary_not(input1[15:14]);
-        end
-    endgenerate
-    
-    // AND operation - avoid variable indexing
+    // AND operation
     assign and_result[1:0] = ternary_and(input1[1:0], input2[1:0]);
     assign and_result[3:2] = ternary_and(input1[3:2], input2[3:2]);
     assign and_result[5:4] = ternary_and(input1[5:4], input2[5:4]);
     assign and_result[7:6] = ternary_and(input1[7:6], input2[7:6]);
+    assign and_result[9:8] = ternary_and(input1[9:8], input2[9:8]);
+    assign and_result[11:10] = ternary_and(input1[11:10], input2[11:10]);
+    assign and_result[13:12] = ternary_and(input1[13:12], input2[13:12]);
+    assign and_result[15:14] = ternary_and(input1[15:14], input2[15:14]);
+    assign and_result[17:16] = ternary_and(input1[17:16], input2[17:16]);
     
-    // Add more AND assignments for larger word sizes
-    generate
-        if (WORD_SIZE > 4) begin
-            assign and_result[9:8] = ternary_and(input1[9:8], input2[9:8]);
-            assign and_result[11:10] = ternary_and(input1[11:10], input2[11:10]);
-            assign and_result[13:12] = ternary_and(input1[13:12], input2[13:12]);
-            assign and_result[15:14] = ternary_and(input1[15:14], input2[15:14]);
-        end
-    endgenerate
-    
-    // OR operation - avoid variable indexing
+    // OR operation
     assign or_result[1:0] = ternary_or(input1[1:0], input2[1:0]);
     assign or_result[3:2] = ternary_or(input1[3:2], input2[3:2]);
     assign or_result[5:4] = ternary_or(input1[5:4], input2[5:4]);
     assign or_result[7:6] = ternary_or(input1[7:6], input2[7:6]);
+    assign or_result[9:8] = ternary_or(input1[9:8], input2[9:8]);
+    assign or_result[11:10] = ternary_or(input1[11:10], input2[11:10]);
+    assign or_result[13:12] = ternary_or(input1[13:12], input2[13:12]);
+    assign or_result[15:14] = ternary_or(input1[15:14], input2[15:14]);
+    assign or_result[17:16] = ternary_or(input1[17:16], input2[17:16]);
     
-    // Add more OR assignments for larger word sizes
-    generate
-        if (WORD_SIZE > 4) begin
-            assign or_result[9:8] = ternary_or(input1[9:8], input2[9:8]);
-            assign or_result[11:10] = ternary_or(input1[11:10], input2[11:10]);
-            assign or_result[13:12] = ternary_or(input1[13:12], input2[13:12]);
-            assign or_result[15:14] = ternary_or(input1[15:14], input2[15:14]);
-        end
-    endgenerate
-    
-    // XOR operation - avoid variable indexing
+    // XOR operation
     assign xor_result[1:0] = ternary_xor(input1[1:0], input2[1:0]);
     assign xor_result[3:2] = ternary_xor(input1[3:2], input2[3:2]);
     assign xor_result[5:4] = ternary_xor(input1[5:4], input2[5:4]);
     assign xor_result[7:6] = ternary_xor(input1[7:6], input2[7:6]);
-    
-    // Add more XOR assignments for larger word sizes
-    generate
-        if (WORD_SIZE > 4) begin
-            assign xor_result[9:8] = ternary_xor(input1[9:8], input2[9:8]);
-            assign xor_result[11:10] = ternary_xor(input1[11:10], input2[11:10]);
-            assign xor_result[13:12] = ternary_xor(input1[13:12], input2[13:12]);
-            assign xor_result[15:14] = ternary_xor(input1[15:14], input2[15:14]);
-        end
-    endgenerate
+    assign xor_result[9:8] = ternary_xor(input1[9:8], input2[9:8]);
+    assign xor_result[11:10] = ternary_xor(input1[11:10], input2[11:10]);
+    assign xor_result[13:12] = ternary_xor(input1[13:12], input2[13:12]);
+    assign xor_result[15:14] = ternary_xor(input1[15:14], input2[15:14]);
+    assign xor_result[17:16] = ternary_xor(input1[17:16], input2[17:16]);
     
     // Comparison implementation
     assign comp_result = {{(2*WORD_SIZE-2){`_0}}, ternary_compare(input1, input2)};
@@ -398,81 +369,70 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
     // Subtraction (negate input2 and add)
     wire [2*WORD_SIZE-1:0] neg_input2;
     
-    // Negate input2 - avoid variable indexing
+    // Negate input2
     assign neg_input2[1:0] = ternary_not(input2[1:0]);
     assign neg_input2[3:2] = ternary_not(input2[3:2]);
     assign neg_input2[5:4] = ternary_not(input2[5:4]);
     assign neg_input2[7:6] = ternary_not(input2[7:6]);
+    assign neg_input2[9:8] = ternary_not(input2[9:8]);
+    assign neg_input2[11:10] = ternary_not(input2[11:10]);
+    assign neg_input2[13:12] = ternary_not(input2[13:12]);
+    assign neg_input2[15:14] = ternary_not(input2[15:14]);
+    assign neg_input2[17:16] = ternary_not(input2[17:16]);
     
-    // Add more negation assignments for larger word sizes
-    generate
-        if (WORD_SIZE > 4) begin
-            assign neg_input2[9:8] = ternary_not(input2[9:8]);
-            assign neg_input2[11:10] = ternary_not(input2[11:10]);
-            assign neg_input2[13:12] = ternary_not(input2[13:12]);
-            assign neg_input2[15:14] = ternary_not(input2[15:14]);
-        end
-    endgenerate
-    
-    ternary_ripple_carry_adder #(.WORD_SIZE(WORD_SIZE)) subtractor(
+    ternary_ripple_carry_adder subtractor(
         .input1(input1),
         .input2(neg_input2),
         .result(sub_result)
     );
+
+    // // Shift implementations
+    // integer shift_amount;
+    // integer j;
     
-    // Shift implementations
-    integer shift_amount;
-    integer j;
-    
-    // Right shift implementation
-    always @(*) begin
-        shift_amount = ternary_to_binary(input2);
-        // Limit to reasonable shift amounts
-        if (shift_amount < 0) shift_amount = 0;
-        if (shift_amount >= WORD_SIZE) shift_amount = WORD_SIZE - 1;
+    // // Right shift implementation
+    // always @(*) begin
+    //     shift_amount = ternary_to_binary(input2);
+    //     // Limit to reasonable shift amounts
+    //     if (shift_amount < 0) shift_amount = 0;
+    //     if (shift_amount >= WORD_SIZE) shift_amount = WORD_SIZE - 1;
         
-        sri_result = input1;
-        for (j = 0; j < shift_amount; j = j + 1) begin
-            // Right shift by manually moving bits
-            sri_result[1:0] = sri_result[3:2];
-            sri_result[3:2] = sri_result[5:4];
-            sri_result[5:4] = sri_result[7:6];
-            
-            if (WORD_SIZE > 4) begin
-                sri_result[7:6] = sri_result[9:8];
-                sri_result[9:8] = sri_result[11:10];
-                sri_result[11:10] = sri_result[13:12];
-                sri_result[13:12] = sri_result[15:14];
-                sri_result[15:14] = `_0; // Shift in zeros
-            end else begin
-                sri_result[7:6] = `_0; // Shift in zeros for 4-trit word
-            end
-        end
-    end
+    //     sri_result = input1;
+    //     for (j = 0; j < shift_amount; j = j + 1) begin
+    //         // Right shift by manually moving bits
+    //         sri_result[1:0] = sri_result[3:2];
+    //         sri_result[3:2] = sri_result[5:4];
+    //         sri_result[5:4] = sri_result[7:6];
+    //         sri_result[7:6] = sri_result[9:8];
+    //         sri_result[9:8] = sri_result[11:10];
+    //         sri_result[11:10] = sri_result[13:12];
+    //         sri_result[13:12] = sri_result[15:14];
+    //         sri_result[15:14] = sri_result[17:16];
+    //         sri_result[17:16] = `_0; // Shift in zeros
+    //     end
+    // end
     
-    // Left shift implementation
-    always @(*) begin
-        shift_amount = ternary_to_binary(input2);
-        // Limit to reasonable shift amounts
-        if (shift_amount < 0) shift_amount = 0;
-        if (shift_amount >= WORD_SIZE) shift_amount = WORD_SIZE - 1;
+    // // Left shift implementation
+    // always @(*) begin
+    //     shift_amount = ternary_to_binary(input2);
+    //     // Limit to reasonable shift amounts
+    //     if (shift_amount < 0) shift_amount = 0;
+    //     if (shift_amount >= WORD_SIZE) shift_amount = WORD_SIZE - 1;
         
-        sli_result = input1;
-        for (j = 0; j < shift_amount; j = j + 1) begin
-            // Left shift by manually moving bits
-            if (WORD_SIZE > 4) begin
-                sli_result[15:14] = sli_result[13:12];
-                sli_result[13:12] = sli_result[11:10];
-                sli_result[11:10] = sli_result[9:8];
-                sli_result[9:8] = sli_result[7:6];
-            end
-            
-            sli_result[7:6] = sli_result[5:4];
-            sli_result[5:4] = sli_result[3:2];
-            sli_result[3:2] = sli_result[1:0];
-            sli_result[1:0] = `_0; // Shift in zeros
-        end
-    end
+    //     sli_result = input1;
+    //     for (j = 0; j < shift_amount; j = j + 1) begin
+    //         // Left shift by manually moving bits
+    //         sli_result[17:16] = sli_result[15:14];
+    //         sli_result[15:14] = sli_result[13:12];
+    //         sli_result[13:12] = sli_result[11:10];
+    //         sli_result[11:10] = sli_result[9:8];
+    //         sli_result[9:8] = sli_result[7:6];
+    //         sli_result[7:6] = sli_result[5:4];
+    //         sli_result[5:4] = sli_result[3:2];
+    //         sli_result[3:2] = sli_result[1:0];
+    //         sli_result[1:0] = `_0; // Shift in zeros
+    //     end
+    // end
     
     // Main logic
     always @(posedge clock) begin
@@ -483,29 +443,36 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
                 end
                 `AND, `ANDI: begin
                     alu_out <= and_result;
+                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `OR: begin
                     alu_out <= or_result;
+                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `XOR: begin
                     alu_out <= xor_result;
+                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `ADD, `ADDI: begin
                     alu_out <= adder_out;
+                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `SUB: begin
                     alu_out <= sub_result;
+                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `COMP: begin
                     alu_out <= comp_result;
+                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
-                `SRI: begin
-                    alu_out <= sri_result;
-                end
-                `SLI: begin
-                    alu_out <= sli_result;
-                end
+                // `SRI: begin
+                //     alu_out <= sri_result;
+                // end
+                // `SLI: begin
+                //     alu_out <= sli_result;
+                // end
                 default: begin
+                    $display("Unknown opcode %h", opcode);
                     alu_out <= input1; // Default to passing through input1
                 end
             endcase

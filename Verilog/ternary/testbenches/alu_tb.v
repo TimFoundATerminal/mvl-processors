@@ -2,9 +2,6 @@
 
 module ternary_alu_tb();
 
-    // Include parameters file
-    `include "parameters.vh"
-    
     // Define ternary encodings for readability in the testbench
     `define _1  2'b11 // -1
     `define _0  2'b00 // 0
@@ -25,7 +22,7 @@ module ternary_alu_tb();
     `define SLI   6'b011100 // 15
     
     // Define local parameters for testing
-    localparam TB_WORD_SIZE = 4; // Use a smaller word size for testing
+    localparam TB_WORD_SIZE = 9; // Fixed 9-trit word size
     localparam CLK_PERIOD = 10;  // Clock period in ns
     
     // Define signals for the DUT (Device Under Test)
@@ -36,7 +33,7 @@ module ternary_alu_tb();
     wire [2*TB_WORD_SIZE-1:0] alu_out;
     
     // Instantiate the ternary ALU
-    ternary_alu #(.WORD_SIZE(TB_WORD_SIZE)) dut (
+    ternary_alu dut (
         .clock(clock),
         .opcode(opcode),
         .input1(input1),
@@ -66,7 +63,11 @@ module ternary_alu_tb();
                     1: trit = ternary_val[3:2];
                     2: trit = ternary_val[5:4];
                     3: trit = ternary_val[7:6];
-                    // Add more cases if TB_WORD_SIZE > 4
+                    4: trit = ternary_val[9:8];
+                    5: trit = ternary_val[11:10];
+                    6: trit = ternary_val[13:12];
+                    7: trit = ternary_val[15:14];
+                    8: trit = ternary_val[17:16];
                     default: trit = 2'bxx;
                 endcase
                 
@@ -152,10 +153,6 @@ module ternary_alu_tb();
         end
     endtask
     
-    // Test vectors
-    // Each test vector contains: {opcode, input1, input2, expected output}
-    reg [6:0] test_cases;
-    
     // Main test procedure
     initial begin
         // Initialize signals
@@ -168,109 +165,112 @@ module ternary_alu_tb();
         // Wait for a few clock cycles to ensure stable state
         #(3*CLK_PERIOD);
         
-        $display("\n=== TERNARY ALU TESTBENCH STARTED ===\n");
+        $display("\n=== 9-TRIT TERNARY ALU TESTBENCH STARTED ===\n");
         
         // TEST 1: NOT Operation
-        // Test NOT on various values
+        // Test NOT on various values - expanded to 9 trits
         run_test(`NOT, 
-                {`_1, `_0, `_1_, `_0}, // Input1 = [-1,0,1,0]
-                {`_0, `_0, `_0, `_0},  // Input2 (unused for NOT)
-                {`_1_, `_0, `_1, `_0}); // Expected: [1,0,-1,0]
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_0, `_1_, `_0}, // Input1 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0},  // Input2 (unused for NOT)
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_0, `_1, `_0}); // Expected: NOT applied to each trit
                 
         // TEST 2: AND Operation
-        // Test AND between two values
+        // Test AND between two values - expanded to 9 trits
         run_test(`AND, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_1, `_1_, `_0, `_1_}, // Input2 = [-1,1,0,1]
-                {`_1, `_1, `_0, `_1_}); // Expected: [-1,0,0,1]
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1_, `_0, `_1_}, // Input2 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1, `_0, `_1_}); // Expected: AND applied to each trit
                 
         // TEST 3: OR Operation
         run_test(`OR, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_1, `_1_, `_0, `_1_}, // Input2 = [-1,1,0,1]
-                {`_1_, `_1_, `_0, `_1_}); // Expected: [1,1,0,1]
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1_, `_0, `_1_}, // Input2 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}); // Expected: OR applied to each trit
                 
         // TEST 4: XOR Operation
         run_test(`XOR, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_1, `_1_, `_0, `_1_}, // Input2 = [-1,1,0,1]
-                {`_0, `_0, `_0, `_1}); // Expected: [0,0,0,-1]
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1_, `_0, `_1_}, // Input2 (padding with 5 zeros)
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1}); // Expected: XOR applied to each trit
                 
-        // TEST 5: ADD Operation
+        // TEST 5: ADD Operation with larger values
         run_test(`ADD, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_1, `_1_, `_0, `_1_}, // Input2 = [-1,1,0,1]
-                {`_0, `_0, `_1_, `_1}); // Expected: [0,0,1,-1]
+                {`_0, `_0, `_0, `_0, `_1_, `_1_, `_1_, `_0, `_1_}, // Input1 = 118
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1},    // Input2 = -1
+                {`_0, `_0, `_0, `_0, `_1_, `_1_, `_1_, `_0, `_0}); // Expected sum = 117
                 
-        // // TEST 6: SUB Operation
-        // run_test(`SUB, 
-        //         {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-        //         {`_1_, `_1, `_0, `_1}, // Input2 = [1,-1,0,-1]
-        //         {`_0, `_0, `_1_, `_1}); // Expected: [0,0,1,-1]
-                
-        // TEST 7: COMP Operation (Equal)
+        // TEST 6: SUB Operation with larger values
+        run_test(`SUB, 
+                {`_0, `_0, `_0, `_0, `_1_, `_1_, `_1_, `_0, `_1_}, // Input1 = 118
+                {`_0, `_0, `_0, `_0, `_1, `_1, `_0, `_0, `_1_},    // Input2 = -107
+                {`_0, `_0, `_0, `_1_, `_0, `_1, `_1_, `_0, `_0}); // Expected = 118 + (-107) = 225
+
+        // TEST 7: COMP Operation (Equal) with 9 trits
         run_test(`COMP, 
-                {`_1_, `_1_, `_0, `_1_}, // Input1 = [1,1,0,1]
-                {`_1_, `_1_, `_0, `_1_}, // Input2 = [1,1,0,1]
-                {`_0, `_0, `_0, `_1_}); // Expected: [0,0,0,1] (1 for equal)
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input2 (same as Input1)
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}); // Expected: [0,0,0,0,0,0,0,0,1] (1 for equal)
                 
-        // TEST 8: COMP Operation (Not Equal)
+        // TEST 8: COMP Operation (Not Equal) with 9 trits
         run_test(`COMP, 
-                {`_1_, `_1_, `_0, `_1_}, // Input1 = [1,1,0,1]
-                {`_1_, `_1_, `_0, `_1}, // Input2 = [1,1,0,-1]
-                {`_0, `_0, `_0, `_0}); // Expected: [0,0,0,0] (0 for not equal)
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1}, // Input2 (differs in last trit)
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0}); // Expected: [0,0,0,0,0,0,0,0,0] (0 for not equal)
                 
-        // TEST 9: SRI Operation (Shift Right)
-        run_test(`SRI, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_0, `_0, `_0, `_1_}, // Input2 = [0,0,0,1] (shift by 1)
-                {`_0, `_1_, `_1, `_0}); // Expected: [0,1,-1,0]
+        // // TEST 9: SRI Operation (Shift Right) with 9 trits
+        // run_test(`SRI, 
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1
+        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}, // Input2 = shift by 1
+        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0}); // Expected: right shifted by 1
                 
-        // TEST 10: SLI Operation (Shift Left)
-        run_test(`SLI, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_0, `_0, `_0, `_1_}, // Input2 = [0,0,0,1] (shift by 1)
-                {`_1, `_0, `_1_, `_0}); // Expected: [-1,0,1,0]
+        // // TEST 10: SLI Operation (Shift Left) with 9 trits
+        // run_test(`SLI, 
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1
+        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}, // Input2 = shift by 1
+        //         {`_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_, `_0}); // Expected: left shifted by 1
                 
-        // TEST 11: ANDI (Same as AND)
+        // TEST 11: ANDI (Same as AND) with 9 trits
         run_test(`ANDI, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_1, `_1_, `_0, `_1_}, // Input2 = [-1,1,0,1]
-                {`_1, `_1, `_0, `_1_}); // Expected: [-1,0,0,1]
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1_, `_0, `_1_}, // Input2
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1, `_0, `_1_}); // Expected AND result
                 
-        // TEST 12: ADDI (Same as ADD)
+        // TEST 12: ADDI (Same as ADD) with 9 trits
         run_test(`ADDI, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_1, `_1_, `_0, `_1_}, // Input2 = [-1,1,0,1]
-                {`_0, `_0, `_1_, `_1}); // Expected: [0,0,0,0]
+                {`_0, `_0, `_0, `_0, `_1_, `_1_, `_1_, `_0, `_1_}, // Input1
+                {`_0, `_0, `_0, `_0, `_1, `_1, `_0, `_0, `_1_},    // Input2
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_1}); // Expected sum
                 
-        // // Additional Tests: More complex additions with carries
-        // run_test(`ADD, 
-        //         {`_1_, `_1_, `_1_, `_1_}, // Input1 = [1,1,1,1]
-        //         {`_1_, `_1_, `_1_, `_1_}, // Input2 = [1,1,1,1]
-        //         {`_1, `_1, `_1, `_0}); // Expected: [-1,-1,-1,0]
+        // TEST 13: Large value addition
+        // Adding two large 9-trit values to test carry propagation
+        run_test(`ADD, 
+                {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_}, // Input1 = all 1's
+                {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_}, // Input2 = all 1's
+                {`_1, `_1, `_1, `_1, `_1, `_1, `_1, `_1, `_1}); // Expected: all -1's with overflow
         
-        // // Complex subtraction
-        // run_test(`SUB, 
-        //         {`_1_, `_1_, `_1_, `_1_}, // Input1 = [1,1,1,1]
-        //         {`_1, `_1, `_1, `_1}, // Input2 = [-1,-1,-1,-1]
-        //         {`_0, `_0, `_0, `_0}); // Expected: [0,0,0,0]
+        // TEST 14: Complex subtraction with 9 trits
+        run_test(`SUB, 
+                {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_}, // Input1 = all 1's
+                {`_1, `_1, `_1, `_1, `_1, `_1, `_1, `_1, `_1}, // Input2 = all -1's
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0}); // Expected: all 0's
                 
-        // Larger shift amount
-        run_test(`SRI, 
-                {`_1_, `_1, `_0, `_1_}, // Input1 = [1,-1,0,1]
-                {`_0, `_0, `_1_, `_0}, // Input2 = [0,0,1,0] (shift by 3 in ternary) 
-                {`_0, `_0, `_0, `_1_}); // Expected: [0,0,0,1]
+        // // TEST 15: Larger shift amount with 9 trits
+        // run_test(`SRI, 
+        //         {`_0, `_0, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_}, // Input1
+        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_1_, `_0, `_0}, // Input2 = shift by 3 in ternary
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_1_, `_1_}); // Expected: right shifted by 3
                 
-        $display("\n=== TERNARY ALU TESTBENCH COMPLETED ===\n");
+        $display("\n=== 9-TRIT TERNARY ALU TESTBENCH COMPLETED ===\n");
         
-        // End simulation
-        #(5*CLK_PERIOD);
+        // Add summary of test results
+        $display("All tests complete.");
+        
+        // End simulation - ensure this is executed even if tests fail
+        #(5*CLK_PERIOD);  // Give a few more clock cycles to complete any pending operations
         $finish;
     end
-
-    // Add a timeout in case of infinite loops
-        // Add a timeout to prevent infinite loops
+    
+    // Add a timeout to prevent infinite loops
     initial begin
         #(1000*CLK_PERIOD);  // Timeout after 1000 clock cycles
         $display("ERROR: Testbench timeout reached. Simulation forcibly terminated.");

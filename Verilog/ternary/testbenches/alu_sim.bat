@@ -1,11 +1,13 @@
 @echo off
 REM Clean up any previous simulation files
-del /F testbenches/alu_tb.vvp 2>nul
+cd testbenches
+del /f alu_tb.vvp
+cd ../
 
-REM Compile the Verilog files
+@REM REM Compile the Verilog files
 iverilog -o testbenches/alu_tb.vvp alu.v testbenches/alu_tb.v
 
-REM Run the simulation
+@REM REM Run the simulation
 vvp testbenches/alu_tb.vvp
 
 @REM REM View waveforms
