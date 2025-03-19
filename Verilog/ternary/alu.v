@@ -1,30 +1,3 @@
-// Define ternary encodings - these can be global
-`define _1  2'b11 // -1 (2)
-`define _0  2'b00 // 0
-`define _1_ 2'b01 // 1
-
-// Opcodes (3 trits) - represented as 6 bits - these can be global
-`define MV    6'b000000 // 0
-`define NOT   6'b000011 // 2
-`define AND   6'b000101 // 4
-`define OR    6'b000111 // 5
-`define XOR   6'b001100 // 6
-`define ADD   6'b001101 // 7
-`define SUB   6'b001111 // 8
-`define COMP  6'b010011 // 11
-`define ANDI  6'b010100 // 12
-`define ADDI  6'b010101 // 13
-`define SRI   6'b010111 // 14
-`define SLI   6'b011100 // 15
-`define LUI   6'b011101 // 16
-`define LI    6'b011111 // 17
-`define BEQ   6'b110000 // 18
-`define BNE   6'b110001 // 19
-`define LOAD  6'b110101 // 22
-`define STORE 6'b110111 // 23
-`define HALT  6'b111111 // 26
-
-// Ternary adder for a single trit
 module ternary_adder_1bit(
     input [1:0] a,
     input [1:0] b,
@@ -32,6 +5,9 @@ module ternary_adder_1bit(
     output [1:0] sum,
     output [1:0] carry_out
 );
+
+    `include "parameters.vh"
+
     // Helper function for ternary addition (returns carry and sum)
     function [3:0] ternary_add_step;
         input [1:0] trit1, trit2;
@@ -73,8 +49,8 @@ endmodule
 
 // Ternary ripple carry adder - fixed for 9 trits
 module ternary_ripple_carry_adder(input1, input2, result);
-    // Fixed word size of 9 trits
-    parameter WORD_SIZE = 9;
+
+    `include "parameters.vh"
     
     input [2*WORD_SIZE-1:0] input1, input2;
     output [2*WORD_SIZE-1:0] result;
@@ -160,11 +136,11 @@ endmodule
 
 // Main ternary ALU module
 module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
-    // Fixed word size of 9 trits
-    parameter WORD_SIZE = 9;
+
+    `include "parameters.vh"
     
     input wire clock, alu_enable;
-    input wire [5:0] opcode;  // 3 trits = 6 bits
+    input wire [2*OPCODE_SIZE-1:0] opcode;  // 3 trits = 6 bits
     input wire [2*WORD_SIZE-1:0] input1, input2;  // Each trit requires 2 bits (18 bits total)
     output reg [2*WORD_SIZE-1:0] alu_out;
 
