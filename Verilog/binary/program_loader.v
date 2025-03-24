@@ -1,17 +1,22 @@
 module program_loader (
-    input wire clock,
-    input wire reset,
-    input wire start_load,
-    output reg load_complete,
-    output reg [4:0] mem_addr,
-    output reg [15:0] mem_write_data,
-    output reg mem_write
+    clock, reset, start_load,
+    load_complete,
+    mem_addr, mem_write_data,
+    mem_write
 );
+
+    `include "parameters.vh"
+
+    input wire clock, reset, start_load;
+    output reg load_complete;
+    output reg [MEM_ADDR_SIZE-1:0] mem_addr;
+    output reg [WORD_SIZE-1:0] mem_write_data;
+    output reg mem_write;
 
     // Program loading states
     reg [2:0] state;
     integer file_handle;
-    reg [15:0] instruction;
+    reg [WORD_SIZE-1:0] instruction;
     integer scan_file;
     integer file_complete;
     
