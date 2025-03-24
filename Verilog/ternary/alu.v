@@ -419,27 +419,21 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
                 end
                 `AND, `ANDI: begin
                     alu_out <= and_result;
-                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `OR: begin
                     alu_out <= or_result;
-                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `XOR: begin
                     alu_out <= xor_result;
-                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `ADD, `ADDI: begin
                     alu_out <= adder_out;
-                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `SUB: begin
                     alu_out <= sub_result;
-                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 `COMP: begin
                     alu_out <= comp_result;
-                    // alu_out <= {`_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_, `_1_};
                 end
                 // `SRI: begin
                 //     alu_out <= sri_result;
