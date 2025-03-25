@@ -1,3 +1,147 @@
+module ternary_comparator_1trit(a, b, lt_in, eq_in, lt_out, eq_out);
+    input [1:0] a, b; // Single trit inputs (2 bits per trit)
+    input lt_in;      // Input is less than so far
+    input eq_in;      // Input is equal so far
+    output lt_out;    // Output is less than
+    output eq_out;    // Output is equal
+    
+    // Comparator logic
+    // For balanced ternary with encodings:
+    // -1 (trit) = 2'b11
+    //  0 (trit) = 2'b00
+    //  1 (trit) = 2'b01
+    
+    wire is_equal;
+    wire a_less_than_b;
+    
+    // Check if a and b are equal
+    assign is_equal = (a == b);
+    
+    // Check if a < b for this trit
+    // -1 < 0 < 1
+    // 11 < 00 < 01
+    assign a_less_than_b = 
+           ((a == 2'b11) && (b == 2'b00 || b == 2'b01)) || // a = -1, b = 0 or 1
+           ((a == 2'b00) && (b == 2'b01));                 // a = 0, b = 1
+    
+    // Output less than if:
+    // 1. Previous trits determined input1 < input2 (lt_in is 1), or
+    // 2. Previous trits were equal (eq_in is 1) and current trit of a < current trit of b
+    assign lt_out = lt_in || (eq_in && a_less_than_b);
+    
+    // Output equal if previous trits were equal and current trits are equal
+    assign eq_out = eq_in && is_equal;
+endmodule
+
+module ternary_less_than_comparator(input1, input2, result);
+
+    // TODO: Verify that this module works correctly
+
+    `include "parameters.vh"
+    
+    input [2*WORD_SIZE-1:0] input1, input2;
+    output result; // 1 if input1 < input2, 0 otherwise
+    
+    // Wires for stage results - each stage determines if input1 is less than, equal to, or greater than input2 so far
+    // lt_signal[i] = 1 if input1 < input2 for trits [i:WORD_SIZE-1]
+    // eq_signal[i] = 1 if input1 = input2 for trits [i:WORD_SIZE-1]
+    wire lt_signal [0:WORD_SIZE];
+    wire eq_signal [0:WORD_SIZE];
+    
+    // Initialize comparison for MSB position
+    // Initially, no "less than" condition has been found
+    assign lt_signal[WORD_SIZE] = 1'b0;
+    // Initially, inputs are considered equal
+    assign eq_signal[WORD_SIZE] = 1'b1;
+    
+    // Instantiate comparator stages from MSB to LSB
+    // Start with MSB (trit 8)
+    ternary_comparator_1trit comp8(
+        .a(input1[17:16]),
+        .b(input2[17:16]),
+        .lt_in(lt_signal[WORD_SIZE]),
+        .eq_in(eq_signal[WORD_SIZE]),
+        .lt_out(lt_signal[8]),
+        .eq_out(eq_signal[8])
+    );
+    
+    ternary_comparator_1trit comp7(
+        .a(input1[15:14]),
+        .b(input2[15:14]),
+        .lt_in(lt_signal[8]),
+        .eq_in(eq_signal[8]),
+        .lt_out(lt_signal[7]),
+        .eq_out(eq_signal[7])
+    );
+    
+    ternary_comparator_1trit comp6(
+        .a(input1[13:12]),
+        .b(input2[13:12]),
+        .lt_in(lt_signal[7]),
+        .eq_in(eq_signal[7]),
+        .lt_out(lt_signal[6]),
+        .eq_out(eq_signal[6])
+    );
+    
+    ternary_comparator_1trit comp5(
+        .a(input1[11:10]),
+        .b(input2[11:10]),
+        .lt_in(lt_signal[6]),
+        .eq_in(eq_signal[6]),
+        .lt_out(lt_signal[5]),
+        .eq_out(eq_signal[5])
+    );
+    
+    ternary_comparator_1trit comp4(
+        .a(input1[9:8]),
+        .b(input2[9:8]),
+        .lt_in(lt_signal[5]),
+        .eq_in(eq_signal[5]),
+        .lt_out(lt_signal[4]),
+        .eq_out(eq_signal[4])
+    );
+    
+    ternary_comparator_1trit comp3(
+        .a(input1[7:6]),
+        .b(input2[7:6]),
+        .lt_in(lt_signal[4]),
+        .eq_in(eq_signal[4]),
+        .lt_out(lt_signal[3]),
+        .eq_out(eq_signal[3])
+    );
+    
+    ternary_comparator_1trit comp2(
+        .a(input1[5:4]),
+        .b(input2[5:4]),
+        .lt_in(lt_signal[3]),
+        .eq_in(eq_signal[3]),
+        .lt_out(lt_signal[2]),
+        .eq_out(eq_signal[2])
+    );
+    
+    ternary_comparator_1trit comp1(
+        .a(input1[3:2]),
+        .b(input2[3:2]),
+        .lt_in(lt_signal[2]),
+        .eq_in(eq_signal[2]),
+        .lt_out(lt_signal[1]),
+        .eq_out(eq_signal[1])
+    );
+    
+    ternary_comparator_1trit comp0(
+        .a(input1[1:0]),
+        .b(input2[1:0]),
+        .lt_in(lt_signal[1]),
+        .eq_in(eq_signal[1]),
+        .lt_out(lt_signal[0]),
+        .eq_out(eq_signal[0])
+    );
+    
+    // Final result
+    assign result = lt_signal[0];
+endmodule
+
+
 module ternary_adder_1bit(
     input [1:0] a,
     input [1:0] b,
