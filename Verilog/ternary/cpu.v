@@ -123,5 +123,8 @@ module cpu(
     assign mem_read = do_fetch || do_mem_load;
     assign mem_write = do_mem_store;
 
+    // Halt
+    assign halted = do_halt;
+
 
 endmodule
