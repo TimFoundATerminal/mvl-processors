@@ -21,7 +21,6 @@ module cpu(
     wire do_fetch, do_reg_load, do_alu, do_mem_load, do_mem_store, do_reg_store, do_next, do_reset, do_halt;
 
     // Program counter
-    wire update_pc;
     wire [WORD_SIZE-1:0] pc_value;
     wire [MEM_ADDR_SIZE-1:0] program_counter;
     program_counter pc (
@@ -90,7 +89,7 @@ module cpu(
         .opcode(opcode),
         .input1(alu_in_1),
         .input2(alu_in_2),
-        .alu_enable(is_alu_operation),
+        .alu_enable(is_alu_operation), // may need to take an input from do_alu
         .alu_out(alu_out)
     );
 
@@ -126,20 +125,8 @@ module cpu(
 
     // Branching
     // wire branch = (opcode == `HALT) ? 1'b0 : (((opcode == `BEQ) && (reg_out1 == reg_out2)) || ((opcode == `BNE) && (reg_out1 != reg_out2)));
-    // Check if final bit of reg_out1 is 1
     wire branch = (((opcode == `BEQ) && (reg_out1[0] == 1'b1)) || ((opcode == `BNE) && (reg_out1[0] == 1'b0))); 
-    // wire branch = ((opcode == `BNE) && (reg_out1[0] == 1'b0));
-    // wire branch = (opcode == `BNE); 
-    // wire branch = 1; 
-    // begin 
-    //     $display("Branching: %d, Opcode: %d", branch, opcode);
-    // end
-    // Check if small_immediate is negative
-    // wire small_immediate_negative = small_immediate[SMALL_IMM_SIZE-1];
-    // Check if instruction is a branch and then apply 2's complement if needed
-    // assign pc_value = branch ? (small_immediate_negative ? (~small_immediate+1): small_immediate) : 1; // Add 1 to PC if not branching
     assign pc_value = branch ? big_immediate : 1; // Add 1 to PC if not branching
-    // assign pc_value = branch ? 2 : 1; // Add 1 to PC if not branching
 
     // Halt
     assign halted = do_halt;
