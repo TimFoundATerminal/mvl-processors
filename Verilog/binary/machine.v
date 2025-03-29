@@ -106,7 +106,7 @@ module system (
                 EXECUTING: begin
                     if (cpu_halted) begin
                         system_state <= HALTED;
-                        start_execution <= 0;  // Stop CPU execution
+                        start_execution <= 0;
                     end else begin
                         start_execution <= 1;
                     end
