@@ -23,10 +23,10 @@ module program_loader (
     reg [7:0] hex_value; // For reading hex value from file
     
     // Pad the memory address with 0s to make it 2*WORD_SIZE bits wide
-    wire [2*WORD_SIZE-1:0] mem_addr_input = = {{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, mem_addr};
+    wire [2*WORD_SIZE-1:0] mem_addr_input = {{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, mem_addr};
 
     // Instantiate a ternary adder to increment the address number by 1 each cycle
-    wire [2*WORD_SIZE-1:0] increment_val = {(WORD_SIZE-1){`_0}, `_1}; // padding with 0s
+    wire [2*WORD_SIZE-1:0] increment_val = {{(WORD_SIZE-1){`_0}}, `_1}; // padding with 0s
     wire [2*WORD_SIZE-1:0] next_mem_addr;
     ternary_ripple_carry_adder pl_adder(
         .input1(mem_addr_input),
@@ -35,9 +35,10 @@ module program_loader (
     );
 
     wire mem_addr_compare;
+    // wire largest_addr
     ternary_less_than_comparator pl_compare(
         .input1(mem_addr_input),
-        .input2({(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, {(MEM_ADDR_SIZE){`_1_}}), // Largest address value
+        .input2({{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, {(MEM_ADDR_SIZE){`_1_}}}), // Largest address value
         .result(mem_addr_compare)
     );
     

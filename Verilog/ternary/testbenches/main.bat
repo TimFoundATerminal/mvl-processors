@@ -5,11 +5,9 @@ del /f main.vvp
 cd ../
 
 REM Compile the Verilog files
-iverilog -o testbenches/main.vvp 
-@REM testbenches/system_tb.v
-
+iverilog -o testbenches/main.vvp alu.v program_counter.v registers.v fetch_instruction.v decode_instruction.v control.v memory.v cpu.v program_loader.v machine.v testbenches/system_tb.v
 REM Run the simulation
-@REM vvp testbenches/main.vvp
+vvp testbenches/main.vvp
 
 @REM REM View waveforms
 @REM start gtkwave main.vcd

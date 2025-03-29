@@ -84,7 +84,7 @@ module cpu(
     // ALU
     wire [2*WORD_SIZE-1:0] alu_in_1, alu_in_2;
     wire [2*WORD_SIZE-1:0] alu_out;
-    alu arithmetic_logic_unit (
+    ternary_alu arithmetic_logic_unit (
         .clock(clock),
         .opcode(opcode),
         .input1(alu_in_1),
@@ -98,7 +98,7 @@ module cpu(
     assign alu_in_2 = (opcode == `ADDI) || (opcode == `ANDI) ? {{WORD_SIZE-BIG_IMM_SIZE{`_0}}, big_immediate} : reg_out2;
 
     // Control unit with state machine
-    output wire [2*STATE_SIZE-1:0] state; // for debugging
+    output wire [3:0] state; // for debugging
     control ctrl (
         .clock(clock),
         .reset(reset),

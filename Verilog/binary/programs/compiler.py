@@ -1,25 +1,5 @@
 import argparse
 
-
-def input_to_hex(string):
-    """Convert a hex string to binary."""
-    if string.startswith('0x'):
-        return string[2:]
-    # Convert decimal to hex
-    return hex(int(string))[2:]
-
-
-def decimal_to_7bit_signed(decimal):
-    """Convert a decimal number to 7-bit signed binary."""
-    if not (-64 <= decimal <= 63):
-        raise ValueError("Value must be in range [-64, 63] for 7-bit signed representation")
-        
-    if decimal < 0:
-        # Perform two's complement by adding 128 which
-        decimal = decimal + (1 << 7)
-    return decimal
-
-
 class InstructionParser:
     def __init__(self):
         # Program memory to store instructions (256 16-bit words)

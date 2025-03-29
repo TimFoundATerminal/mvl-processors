@@ -16,7 +16,7 @@ module control(clock, execute, reset,
 
     input wire clock;
 
-    input wire [OPCODE_SIZE-1:0] opcode;
+    input wire [2*OPCODE_SIZE-1:0] opcode;
     input wire is_alu_operation;
     input wire execute, reset;
 

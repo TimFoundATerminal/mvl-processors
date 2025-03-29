@@ -37,7 +37,7 @@ parameter REG_ADDR_SIZE = 2;
 `define STORE 6'b110111 // 23
 `define HALT  6'b111111 // 26
 
-// Processor States
+// Processor States 
 `define STATE_INSMEM_LOAD 4'h0
 `define STATE_RESET 4'h1
 `define STATE_FETCH 4'h2

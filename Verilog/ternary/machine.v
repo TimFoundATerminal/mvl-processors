@@ -59,8 +59,8 @@ module system (
         .write_enable(mem_write),
         .read_enable(mem_read),
         .address(mem_addr),
-        .write_data(mem_write_data),
-        .read_data(mem_read_data)
+        .data_in(mem_write_data),
+        .data_out(mem_read_data)
     );
 
     // Instantiate program loader
@@ -69,7 +69,7 @@ module system (
         .reset(reset),
         .start_load(system_state == LOADING),
         .load_complete(load_complete),
-        .mem_address(loader_mem_addr),
+        .mem_addr(loader_mem_addr),
         .mem_write_data(loader_mem_write_data),
         .mem_write(loader_mem_write)
     );

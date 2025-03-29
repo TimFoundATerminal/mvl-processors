@@ -1,13 +1,12 @@
 `timescale 1ns/1ps
 
 module system_tb;
-
     // Test bench signals
     reg clock;
     reg reset;
     reg start;
     reg execution_done;
-    reg [:0] prev_pc;
+    reg [17:0] prev_pc;
     integer wait_cycles;
     
     // Clock generation
@@ -24,14 +23,14 @@ module system_tb;
     );
     
     // Monitor CPU registers for debugging
-    wire [15:0] r0 = uut.cpu.regs.regs[0];
-    wire [15:0] r1 = uut.cpu.regs.regs[1];
-    wire [15:0] r2 = uut.cpu.regs.regs[2];
-    wire [15:0] r3 = uut.cpu.regs.regs[3];
-    wire [15:0] r4 = uut.cpu.regs.regs[4];
-    wire [15:0] r5 = uut.cpu.regs.regs[5];
-    wire [15:0] r6 = uut.cpu.regs.regs[6];
-    wire [15:0] r7 = uut.cpu.regs.regs[7];
+    wire [17:0] r0 = uut.cpu.regs.regs[0];
+    wire [17:0] r1 = uut.cpu.regs.regs[1];
+    wire [17:0] r2 = uut.cpu.regs.regs[2];
+    wire [17:0] r3 = uut.cpu.regs.regs[3];
+    wire [17:0] r4 = uut.cpu.regs.regs[4];
+    wire [17:0] r5 = uut.cpu.regs.regs[5];
+    wire [17:0] r6 = uut.cpu.regs.regs[6];
+    wire [17:0] r7 = uut.cpu.regs.regs[7];
     
     // Test sequence
     initial begin
@@ -39,7 +38,7 @@ module system_tb;
         reset = 1;
         start = 0;
         execution_done = 0;
-        prev_pc = 16'hFFFF;  // Invalid initial value
+        prev_pc = 18'hFFFF;  // Invalid initial value
         wait_cycles = 0;
         
         // Setup waveform dumping
@@ -96,12 +95,6 @@ module system_tb;
             // Display the values in decimal
             $display("R%0d=%d", i, uut.cpu.regs.regs[i]);
         end
-        
-        // // Display final memory values
-        // $display("\nFinal Memory Values (first 8 locations):");
-        // for (integer i = 0; i < 8; i = i + 1) begin
-        //     $display("Mem[%0d]=%h", i, uut.ram.memory[i]);
-        // end
         
         #100;
         $finish;
