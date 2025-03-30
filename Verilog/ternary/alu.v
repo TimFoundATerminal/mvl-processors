@@ -1,3 +1,53 @@
+// module ternary_to_integer(input_val, output_val);
+
+//     `include "parameters.vh"
+
+//     input [2*WORD_SIZE-1:0] input_val; // Input is a ternary number (2 bits per trit)
+//     output integer output_val; // Output is an integer value
+    
+//     integer i;
+//     integer result;
+    
+//     function integer ternary_to_integer_func;
+//         input [2*WORD_SIZE-1:0] ternary_val;
+//         integer result;
+//         integer i;
+//         reg [1:0] current_trit;
+
+//         result = 0; // Initialize result to 0
+
+//         for (i = 0; i < WORD_SIZE; i = i + 1) begin
+//             // Extract the trit using a case statement instead of variable indexing
+//             case(i)
+//                 0: current_trit = ternary_val[1:0];
+//                 1: current_trit = ternary_val[3:2];
+//                 2: current_trit = ternary_val[5:4];
+//                 3: current_trit = ternary_val[7:6];
+//                 4: current_trit = ternary_val[9:8];
+//                 5: current_trit = ternary_val[11:10];
+//                 6: current_trit = ternary_val[13:12];
+//                 7: current_trit = ternary_val[15:14];
+//                 8: current_trit = ternary_val[17:16];
+//                 default: current_trit = 2'b00;
+//             endcase
+
+//             case(current_trit)
+//                 `_1: result = result - (3**i);  // - contribution
+//                 `_0: result = result;           // 0 contribution
+//                 `_1_: result = result + (3**i); // + contribution
+//                 default: result = result;  // Invalid input, do nothing
+//             endcase
+//         end
+
+//         ternary_to_integer_func = result;
+    
+//     endfunction
+
+//     output_val = ternary_to_integer_func(input_val);
+
+// endmodule
+
+
 module ternary_comparator_1trit(a, b, lt_in, eq_in, lt_out, eq_out);
     input [1:0] a, b; // Single trit inputs (2 bits per trit)
     input lt_in;      // Input is less than so far

@@ -103,7 +103,7 @@ module system_tb;
     // Monitor for errors
     initial begin
         // Timeout after 10000 cycles
-        #10000;
+        #1000;
         $display("Timeout - simulation stopped");
         $finish;
     end
