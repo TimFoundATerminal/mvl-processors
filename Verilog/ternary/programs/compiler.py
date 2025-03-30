@@ -1,5 +1,9 @@
 import argparse
 
+_1 = 0b11 # -1 (2)
+_0 = 0b00 # 0
+_1_ = 0b01 # 1
+
 class TernaryInstructionParser:
     def __init__(self):
         # Program memory to store instructions (256 18-bit words)
@@ -19,10 +23,10 @@ class TernaryInstructionParser:
             'COMP':  0b010011, # 11
             'ANDI':  0b010100, # 12
             'ADDI':  0b010101, # 13
-            'SRI':  0b010111, # 14
-            'SLI':  0b011100, # 15
+            'SRI':   0b010111, # 14
+            'SLI':   0b011100, # 15
             'LUI':   0b011101, # 16
-            'LI':   0b011111, # 17
+            'LI':    0b011111, # 17
             'BEQ':   0b110000, # 18
             'BNE':   0b110001, # 19
             'LOAD':  0b110101, # 22
@@ -223,24 +227,24 @@ class TernaryInstructionParser:
                 return (opcode << 12) | (reg_a << 8) | (reg_b << 4)
                 
             # I-type instructions with big immediate (4 trits)
-            elif instruction in ['LDI', 'LUI']:
+            elif instruction in ['ANDI', 'ADDI', 'SRI', 'SLI', 'LUI', 'LI']:
                 reg_a, imm = self.parse_register_big_immediate(tokens[1], tokens[2])
                 return (opcode << 12) | (reg_a << 8) | imm
             
-            # I-type instructions with small immediate (2 trits)
-            elif instruction in ['ANDI', 'ORI', 'ADDI', 'SUBI', 'ROTI', 'SHFI']:
-                reg_a, imm = self.parse_register_small_immediate(tokens[1], tokens[2])
-                return (opcode << 12) | (reg_a << 8) | (imm << 4)
+            # # I-type instructions with small immediate (2 trits)
+            # elif instruction in []: # currently empty, but can be added later
+            #     reg_a, small_imm = self.parse_register_small_immediate(tokens[1], tokens[2])
+            #     return (opcode << 12) | (reg_a << 8) | (small_imm << 4)
             
             # Branch instructions
-            elif instruction in ['BEQ', 'BNE', 'BGT', 'BLT']:
+            elif instruction in ['BEQ', 'BNE']:
                 reg_a, immediate = self.parse_branch_instruction(tokens[1], tokens[2])
                 return (opcode << 12) | (reg_a << 8) | immediate
                 
             # Memory instructions
             elif instruction in ['LOAD', 'STORE']:
-                reg_a, reg_b, offset = self.parse_memory_instruction(tokens[1], tokens[2], tokens[3])
-                return (opcode << 12) | (reg_a << 8) | (reg_b << 4) | offset
+                reg_a, reg_b, small_imm = self.parse_memory_instruction(tokens[1], tokens[2], tokens[3])
+                return (opcode << 12) | (reg_a << 8) | (reg_b << 4) | small_imm
                 
         except (IndexError, ValueError) as e:
             print(f"Error processing line '{line}': {str(e)}")
@@ -264,7 +268,8 @@ class TernaryInstructionParser:
             print(f"Successfully assembled {self.instruction_count} instructions")
             
         except Exception as e:
-            print(f"Error during assembly: {str(e)}")
+            # print(f"Error during assembly: {str(e)}")
+            raise e
 
 
 def main():
