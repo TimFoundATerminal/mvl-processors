@@ -7,7 +7,7 @@ module system_tb;
     reg reset;
     reg start;
     reg execution_done;
-    reg [:0] prev_pc;
+    reg [15:0] prev_pc;
     integer wait_cycles;
     
     // Clock generation
