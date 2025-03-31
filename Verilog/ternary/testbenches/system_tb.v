@@ -8,6 +8,43 @@ module system_tb;
     reg execution_done;
     reg [17:0] prev_pc;
     integer wait_cycles;
+
+    // Define a function to convert ternary values to integer
+    function integer ternary_to_integer_func;
+        input [17:0] ternary_val;
+
+        integer i, result;
+        reg [1:0] current_trit;
+
+        begin
+            result = 0; // Initialize result to 0
+
+            for (i = 0; i < 18; i = i + 1) begin
+                // Extract the trit using a case statement instead of variable indexing
+                case(i)
+                    0: current_trit = ternary_val[1:0];
+                    1: current_trit = ternary_val[3:2];
+                    2: current_trit = ternary_val[5:4];
+                    3: current_trit = ternary_val[7:6];
+                    4: current_trit = ternary_val[9:8];
+                    5: current_trit = ternary_val[11:10];
+                    6: current_trit = ternary_val[13:12];
+                    7: current_trit = ternary_val[15:14];
+                    8: current_trit = ternary_val[17:16];
+                    default: current_trit = 2'b00;
+                endcase
+
+                case(current_trit)
+                    `_1: result = result - (3**i);  // - contribution
+                    `_0: result = result;           // 0 contribution
+                    `_1_: result = result + (3**i); // + contribution
+                    default: result = result;  // Invalid input, do nothing
+                endcase
+            end
+
+            ternary_to_integer_func = result;
+        end
+    endfunction
     
     // Clock generation
     initial begin
@@ -64,9 +101,17 @@ module system_tb;
         while (!execution_done && uut.system_state == uut.EXECUTING) begin
             // Display register values on each clock cycle
             @(posedge clock);
-            $display("PC=%0d", uut.cpu.program_counter);
+            $display("PC    =%0d", ternary_to_integer_func(uut.cpu.program_counter));
+            $display("Opcode=%6b", uut.cpu.opcode);
             // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
-            $display("R0=%h R1=%h R2=%h R3=%h R4=%h R5=%h", r0, r1, r2, r3, r4, r5);
+            $display("R0=%3d R1=%3d R2=%3d R3=%3d R4=%3d R5=%3d", 
+                ternary_to_integer_func(r0), 
+                ternary_to_integer_func(r1), 
+                ternary_to_integer_func(r2), 
+                ternary_to_integer_func(r3), 
+                ternary_to_integer_func(r4), 
+                ternary_to_integer_func(r5)
+            );
             
             // Display memory operations
             if (uut.cpu.mem_write)
@@ -93,7 +138,7 @@ module system_tb;
         $display("\nFinal Register Values:");
         for (integer i = 0; i < 8; i = i + 1) begin
             // Display the values in decimal
-            $display("R%0d=%d", i, uut.cpu.regs.regs[i]);
+            $display("R%0d=%3d - %b", i, ternary_to_integer_func(uut.cpu.regs.regs[i]), uut.cpu.regs.regs[i]);
         end
         
         #100;
@@ -112,7 +157,7 @@ module system_tb;
     always @(posedge clock) begin
         if (uut.system_state == uut.LOADING) begin
             if (uut.loader.mem_write)
-                $display("Loading instruction: Addr=%h Data=%h",
+                $display("Loading instruction: Addr=%b Data=%b",
                         uut.loader.mem_addr, uut.loader.mem_write_data);
         end
     end

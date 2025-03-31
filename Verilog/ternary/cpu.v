@@ -125,7 +125,7 @@ module cpu(
 
     // Branching
     wire branch = ((opcode == `BEQ) && (reg_out1[1:0] == `_1)) || ((opcode == `BNE) && (reg_out1 == `_0));
-    assign pc_value = branch ? big_immediate : `_1; // Add 1 to PC if not branching
+    assign pc_value = branch ? big_immediate : {{(WORD_SIZE-1){`_0}}, `_1_}; // Add 1 to PC if not branching
 
     // Halt
     assign halted = do_halt;

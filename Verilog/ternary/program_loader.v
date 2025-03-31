@@ -26,7 +26,7 @@ module program_loader (
     wire [2*WORD_SIZE-1:0] mem_addr_input = {{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, mem_addr};
 
     // Instantiate a ternary adder to increment the address number by 1 each cycle
-    wire [2*WORD_SIZE-1:0] increment_val = {{(WORD_SIZE-1){`_0}}, `_1}; // padding with 0s
+    wire [2*WORD_SIZE-1:0] increment_val = {{(WORD_SIZE-1){`_0}}, `_1_}; // padding with 0s
     wire [2*WORD_SIZE-1:0] next_mem_addr;
     ternary_ripple_carry_adder pl_adder(
         .input1(mem_addr_input),
@@ -35,18 +35,20 @@ module program_loader (
     );
 
     wire mem_addr_compare;
-    // wire largest_addr
     ternary_less_than_comparator pl_compare(
         .input1(mem_addr_input),
         .input2({{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, {(MEM_ADDR_SIZE){`_1_}}}), // Largest address value
         .result(mem_addr_compare)
     );
+
+    // Set default memory address
+    wire [2*MEM_ADDR_SIZE-1:0] default_mem_addr = {MEM_ADDR_SIZE{`_1}};
     
     // Program loading FSM
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             state <= 0;
-            mem_addr <= 0;
+            mem_addr <= default_mem_addr;
             mem_write <= 0;
             load_complete <= 0;
         end else begin
@@ -59,7 +61,7 @@ module program_loader (
                             state <= 4; // Go to error state
                         end else begin
                             state <= 1;
-                            mem_addr <= 0;
+                            mem_addr <= default_mem_addr; // Set default memory address
                         end
                     end
                 end
@@ -79,6 +81,7 @@ module program_loader (
                 2: begin // Write instruction to memory
                     mem_write <= 0;
                     if (mem_addr_compare) begin
+                        $display("Next address: %b", next_mem_addr[2*MEM_ADDR_SIZE-1:0]);
                         mem_addr <= next_mem_addr[2*MEM_ADDR_SIZE-1:0]; // Truncate to MEM_ADDR_SIZE number of trits
                         state <= 1;
                     end else begin
