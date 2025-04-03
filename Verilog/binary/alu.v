@@ -112,8 +112,8 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= input1 ^ input2;
                 end
                 `ADD, `ADDI: begin
-                    // alu_out <= adder_out;
-                    alu_out <= input1 + input2;
+                    alu_out <= adder_out;
+                    // alu_out <= input1 + input2;
                 end
                 `SUB: begin
                     alu_out <= input1 - input2;
