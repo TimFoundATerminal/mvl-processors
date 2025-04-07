@@ -1,32 +1,53 @@
-// Static gate count calculator
-module gate_counter #(parameter WIDTH = 16); // Get the width of ripple-carry adder
+// // Static gate count calculator
+// module gate_counter #(parameter WIDTH = 16); // Get the width of ripple-carry adder
 
-  // Static gate counts
-  integer and_gates, or_gates, xor_gates;
+//   // Static gate counts
+//   integer and_gates, or_gates, xor_gates;
   
-  initial begin
-    // In half_adder:
-    // - 1 XOR gate for sum
-    // - 1 AND gate for carry
+//   initial begin
+//     // In half_adder:
+//     // - 1 XOR gate for sum
+//     // - 1 AND gate for carry
     
-    // In full_adder:
-    // - 2 half_adders = 2 XOR + 2 AND
-    // - 1 OR gate for final carry_out
+//     // In full_adder:
+//     // - 2 half_adders = 2 XOR + 2 AND
+//     // - 1 OR gate for final carry_out
     
-    // In ripple_carry_adder with WIDTH bits:
-    // - WIDTH full_adders
+//     // In ripple_carry_adder with WIDTH bits:
+//     // - WIDTH full_adders
     
-    // Calculate total gates:
-    and_gates = WIDTH * 2;     // 2 AND gates per full_adder
-    or_gates = WIDTH * 1;      // 1 OR gate per full_adder
-    xor_gates = WIDTH * 2;     // 2 XOR gates per full_adder
+//     // Calculate total gates:
+//     and_gates = WIDTH * 2;     // 2 AND gates per full_adder
+//     or_gates = WIDTH * 1;      // 1 OR gate per full_adder
+//     xor_gates = WIDTH * 2;     // 2 XOR gates per full_adder
     
-    $display("Static gate count for %0d-bit ripple-carry adder:", WIDTH);
-    $display("AND gates: %0d", and_gates);
-    $display("OR gates: %0d", or_gates);
-    $display("XOR gates: %0d", xor_gates);
-    $display("Total gates: %0d", and_gates + or_gates + xor_gates);
-  end
+//     $display("Static gate count for %0d-bit ripple-carry adder:", WIDTH);
+//     $display("AND gates: %0d", and_gates);
+//     $display("OR gates: %0d", or_gates);
+//     $display("XOR gates: %0d", xor_gates);
+//     $display("Total gates: %0d", and_gates + or_gates + xor_gates);
+//   end
+// endmodule
+
+
+/*
+* Single bit operations
+*/
+
+module not_gate(input wire a, output wire b);
+    assign b = ~a;
+endmodule
+
+module and_gate(input wire a, b, output wire c);
+    assign c = a & b;
+endmodule
+
+module or_gate(input wire a, b, output wire c);
+    assign c = a | b;
+endmodule
+
+module xor_gate(input wire a, b, output wire c);
+    assign c = a ^ b;
 endmodule
 
 module half_adder(a, b, sum, carry);
@@ -34,9 +55,9 @@ module half_adder(a, b, sum, carry);
     output sum, carry;
 
     // XOR gate for sum
-    assign sum = a ^ b;
+    xor_gate xor_g(a, b, sum);
     // AND gate for carry
-    assign carry = a & b;
+    and_gate and_g(a, b, carry);
 
 endmodule
 
@@ -56,6 +77,9 @@ module full_adder(a, b, carry_in, sum, carry_out);
 
 endmodule
 
+/*
+* ALU operations over bit strings of length WORD_SIZE = 16
+*/
 
 module ripple_carry_adder #(parameter WIDTH = 16)(
     input wire [WIDTH-1:0] a, b,
@@ -113,7 +137,6 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                 end
                 `ADD, `ADDI: begin
                     alu_out <= adder_out;
-                    // alu_out <= input1 + input2;
                 end
                 `SUB: begin
                     alu_out <= input1 - input2;
@@ -121,11 +144,14 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                 `COMP: begin
                     alu_out <= (input1 == input2);
                 end
-                `SRI: begin
-                    alu_out <= input1 >> input2;
+                `LT: begin
+                    alu_out <= (input1 < input2);
                 end
-                `SLI: begin
-                    alu_out <= input1 << input2;
+                `EQ: begin
+                    alu_out <= (input1 == input2);
+                end
+                default: begin
+                    alu_out <= 0; // Default case to avoid latches
                 end
                 // All the immediate instructions can use the same circuitry as the memory instructions
             endcase

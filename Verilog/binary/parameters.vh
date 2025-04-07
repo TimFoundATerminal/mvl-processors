@@ -22,8 +22,8 @@ parameter REG_ADDR_SIZE = 3;
 `define COMP  5'b01011 // 11
 `define ANDI  5'b01100 // 12
 `define ADDI  5'b01101 // 13
-`define SRI   5'b01110 // 14
-`define SLI   5'b01111 // 15
+`define LT    5'b01110 // 14
+`define EQ   5'b01111 // 15
 `define LUI   5'b10000 // 16
 `define LI    5'b10001 // 17
 `define BEQ   5'b10010 // 18
