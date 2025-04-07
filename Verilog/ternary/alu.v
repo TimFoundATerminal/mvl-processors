@@ -144,6 +144,155 @@ module ternary_less_than_comparator(input1, input2, result);
 endmodule
 
 
+module ternary_negation_1bit(
+    input [1:0] a,
+    output [1:0] neg_out
+);
+
+    `include "parameters.vh"
+
+    // Mapping of inputs to outputs for ternary negation gate
+    assign neg_out = (a == `_1) ? `_1_ :
+              (a == `_1_) ? `_1 :
+              `_0; 
+
+endmodule
+
+
+module ternary_any_1bit(
+    input [1:0] a,
+    input [1:0] b,
+    output [1:0] any_out
+);
+
+    `include "parameters.vh"
+
+    // Mapping of inputs to outputs for ternary any gate
+    function [1:0] ternary_any_gate;
+        input [1:0] trit1, trit2;
+        begin
+            case({trit1, trit2})
+                {`_1, `_1}: ternary_any_gate = {`_1};       // -1 ⊞ -1 = -1
+                {`_1, `_0}: ternary_any_gate = {`_1};       // -1 ⊞  0 = -1
+                {`_1, `_1_}: ternary_any_gate = {`_0};      // -1 ⊞ +1 =  0
+                {`_0, `_1}: ternary_any_gate = {`_1};       //  0 ⊞ -1 = -1
+                {`_0, `_0}: ternary_any_gate = {`_0};       //  0 ⊞  0 =  0
+                {`_0, `_1_}: ternary_any_gate = {`_1_};     //  0 ⊞ +1 = +1
+                {`_1_, `_1}: ternary_any_gate = {`_0};      // +1 ⊞ -1 =  0
+                {`_1_, `_0}: ternary_any_gate = {`_1_};     // +1 ⊞  0 = +1
+                {`_1_, `_1_}: ternary_any_gate = {`_1_};    // +1 ⊞ +1 = +1
+                default: ternary_any_gate = {`_0};
+            endcase
+        end
+    endfunction
+
+    assign any_out = ternary_any_gate(a, b);
+
+endmodule
+
+
+module ternary_consensus_1bit(
+    input [1:0] a,
+    input [1:0] b,
+    output [1:0] consensus_out
+);
+
+    `include "parameters.vh"
+
+    // Mapping of inputs to outputs for ternary consensus gate
+    function [1:0] ternary_consensus_gate;
+        input [1:0] trit1, trit2;
+        begin
+            case({trit1, trit2})
+                {`_1, `_1}: ternary_consensus_gate = {`_1};       // -1 ⊠ -1 = -1
+                {`_1, `_0}: ternary_consensus_gate = {`_0};       // -1 ⊠  0 =  0
+                {`_1, `_1_}: ternary_consensus_gate = {`_0};      // -1 ⊠ +1 =  0
+                {`_0, `_1}: ternary_consensus_gate = {`_0};       //  0 ⊠ -1 =  0
+                {`_0, `_0}: ternary_consensus_gate = {`_0};       //  0 ⊠  0 =  0
+                {`_0, `_1_}: ternary_consensus_gate = {`_0};     //  0 ⊠ +1 =  0
+                {`_1_, `_1}: ternary_consensus_gate = {`_0};      // +1 ⊠ -1 =  0
+                {`_1_, `_0}: ternary_consensus_gate = {`_0};     // +1 ⊠  0 =  0
+                {`_1_, `_1_}: ternary_consensus_gate = {`_1_};    // +1 ⊠ +1 = +1
+                default: ternary_consensus_gate = {`_0};
+            endcase
+        end
+    endfunction
+
+    assign consensus_out = ternary_consensus_gate(a, b);
+
+endmodule
+
+
+module ternary_addition_1bit(
+    input [1:0] a,
+    input [1:0] b,
+    output [1:0] sum
+);
+
+    `include "parameters.vh"
+
+    // Use any and consensus gates to compute the sum
+    wire [1:0] consensus_out;
+    ternary_consensus_1bit consensus_gate(
+        .a(a),
+        .b(b),
+        .consensus_out(consensus_out)
+    );
+
+    wire [1:0] consensus_neg;
+    ternary_negation_1bit neg_gate(
+        .a(consensus_out),
+        .neg_out(consensus_neg)
+    );
+
+    wire [1:0] any1_out;
+    ternary_any_1bit any_gate1(
+        .a(a),
+        .b(b),
+        .any_out(any1_out)
+    );
+
+    wire [1:0] any2_out;
+    ternary_any_1bit any_gate2(
+        .a(consensus_neg),
+        .b(any1_out),
+        .any_out(any2_out)
+    );
+
+    wire [1:0] any3_out;
+    ternary_any_1bit any_gate3(
+        .a(consensus_neg),
+        .b(any2_out),
+        .any_out(any3_out)
+    );
+
+    assign sum = any3_out;
+
+endmodule
+
+
+module ternary_half_adder_1bit(
+    input [1:0] a,
+    input [1:0] b,
+    output [1:0] sum,
+    output [1:0] carry_out
+);
+
+    ternary_addition_1bit add_gate(
+        .a(a),
+        .b(b),
+        .sum(sum)
+    );
+
+    ternary_consensus_1bit consensus_gate(
+        .a(a),
+        .b(b),
+        .consensus_out(carry_out)
+    );
+
+endmodule
+
+
 module ternary_adder_1bit(
     input [1:0] a,
     input [1:0] b,
@@ -154,46 +303,83 @@ module ternary_adder_1bit(
 
     `include "parameters.vh"
 
-    // Ternary 
+    wire [1:0] sum1, carry1, carry2;
+    ternary_half_adder_1bit half_adder1(
+        .a(b),
+        .b(carry_in),
+        .sum(sum1),
+        .carry_out(carry1)
+    );
 
-    // Helper function for ternary addition (returns carry and sum)
-    function [3:0] ternary_add_step;
-        input [1:0] trit1, trit2;
-        begin
-            case({trit1, trit2})
-                {`_1, `_1}: ternary_add_step = {`_1, `_1_};  // -1 + -1 = -2 = carry -1, sum 1
-                {`_1, `_0}: ternary_add_step = {`_0, `_1};   // -1 + 0 = -1
-                {`_1, `_1_}: ternary_add_step = {`_0, `_0};  // -1 + 1 = 0
-                {`_0, `_1}: ternary_add_step = {`_0, `_1};   // 0 + -1 = -1
-                {`_0, `_0}: ternary_add_step = {`_0, `_0};   // 0 + 0 = 0
-                {`_0, `_1_}: ternary_add_step = {`_0, `_1_}; // 0 + 1 = 1
-                {`_1_, `_1}: ternary_add_step = {`_0, `_0};  // 1 + -1 = 0
-                {`_1_, `_0}: ternary_add_step = {`_0, `_1_}; // 1 + 0 = 1
-                {`_1_, `_1_}: ternary_add_step = {`_1_, `_1}; // 1 + 1 = 2 = carry 1, sum -1
-                default: ternary_add_step = {`_0, `_0};
-            endcase
-        end
-    endfunction
-    
-    // First add a and b, then add the result to carry_in
-    wire [3:0] step1, step2;
-    
-    // First addition: a + b
-    assign step1 = ternary_add_step(a, b);
-    
-    // Second addition: (a+b result) + carry_in
-    assign step2 = ternary_add_step(step1[1:0], carry_in);
-    
-    // Final sum is the result of the second addition
-    assign sum = step2[1:0];
-    
-    // Combine the carries from both addition steps
-    assign carry_out = (step1[3:2] == `_0) ? step2[3:2] :
-                       (step2[3:2] == `_0) ? step1[3:2] :
-                       (step1[3:2] == `_1_ && step2[3:2] == `_1_) ? `_1 :  // 1+1=-1 with carry 1
-                       (step1[3:2] == `_1 && step2[3:2] == `_1) ? `_1_ :   // -1+-1=1 with carry -1
-                       `_0;  // Otherwise carries cancel out
+    ternary_half_adder_1bit half_adder2(
+        .a(a),
+        .b(sum1),
+        .sum(sum),
+        .carry_out(carry2)
+    );
+
+    // Carry out is the any of the two carry outputs
+    ternary_any_1bit any_gate(
+        .a(carry1),
+        .b(carry2),
+        .any_out(carry_out)
+    );
+
 endmodule
+
+
+// module ternary_adder_1bit(
+//     input [1:0] a,
+//     input [1:0] b,
+//     input [1:0] carry_in,
+//     output [1:0] sum,
+//     output [1:0] carry_out
+// );
+
+//      // TODO: Create an efficient 1-bit ternary adder implementation here
+
+//     `include "parameters.vh"
+
+//     // Ternary 
+
+//     // Helper function for ternary addition (returns carry and sum)
+//     function [3:0] ternary_add_step;
+//         input [1:0] trit1, trit2;
+//         begin
+//             case({trit1, trit2})
+//                 {`_1, `_1}: ternary_add_step = {`_1, `_1_};  // -1 + -1 = -2 = carry -1, sum 1
+//                 {`_1, `_0}: ternary_add_step = {`_0, `_1};   // -1 + 0 = -1
+//                 {`_1, `_1_}: ternary_add_step = {`_0, `_0};  // -1 + 1 = 0
+//                 {`_0, `_1}: ternary_add_step = {`_0, `_1};   // 0 + -1 = -1
+//                 {`_0, `_0}: ternary_add_step = {`_0, `_0};   // 0 + 0 = 0
+//                 {`_0, `_1_}: ternary_add_step = {`_0, `_1_}; // 0 + 1 = 1
+//                 {`_1_, `_1}: ternary_add_step = {`_0, `_0};  // 1 + -1 = 0
+//                 {`_1_, `_0}: ternary_add_step = {`_0, `_1_}; // 1 + 0 = 1
+//                 {`_1_, `_1_}: ternary_add_step = {`_1_, `_1}; // 1 + 1 = 2 = carry 1, sum -1
+//                 default: ternary_add_step = {`_0, `_0};
+//             endcase
+//         end
+//     endfunction
+    
+//     // First add a and b, then add the result to carry_in
+//     wire [3:0] step1, step2;
+    
+//     // First addition: a + b
+//     assign step1 = ternary_add_step(a, b);
+    
+//     // Second addition: (a+b result) + carry_in
+//     assign step2 = ternary_add_step(step1[1:0], carry_in);
+    
+//     // Final sum is the result of the second addition
+//     assign sum = step2[1:0];
+    
+//     // Combine the carries from both addition steps
+//     assign carry_out = (step1[3:2] == `_0) ? step2[3:2] :
+//                        (step2[3:2] == `_0) ? step1[3:2] :
+//                        (step1[3:2] == `_1_ && step2[3:2] == `_1_) ? `_1 :  // 1+1=-1 with carry 1
+//                        (step1[3:2] == `_1 && step2[3:2] == `_1) ? `_1_ :   // -1+-1=1 with carry -1
+//                        `_0;  // Otherwise carries cancel out
+// endmodule
 
 // Ternary ripple carry adder - fixed for 9 trits
 module ternary_ripple_carry_adder(input1, input2, result);
