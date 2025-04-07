@@ -58,7 +58,6 @@ module half_adder(a, b, sum, carry);
     xor_gate xor_g(a, b, sum);
     // AND gate for carry
     and_gate and_g(a, b, carry);
-
 endmodule
 
 module full_adder(a, b, carry_in, sum, carry_out);
@@ -81,8 +80,60 @@ endmodule
 * ALU operations over bit strings of length WORD_SIZE = 16
 */
 
+module binary_not #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a, 
+    output wire [WIDTH-1:0] out
+);
+    genvar i;
+    generate
+        for (i = 0; i < WIDTH; i = i + 1) begin: not_loop
+            not_gate ng(a[i], out[i]);
+        end
+    endgenerate
+endmodule
+
+module binary_and #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a, 
+    input wire [WIDTH-1:0] b, 
+    output wire [WIDTH-1:0] out
+);
+    genvar i;
+    generate
+        for (i = 0; i < WIDTH; i = i + 1) begin: and_loop
+            and_gate ag(a[i], b[i], out[i]);
+        end
+    endgenerate
+endmodule
+
+module binary_or #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a, 
+    input wire [WIDTH-1:0] b, 
+    output wire [WIDTH-1:0] out
+);
+    genvar i;
+    generate
+        for (i = 0; i < WIDTH; i = i + 1) begin: or_loop
+            or_gate og(a[i], b[i], out[i]);
+        end
+    endgenerate
+endmodule
+
+module binary_xor #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a, 
+    input wire [WIDTH-1:0] b, 
+    output wire [WIDTH-1:0] out
+);
+    genvar i;
+    generate
+        for (i = 0; i < WIDTH; i = i + 1) begin: xor_loop
+            xor_gate xg(a[i], b[i], out[i]);
+        end
+    endgenerate
+endmodule
+
 module ripple_carry_adder #(parameter WIDTH = 16)(
-    input wire [WIDTH-1:0] a, b,
+    input wire [WIDTH-1:0] a, 
+    input wire [WIDTH-1:0] b, 
     output wire [WIDTH-1:0] sum
 );
     wire [WIDTH:0] carry; // Extra bit for the carry out
@@ -115,25 +166,39 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
     input wire [WORD_SIZE-1:0] input1, input2;
     output reg [WORD_SIZE-1:0] alu_out;
 
+    // Instantiate the outputs for all logic components
+    wire [WORD_SIZE-1:0] not_out;
+    wire [WORD_SIZE-1:0] and_out;
+    wire [WORD_SIZE-1:0] or_out;
+    wire [WORD_SIZE-1:0] xor_out;
+    wire [WORD_SIZE-1:0] add_out;
+    wire [WORD_SIZE-1:0] sub_out;
+    wire [WORD_SIZE-1:0] comp_out;
+    wire [WORD_SIZE-1:0] lt_out;
+    wire [WORD_SIZE-1:0] eq_out;
 
-    // Instantiate the ripple carry adder plus adder_out
-    wire [WORD_SIZE-1:0] adder_out;
-    ripple_carry_adder #(WORD_SIZE) adder(input1, input2, adder_out);
+    // Instantiate the logic components with the appropriate widths
+    binary_not #(WORD_SIZE) not_gate(input1, not_out);
+    binary_and #(WORD_SIZE) and_gate(input1, input2, and_out);
+    binary_or #(WORD_SIZE) or_gate(input1, input2, or_out);
+    binary_xor #(WORD_SIZE) xor_gate(input1, input2, xor_out);
+    // Insert others here
+    ripple_carry_adder #(WORD_SIZE) adder(input1, input2, add_out);
 
     always @(posedge clock) begin
         if (alu_enable) begin
             case (opcode)
                 `NOT: begin
-                    alu_out <= ~input1;
+                    alu_out <= not_out;
                 end
                 `AND, `ANDI: begin
-                    alu_out <= input1 & input2;
+                    alu_out <= and_out;
                 end
                 `OR: begin
-                    alu_out <= input1 | input2;
+                    alu_out <= or_out;
                 end
                 `XOR: begin
-                    alu_out <= input1 ^ input2;
+                    alu_out <= xor_out;
                 end
                 `ADD, `ADDI: begin
                     alu_out <= adder_out;

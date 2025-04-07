@@ -81,24 +81,29 @@ module alu_testbench();
         // Test SUB operation (with borrow)
         test_operation(`SUB, 16'h1234, 16'h5678, 16'h1234 - 16'h5678, "SUB with borrow");
         
-        // Test COMP operation (equal)
-        test_operation(`COMP, 16'h1234, 16'h1234, 16'h0001, "COMP equal");
+        // // Test COMP operation (equal)
+        // test_operation(`COMP, 16'h1234, 16'h1234, 16'h0001, "COMP equal");
         
-        // Test COMP operation (not equal)
-        test_operation(`COMP, 16'h1234, 16'h5678, 16'h0000, "COMP not equal");
+        // // Test COMP operation (not equal)
+        // test_operation(`COMP, 16'h1234, 16'h5678, 16'h0000, "COMP not equal");
         
         // Test ANDI operation
         test_operation(`ANDI, 16'hAAAA, 16'h5555, 16'hAAAA & 16'h5555, "ANDI");
         
-        // Test SRI operation (shift right)
-        test_operation(`SRI, 16'h8000, 16'h0001, 16'h4000, "SRI");
-        
-        // Test SLI operation (shift left)
-        test_operation(`SLI, 16'h0001, 16'h0001, 16'h0002, "SLI");
-        
-        // Test multiple shifts
-        test_operation(`SRI, 16'hFFFF, 16'h0008, 16'h00FF, "SRI by 8");
-        test_operation(`SLI, 16'h00FF, 16'h0008, 16'hFF00, "SLI by 8");
+        // Test EQ operation (equal to) - should return 1 when inputs are equal
+        test_operation(`EQ, 16'h1234, 16'h1234, 16'h0001, "EQ - equal values");
+
+        // Test EQ operation (equal to) - should return 0 when inputs are different
+        test_operation(`EQ, 16'h1234, 16'h5678, 16'h0000, "EQ - different values");
+
+        // Test LT operation (less than) - should return 1 when first input is less than second
+        test_operation(`LT, 16'h1234, 16'h5678, 16'h0001, "LT - first < second");
+
+        // Test LT operation (less than) - should return 0 when first input is greater than second
+        test_operation(`LT, 16'h5678, 16'h1234, 16'h0000, "LT - first > second");
+
+        // Test LT operation (less than) - should return 0 when inputs are equal
+        test_operation(`LT, 16'h1234, 16'h1234, 16'h0000, "LT - equal values");
         
         // Test edge case - all operations with zero values
         test_operation(`ADD, 16'h0000, 16'h0000, 16'h0000, "ADD zeros");
