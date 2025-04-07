@@ -146,9 +146,6 @@ class TernaryInstructionParser:
 
     def parse_register_big_immediate(self, reg1, imm):
         """Parse register and big immediate value (4 trits = 8 bits)."""
-
-        # TODO convert immediate's to ternary representation
-
         try:
             r1_num = int(reg1.strip()[1:])  # Remove 'R' and convert to int
             
