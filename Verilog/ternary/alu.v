@@ -643,7 +643,6 @@ endmodule
 *Main ALU module that instantiates all of the above components to perform the ALU operations
 */
 
-
 module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
 
     `include "parameters.vh"
@@ -652,78 +651,14 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
     input wire [2*OPCODE_SIZE-1:0] opcode;  // 3 trits = 6 bits
     input wire [2*WORD_SIZE-1:0] input1, input2;  // Each trit requires 2 bits (18 bits total)
     output reg [2*WORD_SIZE-1:0] alu_out;
-
-
-    
-    // Function to extract a binary value from a ternary value (for shifts)
-    function integer ternary_to_binary;
-        input [2*WORD_SIZE-1:0] ternary_val;
-        integer i, result;
-        reg [1:0] current_trit;
-        begin
-            result = 0;
-            for (i = 0; i < WORD_SIZE; i = i + 1) begin
-                // Extract the trit using a case statement instead of variable indexing
-                case(i)
-                    0: current_trit = ternary_val[1:0];
-                    1: current_trit = ternary_val[3:2];
-                    2: current_trit = ternary_val[5:4];
-                    3: current_trit = ternary_val[7:6];
-                    4: current_trit = ternary_val[9:8];
-                    5: current_trit = ternary_val[11:10];
-                    6: current_trit = ternary_val[13:12];
-                    7: current_trit = ternary_val[15:14];
-                    8: current_trit = ternary_val[17:16];
-                    default: current_trit = 2'b00;
-                endcase
-                
-                case(current_trit)
-                    `_1: result = result - 1;  // -1 contribution
-                    `_1_: result = result + 1; // +1 contribution
-                    default: result = result;  // 0 contribution
-                endcase
-            end
-            ternary_to_binary = result;
-        end
-    endfunction
-    
-    // Helper function for ternary comparison
-    function [1:0] ternary_compare;
-        input [2*WORD_SIZE-1:0] a, b;
-        integer i;
-        reg equal;
-        reg [1:0] a_trit, b_trit;
-        begin
-            equal = 1;
-            for (i = 0; i < WORD_SIZE; i = i + 1) begin
-                // Extract trits using case statements
-                case(i)
-                    0: begin a_trit = a[1:0]; b_trit = b[1:0]; end
-                    1: begin a_trit = a[3:2]; b_trit = b[3:2]; end
-                    2: begin a_trit = a[5:4]; b_trit = b[5:4]; end
-                    3: begin a_trit = a[7:6]; b_trit = b[7:6]; end
-                    4: begin a_trit = a[9:8]; b_trit = b[9:8]; end
-                    5: begin a_trit = a[11:10]; b_trit = b[11:10]; end
-                    6: begin a_trit = a[13:12]; b_trit = b[13:12]; end
-                    7: begin a_trit = a[15:14]; b_trit = b[15:14]; end
-                    8: begin a_trit = a[17:16]; b_trit = b[17:16]; end
-                    default: begin a_trit = 2'b00; b_trit = 2'b00; end
-                endcase
-                
-                if (a_trit != b_trit) begin
-                    equal = 0;
-                end
-            end
-            ternary_compare = equal ? `_1_ : `_0;
-        end
-    endfunction
     
     // Wire declarations for intermediate results
     wire [2*WORD_SIZE-1:0] not_result;
     wire [2*WORD_SIZE-1:0] and_result;
     wire [2*WORD_SIZE-1:0] or_result;
     wire [2*WORD_SIZE-1:0] xor_result;
-    wire [2*WORD_SIZE-1:0] comp_result;
+    wire [2*WORD_SIZE-1:0] less_than_result;
+    wire [2*WORD_SIZE-1:0] equal_result;
     wire [2*WORD_SIZE-1:0] adder_out;
     wire [2*WORD_SIZE-1:0] sub_result;
 
@@ -755,7 +690,14 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
     );
     
     // Comparison implementation
-    assign comp_result = {{(2*WORD_SIZE-2){`_0}}, ternary_compare(input1, input2)};
+    ternary_less_than_comparator comparator(
+        .input1(input1),
+        .input2(input2),
+        .result(less_than_result)
+    );
+
+    // Equality check
+    assign equal_result = (input1 == input2) ? `_1_ : `_0; // Equality check
 
     // Instantiate the ternary ripple carry adder
     ternary_ripple_carry_adder adder(
@@ -800,14 +742,15 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= sub_result;
                 end
                 `COMP: begin
-                    alu_out <= comp_result;
+                    $display("Currently not implemented");
+                    alu_out <= input1;
                 end
-                // `SRI: begin
-                //     alu_out <= sri_result;
-                // end
-                // `SLI: begin
-                //     alu_out <= sli_result;
-                // end
+                `LT: begin
+                    alu_out <= less_than_result;
+                end
+                `EQ: begin
+                    alu_out <= equal_result;
+                end
                 default: begin
                     $display("Unknown opcode %h", opcode);
                     alu_out <= input1; // Default to passing through input1

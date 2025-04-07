@@ -98,8 +98,8 @@ module ternary_alu_tb();
                 `COMP:  $write("COMP");
                 `ANDI:  $write("ANDI");
                 `ADDI:  $write("ADDI");
-                `SRI:   $write("SRI");
-                `SLI:   $write("SLI");
+                `LT:   $write("LT");
+                `EQ:   $write("EQ");
                 default: $write("UNKNOWN");
             endcase
         end
@@ -205,29 +205,41 @@ module ternary_alu_tb();
                 {`_0, `_0, `_0, `_0, `_1, `_1, `_0, `_0, `_1_},    // Input2 = -107
                 {`_0, `_0, `_0, `_1_, `_0, `_1, `_1_, `_0, `_0}); // Expected = 118 + (-107) = 225
 
-        // TEST 7: COMP Operation (Equal) with 9 trits
-        run_test(`COMP, 
+        // // TEST 7: COMP Operation (Equal) with 9 trits
+        // run_test(`COMP, 
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input2 (same as Input1)
+        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}); // Expected: [0,0,0,0,0,0,0,0,1] (1 for equal)
+                
+        // // TEST 8: COMP Operation (Not Equal) with 9 trits
+        // run_test(`COMP, 
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1
+        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1}, // Input2 (differs in last trit)
+        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0}); // Expected: [0,0,0,0,0,0,0,0,0] (0 for not equal)
+
+        // TEST 7: EQ Operation (Equal)
+        run_test(`EQ, 
                 {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1
                 {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input2 (same as Input1)
                 {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}); // Expected: [0,0,0,0,0,0,0,0,1] (1 for equal)
                 
-        // TEST 8: COMP Operation (Not Equal) with 9 trits
-        run_test(`COMP, 
+        // TEST 8: EQ Operation (Not Equal)
+        run_test(`EQ, 
                 {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1
                 {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1}, // Input2 (differs in last trit)
                 {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0}); // Expected: [0,0,0,0,0,0,0,0,0] (0 for not equal)
+
+        // TEST 9: LT Operation (Less Than)
+        run_test(`LT, 
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1_, `_0, `_1_}, // Input1 (smaller)
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input2 (larger)
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}); // Expected: [0,0,0,0,0,0,0,0,1] (1 for less than)
                 
-        // // TEST 9: SRI Operation (Shift Right) with 9 trits
-        // run_test(`SRI, 
-        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1
-        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}, // Input2 = shift by 1
-        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0}); // Expected: right shifted by 1
-                
-        // // TEST 10: SLI Operation (Shift Left) with 9 trits
-        // run_test(`SLI, 
-        //         {`_0, `_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_}, // Input1
-        //         {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_1_}, // Input2 = shift by 1
-        //         {`_0, `_0, `_0, `_0, `_1_, `_1, `_0, `_1_, `_0}); // Expected: left shifted by 1
+        // TEST 10: LT Operation (Not Less Than - Greater or Equal)
+        run_test(`LT, 
+                {`_0, `_0, `_0, `_0, `_0, `_1_, `_1_, `_0, `_1_}, // Input1 (larger)
+                {`_0, `_0, `_0, `_0, `_0, `_1, `_1_, `_0, `_1_}, // Input2 (smaller)
+                {`_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0, `_0}); // Expected: [0,0,0,0,0,0,0,0,0] (0 for not less than)
                 
         // TEST 11: ANDI (Same as AND) with 9 trits
         run_test(`ANDI, 

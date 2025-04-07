@@ -24,6 +24,6 @@ module decode_instruction(
     // If opcode is in the following list, it is an ALU operation
     assign is_alu_operation = (opcode == `NOT) || (opcode == `AND) || (opcode == `OR) || 
         (opcode == `XOR) || (opcode == `ADD) || (opcode == `SUB) || (opcode == `COMP) || 
-        (opcode == `ANDI) || (opcode == `ADDI) || (opcode == `SRI) || (opcode == `SLI);
+        (opcode == `ANDI) || (opcode == `ADDI) || (opcode == `LT) || (opcode == `EQ);
 
 endmodule

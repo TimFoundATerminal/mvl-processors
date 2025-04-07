@@ -4,6 +4,85 @@ _1 = 0b11 # -1 (2)
 _0 = 0b00 # 0
 _1_ = 0b01 # 1
 
+
+# Helper function
+def int_to_balanced_ternary_to_binary(value):
+    """
+    Convert an integer to balanced ternary representation, then interpret
+    that representation as binary and convert back to an integer.
+    
+    Balanced ternary bit encoding:
+    -1 = 0b11 (_1)
+    0 = 0b00 (_0)
+    1 = 0b01 (_1_)
+    """
+    if value == 0:
+        # return {
+        #     "original_value": 0,
+        #     "balanced_ternary_trits": [0b00],
+        #     "balanced_ternary_formatted": ["_0"],
+        #     "binary_representation": "00",
+        #     "binary_value": 0
+        # }
+        return 0
+    
+    # Define the ternary digit encodings
+    trit_encodings = {
+        -1: 0b11,  # _1
+        0: 0b00,   # _0
+        1: 0b01    # _1_
+    }
+    
+    trit_names = {
+        0b11: "_1",   # -1
+        0b00: "_0",   # 0
+        0b01: "_1_"   # 1
+    }
+    
+    # Convert to balanced ternary
+    trits = []
+    
+    # Handle negative values by taking the absolute value and negating each trit at the end
+    is_negative = value < 0
+    abs_value = abs(value)
+    
+    while abs_value > 0:
+        remainder = abs_value % 3
+        
+        if remainder == 2:
+            # In balanced ternary, 2 is represented as -1 in the next position
+            trit = -1
+            abs_value = (abs_value + 1) // 3
+        else:
+            trit = remainder
+            abs_value = abs_value // 3
+        
+        # If the original value was negative, negate the trit
+        if is_negative:
+            trit = -trit
+            
+        trits.append(trit_encodings[trit])
+    
+    # Reverse the list since we built it from least to most significant
+    trits.reverse()
+    
+    # Format the trits for display
+    formatted_trits = [trit_names[trit] for trit in trits]
+    
+    # Convert the binary representation to an integer
+    binary_string = ''.join([f"{trit:02b}" for trit in trits])
+    binary_value = int(binary_string, 2)
+    
+    # return {
+    #     "original_value": value,
+    #     "balanced_ternary_trits": trits,
+    #     "balanced_ternary_formatted": formatted_trits,
+    #     "binary_representation": binary_string,
+    #     "binary_value": binary_value
+    # }
+    return binary_value
+
+
 class TernaryInstructionParser:
     def __init__(self):
         # Program memory to store instructions (256 18-bit words)
@@ -23,8 +102,8 @@ class TernaryInstructionParser:
             'COMP':  0b010011, # 11
             'ANDI':  0b010100, # 12
             'ADDI':  0b010101, # 13
-            'SRI':   0b010111, # 14
-            'SLI':   0b011100, # 15
+            'LT':    0b010111, # 14
+            'EQ':    0b011100, # 15
             'LUI':   0b011101, # 16
             'LI':    0b011111, # 17
             'BEQ':   0b110000, # 18
@@ -67,6 +146,9 @@ class TernaryInstructionParser:
 
     def parse_register_big_immediate(self, reg1, imm):
         """Parse register and big immediate value (4 trits = 8 bits)."""
+
+        # TODO convert immediate's to ternary representation
+
         try:
             r1_num = int(reg1.strip()[1:])  # Remove 'R' and convert to int
             
@@ -76,7 +158,7 @@ class TernaryInstructionParser:
                     imm_val = int(imm, 16)
                 else:
                     try:
-                        imm_val = int(imm)
+                        imm_val = int_to_balanced_ternary_to_binary(int(imm))
                     except ValueError:
                         imm_val = int(imm, 16)
             else:
@@ -109,7 +191,7 @@ class TernaryInstructionParser:
                     imm_val = int(imm, 16)
                 else:
                     try:
-                        imm_val = int(imm)
+                        imm_val = int_to_balanced_ternary_to_binary(int(imm))
                     except ValueError:
                         imm_val = int(imm, 16)
             else:
@@ -174,7 +256,7 @@ class TernaryInstructionParser:
                     imm_val = int(immediate, 16)
                 else:
                     try:
-                        imm_val = int(immediate)
+                        imm_val = int_to_balanced_ternary_to_binary(int(immediate))
                     except ValueError:
                         imm_val = int(immediate, 16)
             else:
@@ -222,7 +304,7 @@ class TernaryInstructionParser:
                 return (opcode << 12)  # 6 bits shifted left by 12 bits
             
             # R-type instructions (register-register operations)
-            if instruction in ['MV', 'NOT', 'AND', 'OR', 'XOR', 'ADD', 'SUB', 'MULT', 'DIV', 'MOD', 'COMP']:
+            if instruction in ['MV', 'NOT', 'AND', 'OR', 'XOR', 'ADD', 'SUB', 'COMP', 'LT', 'EQ']:
                 reg_a, reg_b = self.parse_registers(tokens[1], tokens[2])
                 return (opcode << 12) | (reg_a << 8) | (reg_b << 4)
                 
@@ -287,5 +369,16 @@ def main():
     parser.assemble(args.filepath, args.output)
 
 
+def test():
+    for test_value in [0, 10, -10, 42, -42]:
+        result = int_to_balanced_ternary_to_binary(test_value)
+        print(f"Original: {result['original_value']}")
+        print(f"Balanced ternary: {result['balanced_ternary_formatted']}")
+        print(f"Binary representation: {result['binary_representation']}")
+        print(f"Binary value: {result['binary_value']}")
+        print()
+
+
 if __name__ == "__main__":
     main()
+    # test()
