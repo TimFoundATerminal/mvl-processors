@@ -15,6 +15,9 @@ module system_tb;
         clock = 0;
         forever #5 clock = ~clock;  // 100MHz clock
     end
+
+    // Instantiate the gate count module
+    gate_counter_top counter();
     
     // Instantiate the system
     system uut (
@@ -67,7 +70,14 @@ module system_tb;
             @(posedge clock);
             $display("PC=%0d", uut.cpu.program_counter);
             // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
-            $display("R0=%h R1=%h R2=%h R3=%h R4=%h R5=%h", r0, r1, r2, r3, r4, r5);
+            $display("R0=%3d R1=%3d R2=%3d R3=%3d R4=%3d R5=%3d", 
+                r0, 
+                r1, 
+                r2, 
+                r3, 
+                r4, 
+                r5
+            );
             
             // Display memory operations
             if (uut.cpu.mem_write)
@@ -102,6 +112,9 @@ module system_tb;
         // for (integer i = 0; i < 8; i = i + 1) begin
         //     $display("Mem[%0d]=%h", i, uut.ram.memory[i]);
         // end
+
+        // Display gate counts
+        counter.display_counts;
         
         #100;
         $finish;

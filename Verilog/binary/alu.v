@@ -1,33 +1,18 @@
-// // Static gate count calculator
-// module gate_counter #(parameter WIDTH = 16); // Get the width of ripple-carry adder
-
-//   // Static gate counts
-//   integer and_gates, or_gates, xor_gates;
-  
-//   initial begin
-//     // In half_adder:
-//     // - 1 XOR gate for sum
-//     // - 1 AND gate for carry
+// Static gate counter
+module gate_counter_top;
+    integer not_count = 0;
+    integer and_count = 0;
+    integer or_count = 0;
+    integer xor_count = 0;
     
-//     // In full_adder:
-//     // - 2 half_adders = 2 XOR + 2 AND
-//     // - 1 OR gate for final carry_out
-    
-//     // In ripple_carry_adder with WIDTH bits:
-//     // - WIDTH full_adders
-    
-//     // Calculate total gates:
-//     and_gates = WIDTH * 2;     // 2 AND gates per full_adder
-//     or_gates = WIDTH * 1;      // 1 OR gate per full_adder
-//     xor_gates = WIDTH * 2;     // 2 XOR gates per full_adder
-    
-//     $display("Static gate count for %0d-bit ripple-carry adder:", WIDTH);
-//     $display("AND gates: %0d", and_gates);
-//     $display("OR gates: %0d", or_gates);
-//     $display("XOR gates: %0d", xor_gates);
-//     $display("Total gates: %0d", and_gates + or_gates + xor_gates);
-//   end
-// endmodule
+    // Task to display counts
+    task display_counts;
+    begin
+        $display("Gate counts: NOT=%0d, AND=%0d, OR=%0d, XOR=%0d", 
+                 not_count, and_count, or_count, xor_count);
+    end
+    endtask
+endmodule
 
 
 /*
@@ -36,18 +21,38 @@
 
 module not_gate(input wire a, output wire b);
     assign b = ~a;
+
+    //Increment the gate counter for NOT gate
+    always @(a) begin
+        counter.not_count = counter.not_count + 1;
+    end
 endmodule
 
 module and_gate(input wire a, b, output wire c);
     assign c = a & b;
+
+    //Increment the gate counter for AND gate
+    always @(a or b) begin
+        counter.and_count = counter.and_count + 1;
+    end
 endmodule
 
 module or_gate(input wire a, b, output wire c);
     assign c = a | b;
+
+    //Increment the gate counter for OR gate
+    always @(a or b) begin
+        counter.or_count = counter.or_count + 1;
+    end
 endmodule
 
 module xor_gate(input wire a, b, output wire c);
     assign c = a ^ b;
+
+    //Increment the gate counter for XOR gate
+    always @(a or b) begin
+        counter.xor_count = counter.xor_count + 1;
+    end
 endmodule
 
 module half_adder(a, b, sum, carry);
@@ -201,7 +206,7 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= xor_out;
                 end
                 `ADD, `ADDI: begin
-                    alu_out <= adder_out;
+                    alu_out <= add_out;
                 end
                 `SUB: begin
                     alu_out <= input1 - input2;
