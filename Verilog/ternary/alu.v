@@ -1,3 +1,23 @@
+// Gate Counter Module
+module gate_counter_top;
+    integer not_count = 0;
+    integer and_count = 0;
+    integer or_count = 0;
+    integer xor_count = 0;
+    integer any_count = 0;
+    integer consensus_count = 0;
+    
+    // Task to display counts
+    task display_counts;
+    begin
+        $display("Gate counts: NOT=%0d, AND=%0d, OR=%0d, XOR=%0d, ANY=%0d, CONSENSUS=%0d", 
+                 not_count, and_count, or_count, xor_count, any_count, consensus_count);
+    end
+    endtask
+endmodule
+
+
+
 /*
 * Ternary ALU gates operating of a single trit (2 bits)
 */
@@ -12,8 +32,12 @@ module ternary_negation_1bit(
     // Mapping of inputs to outputs for ternary negation gate
     assign neg_out = (a == `_1) ? `_1_ :
               (a == `_1_) ? `_1 :
-              `_0; 
+              `_0;
 
+    // Increment the gate counter for NOT gate
+    always @(a) begin
+        counter.not_count = counter.not_count + 1;
+    end
 endmodule
 
 
@@ -23,7 +47,6 @@ module ternary_comparator_1trit(a, b, lt_in, eq_in, lt_out, eq_out);
     input eq_in;      // Input is equal so far
     output lt_out;    // Output is less than
     output eq_out;    // Output is equal
-
     
     wire is_equal;
     wire a_less_than_b;
@@ -72,6 +95,11 @@ module ternary_and_1bit(
 
     assign and_out = ternary_and_gate(a, b);
 
+    // Increment the gate counter for AND gate
+    always @(a or b) begin
+        counter.and_count = counter.and_count + 1;
+    end
+
 endmodule
 
 // Ternary OR Module
@@ -103,6 +131,11 @@ module ternary_or_1bit(
     endfunction
 
     assign or_out = ternary_or_gate(a, b);
+
+    // Increment the gate counter for OR gate
+    always @(a or b) begin
+        counter.or_count = counter.or_count + 1;
+    end
 
 endmodule
 
@@ -136,6 +169,11 @@ module ternary_xor_1bit(
 
     assign xor_out = ternary_xor_gate(a, b);
 
+    // Increment the gate counter for XOR gate
+    always @(a or b) begin
+        counter.xor_count = counter.xor_count + 1;
+    end
+
 endmodule
 
 
@@ -168,6 +206,11 @@ module ternary_any_1bit(
 
     assign any_out = ternary_any_gate(a, b);
 
+    // Increment the gate counter for ANY gate
+    always @(a or b) begin
+        counter.any_count = counter.any_count + 1;
+    end
+
 endmodule
 
 
@@ -199,6 +242,11 @@ module ternary_consensus_1bit(
     endfunction
 
     assign consensus_out = ternary_consensus_gate(a, b);
+
+    // Increment the gate counter for CONSENSUS gate
+    always @(a or b) begin
+        counter.consensus_count = counter.consensus_count + 1;
+    end
 
 endmodule
 

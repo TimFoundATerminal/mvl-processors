@@ -51,6 +51,9 @@ module system_tb;
         clock = 0;
         forever #5 clock = ~clock;  // 100MHz clock
     end
+
+    // Instantiate the gate count module
+    gate_counter_top counter();
     
     // Instantiate the system
     system uut (
@@ -140,6 +143,9 @@ module system_tb;
             // Display the values in decimal
             $display("R%0d=%3d - %b", i, ternary_to_integer_func(uut.cpu.regs.regs[i]), uut.cpu.regs.regs[i]);
         end
+
+        // Display gate counts
+        counter.display_counts;
         
         #100;
         $finish;
