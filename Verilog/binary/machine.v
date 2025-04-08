@@ -86,8 +86,8 @@ module system (
             system_state <= IDLE;
             start_execution <= 0;
         end else begin
-            $display("System State: %d", system_state);
-            $display("Opcode: %d", opcode);
+            // $display("System State: %d", system_state);
+            // $display("Opcode: %d", opcode);
             case (system_state)
                 IDLE: begin
                     if (start) begin

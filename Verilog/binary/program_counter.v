@@ -17,7 +17,7 @@ module program_counter(clock, reset_enable, update_enable, value, out);
             out <= 0;
         end
         else if (update_enable) begin
-            $display("Updating program counter by %0d", $signed(value));
+            // $display("Updating program counter by %0d", $signed(value));
             out <= out + value;
         end
         else begin
