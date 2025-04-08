@@ -31,6 +31,9 @@ module ternary_alu_tb();
     reg [5:0] opcode;
     reg [2*TB_WORD_SIZE-1:0] input1, input2;
     wire [2*TB_WORD_SIZE-1:0] alu_out;
+
+    // Instantiate the gate count module
+    gate_counter_top counter();
     
     // Instantiate the ternary ALU
     ternary_alu dut (

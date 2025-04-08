@@ -11,6 +11,9 @@ module alu_testbench();
     reg [WORD_SIZE-1:0] input1, input2;
     reg alu_enable;
     wire [WORD_SIZE-1:0] alu_out;
+
+    // Instantiate the gate count module
+    gate_counter_top counter();
     
     // Instantiate the ALU
     alu dut(
