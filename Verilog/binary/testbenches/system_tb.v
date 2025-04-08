@@ -115,6 +115,9 @@ module system_tb;
 
         // Display gate counts
         counter.display_counts;
+
+        // Save gate counts to file
+        counter.save_counts("programs/program_gate_counts.csv");
         
         #100;
         $finish;

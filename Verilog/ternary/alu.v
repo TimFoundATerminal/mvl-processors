@@ -14,6 +14,36 @@ module gate_counter_top;
                  not_count, and_count, or_count, xor_count, any_count, consensus_count);
     end
     endtask
+
+    // Task to save counts to a CSV file
+    task save_counts;
+        input [8*100:1] filename; // Can store a string up to 100 characters
+        integer file;
+    begin
+        // Open file for writing
+        file = $fopen(filename, "w");
+        
+        // Check if file was opened successfully
+        if (file == 0) begin
+            $display("Error: Could not open file %s", filename);
+        end else begin
+            // Write header
+            $fwrite(file, "Gate,Count\n");
+            
+            // Write gate counts
+            $fwrite(file, "NOT,%0d\n", not_count);
+            $fwrite(file, "AND,%0d\n", and_count);
+            $fwrite(file, "OR,%0d\n", or_count);
+            $fwrite(file, "XOR,%0d\n", xor_count);
+            $fwrite(file, "ANY,%0d\n", any_count);
+            $fwrite(file, "CONSENSUS,%0d\n", consensus_count);
+            
+            // Close the file
+            $fclose(file);
+            $display("Gate counts saved successfully");
+        end
+    end
+    endtask
 endmodule
 
 
