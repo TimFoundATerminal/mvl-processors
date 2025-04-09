@@ -13,4 +13,4 @@ MV R4, R3     ; Copy into R4 to perform the compare
 EQ R4, R1     ; Compare counter with multiplier
 BNE R4, -4    ; If counter != multiplier, loop back 4 instructions
 
-HALT            ;
+HALT          ;

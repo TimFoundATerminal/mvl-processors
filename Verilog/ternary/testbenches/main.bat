@@ -1,6 +1,14 @@
 @echo off
+
+REM Argument for the directory of the Verilog files
+IF "%1"=="" (
+    SET SRC_DIR="."
+) ELSE (
+    SET SRC_DIR=%1
+)
+
 REM Clean up any previous simulation files
-cd testbenches
+cd %SRC_DIR%/testbenches
 del /f main.vvp
 cd ../
 
