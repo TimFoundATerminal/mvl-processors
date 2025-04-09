@@ -280,6 +280,7 @@ class TernaryInstructionParser:
         # Remove comments (everything after semicolon)
         line = line.split(';')[0].strip().replace(',', '')
         
+        # Ignore lines that are empty before the semicolon
         if not line:
             return None
             
@@ -306,28 +307,25 @@ class TernaryInstructionParser:
                 return (opcode << 12) | (reg_a << 8) | (reg_b << 4)
                 
             # I-type instructions with big immediate (4 trits)
-            elif instruction in ['ANDI', 'ADDI', 'SRI', 'SLI', 'LUI', 'LI']:
+            if instruction in ['ANDI', 'ADDI', 'SRI', 'SLI', 'LUI', 'LI']:
                 reg_a, imm = self.parse_register_big_immediate(tokens[1], tokens[2])
                 return (opcode << 12) | (reg_a << 8) | imm
             
-            # # I-type instructions with small immediate (2 trits)
-            # elif instruction in []: # currently empty, but can be added later
-            #     reg_a, small_imm = self.parse_register_small_immediate(tokens[1], tokens[2])
-            #     return (opcode << 12) | (reg_a << 8) | (small_imm << 4)
-            
             # Branch instructions
-            elif instruction in ['BEQ', 'BNE']:
+            if instruction in ['BEQ', 'BNE']:
                 reg_a, immediate = self.parse_branch_instruction(tokens[1], tokens[2])
                 return (opcode << 12) | (reg_a << 8) | immediate
                 
             # Memory instructions
-            elif instruction in ['LOAD', 'STORE']:
+            if instruction in ['LOAD', 'STORE']:
                 reg_a, reg_b, small_imm = self.parse_memory_instruction(tokens[1], tokens[2], tokens[3])
                 return (opcode << 12) | (reg_a << 8) | (reg_b << 4) | small_imm
                 
         except (IndexError, ValueError) as e:
             print(f"Error processing line '{line}': {str(e)}")
             return None
+        
+        return None
 
     def assemble(self, input_file, output_file):
         """Assemble input file to hex output."""
@@ -344,7 +342,7 @@ class TernaryInstructionParser:
                 for i in range(self.instruction_count):
                     f.write(f"{self.program_memory[i]:05x}\n")
                     
-            print(f"Successfully assembled {self.instruction_count} instructions")
+            print(f"Successfully assembled {self.instruction_count} ternary instructions")
             
         except Exception as e:
             # print(f"Error during assembly: {str(e)}")
@@ -355,12 +353,13 @@ def main():
     parser = argparse.ArgumentParser(description="Assembler for ternary ISA")
 
     # Add filepath arguments
-    parser.add_argument("--filepath", type=str, default="program", help="Input assembly filepath")
+    parser.add_argument("--file", type=str, default="program", help="Input assembly file")
+    parser.add_argument("--filepath", type=str, default=None, help="Input assembly filepath")
     parser.add_argument("--output", type=str, default="program", help="Output hex filepath")
 
     args = parser.parse_args()
-    args.filepath = "programs/" + args.filepath + ".asm"
-    args.output = "programs/bin/" + args.output + ".hex"
+    if args.filepath is None:
+        args.filepath = "programs/" + args.file + ".asm"
 
     parser = TernaryInstructionParser()
     parser.assemble(args.filepath, args.output)

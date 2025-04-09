@@ -18,8 +18,8 @@ class InstructionParser:
             'COMP':  0b01011, # 11
             'ANDI':  0b01100, # 12
             'ADDI':  0b01101, # 13
-            'SRI':   0b01110, # 14
-            'SLI':   0b01111, # 15
+            'LT':    0b01110, # 14
+            'EQ':    0b01111, # 15
             'LUI':   0b10000, # 16
             'LI':    0b10001, # 17
             'BEQ':   0b10010, # 18
@@ -138,6 +138,7 @@ class InstructionParser:
         # Remove comments (everything after semicolon)
         line = line.split(';')[0].strip().replace(',', '')
         
+        # Ignore lines that are empty before the semicolon
         if not line:
             return None
             
@@ -147,7 +148,7 @@ class InstructionParser:
             return None
             
         instruction = tokens[0].upper()
-        
+
         try:
             if instruction not in self.instructions:
                 raise ValueError(f"Unknown instruction: {instruction}")
@@ -159,33 +160,30 @@ class InstructionParser:
                 return (opcode << 11)
             
             # R-type instructions
-            if instruction in ['MV', 'NOT', 'AND', 'OR', 'XOR', 'ADD', 'SUB', 'COMP']:
+            if instruction in ['MV', 'NOT', 'AND', 'OR', 'XOR', 'ADD', 'SUB', 'COMP', 'LT', 'EQ']:
                 reg_a, reg_b = self.parse_registers(tokens[1], tokens[2])
                 return (opcode << 11) | (reg_a << 8) | (reg_b << 5)
                 
             # I-type instructions
-            elif instruction in ['ANDI', 'ADDI', 'SRI', 'SLI', 'LUI', 'LI']:
+            if instruction in ['ANDI', 'ADDI', 'SRI', 'SLI', 'LUI', 'LI']:
                 reg_a, imm = self.parse_register_immediate(tokens[1], tokens[2])
                 return (opcode << 11) | (reg_a << 8) | imm
             
             # Negative I-type instructions
-            elif instruction in ['BEQ', 'BNE']:
+            if instruction in ['BEQ', 'BNE']:
                 reg_a, imm = self.parse_register_neg_immediate(tokens[1], tokens[2])
                 return (opcode << 11) | (reg_a << 8) | imm
-            
-            # # Branch instructions
-            # elif instruction in ['BEQ', 'BNE']:
-            #     reg_a, b, immediate = self.parse_branch_instruction(tokens[1], tokens[2], tokens[3])
-            #     return (opcode << 11) | (reg_a << 8) | (b << 7) | immediate
                 
             # M-type instructions
-            elif instruction in ['LOAD', 'STORE']:
+            if instruction in ['LOAD', 'STORE']:
                 reg_a, reg_b, offset = self.parse_memory_instruction(tokens[1], tokens[2], tokens[3])
                 return (opcode << 11) | (reg_a << 8) | (reg_b << 5) | offset
                 
         except (IndexError, ValueError) as e:
             print(f"Error processing line '{line}': {str(e)}")
             return None
+        
+        return None
 
     def assemble(self, input_file, output_file):
         """Assemble input file to hex output."""
@@ -202,7 +200,7 @@ class InstructionParser:
                 for i in range(self.instruction_count):
                     f.write(f"{self.program_memory[i]:04x}\n")
                     
-            print(f"Successfully assembled {self.instruction_count} instructions")
+            print(f"Successfully assembled {self.instruction_count} binary instructions")
             
         except Exception as e:
             print(f"Error during assembly: {str(e)}")
@@ -212,12 +210,13 @@ def main():
     parser = argparse.ArgumentParser(description="Assembler for custom ISA")
 
     # Add filepath arguments
-    parser.add_argument("--filepath", type=str, default="program", help="Input assembly filepath")
+    parser.add_argument("--file", type=str, default="program", help="Input assembly file")
+    parser.add_argument("--filepath", type=str, default=None, help="Input assembly filepath")
     parser.add_argument("--output", type=str, default="program", help="Output hex filepath")
 
     args = parser.parse_args()
-    args.filepath = "programs/" + args.filepath + ".asm"
-    args.output = "programs/bin/" + args.output + ".hex"
+    if args.filepath is None:
+        args.filepath = "programs/" + args.file + ".asm"
 
     parser = InstructionParser()
     parser.assemble(args.filepath, args.output)
