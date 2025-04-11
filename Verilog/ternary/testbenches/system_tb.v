@@ -1,6 +1,9 @@
 `timescale 1ns/1ps
 
 module system_tb;
+    // Configuration parameter
+    parameter VERBOSE = 1; // Set to 0 to disable display messages, 1 to enable
+    
     // Test bench signals
     reg clock;
     reg reset;
@@ -98,32 +101,34 @@ module system_tb;
         // Wait for program to load and execute
         // Monitor system state
         wait(uut.system_state == uut.EXECUTING);
-        $display("Program Execution Started");
+        if (VERBOSE) $display("Program Execution Started");
         
         // Monitor execution
         while (!execution_done && uut.system_state == uut.EXECUTING) begin
             // Display register values on each clock cycle
             @(posedge clock);
-            $display("PC    =%0d", ternary_to_integer_func(uut.cpu.program_counter));
-            $display("Opcode=%6b", uut.cpu.opcode);
-            // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
-            $display("R0=%3d R1=%3d R2=%3d R3=%3d R4=%3d R5=%3d", 
-                ternary_to_integer_func(r0), 
-                ternary_to_integer_func(r1), 
-                ternary_to_integer_func(r2), 
-                ternary_to_integer_func(r3), 
-                ternary_to_integer_func(r4), 
-                ternary_to_integer_func(r5)
-            );
-            
-            // Display memory operations
-            if (uut.cpu.mem_write)
-                $display("Memory Write: Addr=%h Data=%h",
-                        uut.cpu.mem_address, uut.cpu.mem_write_data);
-            
-            // Display ALU operations
-            if (uut.cpu.state == 4)  // Write Back state
-                $display("ALU Result=%d", uut.cpu.alu_out);
+            if (VERBOSE) begin
+                $display("PC    =%0d", ternary_to_integer_func(uut.cpu.program_counter));
+                $display("Opcode=%6b", uut.cpu.opcode);
+                // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
+                $display("R0=%3d R1=%3d R2=%3d R3=%3d R4=%3d R5=%3d", 
+                    ternary_to_integer_func(r0), 
+                    ternary_to_integer_func(r1), 
+                    ternary_to_integer_func(r2), 
+                    ternary_to_integer_func(r3), 
+                    ternary_to_integer_func(r4), 
+                    ternary_to_integer_func(r5)
+                );
+                
+                // Display memory operations
+                if (uut.cpu.mem_write)
+                    $display("Memory Write: Addr=%h Data=%h",
+                            uut.cpu.mem_address, uut.cpu.mem_write_data);
+                
+                // Display ALU operations
+                if (uut.cpu.state == 4)  // Write Back state
+                    $display("ALU Result=%d", uut.cpu.alu_out);
+            end
                 
             // Check if program counter has stopped changing
             if (prev_pc == uut.cpu.program_counter && uut.cpu.state == 0) begin
@@ -137,14 +142,14 @@ module system_tb;
             prev_pc = uut.cpu.program_counter;
         end
         
-        // Display final register values
+        // Display final register values - always show these regardless of verbose setting
         $display("\nFinal Register Values:");
         for (integer i = 0; i < 8; i = i + 1) begin
             // Display the values in decimal
             $display("R%0d=%3d - %b", i, ternary_to_integer_func(uut.cpu.regs.regs[i]), uut.cpu.regs.regs[i]);
         end
 
-        // Display gate counts
+        // Display gate counts - always show regardless of verbose setting
         counter.display_counts;
 
         // Save gate counts to file
@@ -164,7 +169,7 @@ module system_tb;
     
     // Monitor program loading
     always @(posedge clock) begin
-        if (uut.system_state == uut.LOADING) begin
+        if (uut.system_state == uut.LOADING && VERBOSE) begin
             if (uut.loader.mem_write)
                 $display("Loading instruction: Addr=%b Data=%b",
                         uut.loader.mem_addr, uut.loader.mem_write_data);
