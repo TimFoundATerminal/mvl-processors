@@ -25,3 +25,5 @@ Proposal/examples
 
 # Ignore all files in the output directory
 bin/
+
+package-lock.json
