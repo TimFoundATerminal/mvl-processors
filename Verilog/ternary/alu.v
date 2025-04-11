@@ -768,11 +768,13 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
     );
     
     // Comparison implementation
+    wire ltc_output;
     ternary_less_than_comparator comparator(
         .input1(input1),
         .input2(input2),
-        .result(less_than_result)
+        .result(ltc_output)
     );
+    assign less_than_result = ltc_output ? `_1 : `_0; // Less than check
 
     // Equality check
     assign equal_result = (input1 == input2) ? `_1_ : `_0; // Equality check
