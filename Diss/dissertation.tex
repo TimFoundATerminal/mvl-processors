@@ -271,11 +271,11 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c}
-        Matrix & Description & Name & Symbol \\
+    \begin{tabular}{c|c|c|c|c|c}
+        Matrix & Description & Name & Symbol & CMOS Pairs & Propagation Delay \\
         \hline
-        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Identity, Buffer, Pass & Buffer & $A$ \\
-        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
+        $\begin{bmatrix}0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & Buffer & $A$ & $1$ & $1\tau$ \\
+        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ & $1$ & $1\tau$ \\
     \end{tabular}
     \caption{Useful Single Value Binary Gates}
     \label{fig:single_value_bin_gates}
@@ -283,13 +283,13 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c}
-        Matrix & Description & Name & Symbol \\
+    \begin{tabular}{c|c|c|c|c}
+        Matrix & Description & Name & Symbol & CNFETs \\
         \hline
-        $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & BUF & $A$ \\
-        $\begin{bmatrix}1 \\ 0 \\ T \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
-        $\begin{bmatrix}1 \\ 1 \\ T \\\end{bmatrix}$ & Positively Biased Inverter & PNOT & $\hat{A}$ \\
-        $\begin{bmatrix}1 \\ T \\ T \\\end{bmatrix}$ & Negatively Biased Inverter & NNOT & $\check{A}$ \\
+        $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & BUF & $A$ & 2 \\
+        $\begin{bmatrix}1 \\ 0 \\ T \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ & 4 \\
+        $\begin{bmatrix}1 \\ 1 \\ T \\\end{bmatrix}$ & Positively Biased Inverter & PTI & $\hat{A}$ & 4 \\
+        $\begin{bmatrix}1 \\ T \\ T \\\end{bmatrix}$ & Negatively Biased Inverter & NTI & $\check{A}$ & 4 \\
         % $\begin{bmatrix}1 \\ 0 \\ 1 \\\end{bmatrix}$ & Absolute & ABS & $|A|$ \\
         % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Increment & INC & $A^{+}$ \\
         % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Decrement & DEC & $A^{-}$ \\
@@ -305,12 +305,12 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c}
-        Matrix & Description & Name & Symbol \\
+    \begin{tabular}{c|c|c|c|c}
+        Matrix & Description & Name & Symbol & CMOS Pairs \\
         \hline
-        $\begin{bmatrix}0 & 0 \\ 0 & 1 \\\end{bmatrix}$ & And & AND & $A \times B$ \\
-        $\begin{bmatrix}0 & 1 \\ 1 & 1 \\\end{bmatrix}$ & Or & OR & $A + B$ \\
-        $\begin{bmatrix}0 & 1 \\ 1 & 0 \\\end{bmatrix}$ & Exclusive Or & XOR & $A \oplus B$ \\
+        $\begin{bmatrix}0 & 0 \\ 0 & 1 \\\end{bmatrix}$ & And & AND & $A \times B$ & 2 \\
+        $\begin{bmatrix}0 & 1 \\ 1 & 1 \\\end{bmatrix}$ & Or & OR & $A + B$ & 2 \\
+        $\begin{bmatrix}0 & 1 \\ 1 & 0 \\\end{bmatrix}$ & Exclusive Or & XOR & $A \oplus B$ & 4 \\
     \end{tabular}
     \caption{Useful Two-Input Binary Gates}
     \label{fig:two_value_bin_gates}
@@ -318,15 +318,15 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c}
-        Matrix & Description & Name & Symbol \\
+    \begin{tabular}{c|c|c|c|c}
+        Matrix & Description & Name & Symbol & CNFETs \\
         \hline
-        $\begin{bmatrix}T & T & T \\ T & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & And/Minimum & AND & $A \times B$ \\
-        $\begin{bmatrix}T & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 1 \\\end{bmatrix}$ & Or/Maximum & OR & $A + B$ \\
-        $\begin{bmatrix}T & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \\\end{bmatrix}$ & Consensus & CONS & $A \boxtimes B$ \\
-        $\begin{bmatrix}T & T & 0 \\ T & 0 & 1 \\ 0 & 1 & 1 \\\end{bmatrix}$ & Any & ANY & $A \boxplus B$ \\
-        $\begin{bmatrix}1 & 0 & T \\ 0 & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & Multiplication & MUL & $A \otimes B$ \\
-        $\begin{bmatrix}1 & T & 0 \\ T & 0 & 1 \\ 0 & 1 & T \\\end{bmatrix}$ & Addition & SUM & $A \oplus B$ \\
+        $\begin{bmatrix}T & T & T \\ T & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & And/Minimum & AND & $A \times B$ & 8 \\
+        $\begin{bmatrix}T & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 1 \\\end{bmatrix}$ & Or/Maximum & OR & $A + B$ & 8 \\
+        $\begin{bmatrix}T & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \\\end{bmatrix}$ & Consensus & CONS & $A \boxtimes B$ & 10 \\
+        $\begin{bmatrix}T & T & 0 \\ T & 0 & 1 \\ 0 & 1 & 1 \\\end{bmatrix}$ & Any & ANY & $A \boxplus B$ & 10 \\
+        $\begin{bmatrix}1 & 0 & T \\ 0 & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & Multiplication & MUL & $A \otimes B$ & 14 \\
+        $\begin{bmatrix}1 & T & 0 \\ T & 0 & 1 \\ 0 & 1 & T \\\end{bmatrix}$ & Addition & SUM & $A \oplus B$ & 16 \\
     \end{tabular}
     \caption{Useful Two-Input Ternary Gates}
     \label{fig:two_value_ter_gates}
