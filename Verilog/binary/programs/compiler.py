@@ -26,7 +26,7 @@ class InstructionParser:
             'BNE':   0b10011, # 19
             'LOAD':  0b10110, # 22
             'STORE': 0b10111, # 23
-            'HALT':  0b11111  # 31
+            'HALT':  0b11010  # 26
         }
 
     def parse_registers(self, reg1, reg2):
@@ -212,7 +212,7 @@ def main():
     # Add filepath arguments
     parser.add_argument("--file", type=str, default="program", help="Input assembly file")
     parser.add_argument("--filepath", type=str, default=None, help="Input assembly filepath")
-    parser.add_argument("--output", type=str, default="program", help="Output hex filepath")
+    parser.add_argument("--output", type=str, default="programs/bin/program.hex", help="Output hex filepath")
 
     args = parser.parse_args()
     if args.filepath is None:
