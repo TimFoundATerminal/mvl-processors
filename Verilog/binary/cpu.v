@@ -89,7 +89,7 @@ module cpu(
         .opcode(opcode),
         .input1(alu_in_1),
         .input2(alu_in_2),
-        .alu_enable(is_alu_operation), // may need to take an input from do_alu
+        .alu_enable(do_alu),
         .alu_out(alu_out)
     );
 
