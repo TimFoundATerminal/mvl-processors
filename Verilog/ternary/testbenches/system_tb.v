@@ -108,7 +108,7 @@ module system_tb;
             // Display register values on each clock cycle
             @(posedge clock);
             if (VERBOSE) begin
-                $display("PC    =%0d", ternary_to_integer_func(uut.cpu.program_counter));
+                $display("PC    =%0d, State=%1d", ternary_to_integer_func(uut.cpu.program_counter), uut.cpu.ctrl.state);
                 $display("Opcode=%6b", uut.cpu.opcode);
                 // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
                 $display("R0=%3d R1=%3d R2=%3d R3=%3d R4=%3d R5=%3d", 
