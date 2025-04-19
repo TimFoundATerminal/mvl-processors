@@ -21,6 +21,7 @@ module program_counter(clock, reset_enable, update_enable, value, out);
     ternary_ripple_carry_adder pc_adder(
         .input1(adder_input1),
         .input2(value),
+        .enable(1'b0),             // Don't want to count this within the cycle
         .result(adder_result)
     );
     
@@ -30,34 +31,6 @@ module program_counter(clock, reset_enable, update_enable, value, out);
             out <= _zero;
         end
         else if (update_enable) begin
-            // // Convert ternary value to decimal for display purposes
-            // integer dec_value = 0;
-            // integer i;
-            // reg [1:0] trit;
-            
-            // // Calculate decimal value of the ternary input
-            // for (i = 0; i < WORD_SIZE; i = i + 1) begin
-            //     case (i)
-            //         0: trit = value[1:0];
-            //         1: trit = value[3:2];
-            //         2: trit = value[5:4];
-            //         3: trit = value[7:6];
-            //         4: trit = value[9:8];
-            //         5: trit = value[11:10];
-            //         6: trit = value[13:12];
-            //         7: trit = value[15:14];
-            //         8: trit = value[17:16];
-            //         default: trit = 2'b00;
-            //     endcase
-                
-            //     case (trit)
-            //         `_1: dec_value = dec_value - (3**i);    // -1 × 3^i
-            //         `_1_: dec_value = dec_value + (3**i);   // 1 × 3^i
-            //         default: dec_value = dec_value;         // 0 × 3^i
-            //     endcase
-            // end
-            
-            // $display("Updating program counter by %0d", dec_value);
 
             out <= adder_result[2*MEM_ADDR_SIZE-1:0]; // Truncate to MEM_ADDR_SIZE number of trits
         end

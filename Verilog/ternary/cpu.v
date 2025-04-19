@@ -89,7 +89,7 @@ module cpu(
         .opcode(opcode),
         .input1(alu_in_1),
         .input2(alu_in_2),
-        .alu_enable(is_alu_operation),
+        .alu_enable(do_alu),
         .alu_out(alu_out)
     );
 
@@ -129,6 +129,5 @@ module cpu(
 
     // Halt
     assign halted = do_halt;
-
 
 endmodule

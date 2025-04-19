@@ -31,6 +31,7 @@ module program_loader (
     ternary_ripple_carry_adder pl_adder(
         .input1(mem_addr_input),
         .input2(increment_val),
+        .enable(1'b0),
         .result(next_mem_addr)
     );
 
@@ -38,6 +39,7 @@ module program_loader (
     ternary_less_than_comparator pl_compare(
         .input1(mem_addr_input),
         .input2({{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, {(MEM_ADDR_SIZE){`_1_}}}), // Largest address value
+        .enable(1'b0),
         .result(mem_addr_compare)
     );
 
