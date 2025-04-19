@@ -355,7 +355,7 @@ def main():
     # Add filepath arguments
     parser.add_argument("--file", type=str, default="program", help="Input assembly file")
     parser.add_argument("--filepath", type=str, default=None, help="Input assembly filepath")
-    parser.add_argument("--output", type=str, default="program", help="Output hex filepath")
+    parser.add_argument("--output", type=str, default="programs/bin/program.hex", help="Output hex filepath")
 
     args = parser.parse_args()
     if args.filepath is None:
