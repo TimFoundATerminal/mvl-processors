@@ -27,3 +27,6 @@ Proposal/examples
 bin/
 
 package-lock.json
+
+# Ignore output csv files
+*.csv
