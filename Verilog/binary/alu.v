@@ -51,7 +51,7 @@ module not_gate(input wire a, input wire enable, output wire b);
     assign b = ~a;
 
     //Increment the gate counter for NOT gate only when enabled
-    always @(a) begin
+    always @(posedge enable) begin
         if (enable) begin
             counter.not_count = counter.not_count + 1;
             $display("Incrementing NOT gate count");
@@ -73,7 +73,7 @@ module or_gate(input wire a, b, input wire enable, output wire c);
     assign c = a | b;
 
     //Increment the gate counter for OR gate only when enabled
-    always @(a or b) begin
+    always @(posedge enable) begin
         if (enable) begin
             counter.or_count = counter.or_count + 1;
             $display("Incrementing OR gate count");
@@ -85,7 +85,7 @@ module xor_gate(input wire a, b, input wire enable, output wire c);
     assign c = a ^ b;
 
     //Increment the gate counter for XOR gate only when enabled
-    always @(a or b) begin
+    always @(posedge enable) begin
         if (enable) begin
             counter.xor_count = counter.xor_count + 1;
             $display("Incrementing XOR gate count");
@@ -216,27 +216,15 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
     output reg [WORD_SIZE-1:0] alu_out;
 
     // Generate operation-specific enable signals
-    // wire not_enable = alu_enable && (opcode == `NOT);
-    // // wire and_enable = alu_enable && (opcode == `AND || opcode == `ANDI);
-    // // wire and_enable = alu_enable;
-    // wire and_enable = 1; // For testing purposes, always enabled
-    // wire or_enable = alu_enable && (opcode == `OR);
-    // wire xor_enable = alu_enable && (opcode == `XOR);
-    // wire add_enable = alu_enable && (opcode == `ADD || opcode == `ADDI);
-    // wire sub_enable = alu_enable && (opcode == `SUB);
-    // wire comp_enable = alu_enable && (opcode == `COMP);
-    // wire lt_enable = alu_enable && (opcode == `LT);
-    // wire eq_enable = alu_enable && (opcode == `EQ);
-
-    wire not_enable =   1;
-    wire and_enable =   alu_enable;
-    wire or_enable =    1;
-    wire xor_enable =   1;
-    wire add_enable =   0;
-    wire sub_enable =   0;
-    wire comp_enable =  0;
-    wire lt_enable =    0;
-    wire eq_enable =    0;
+    wire not_enable = alu_enable && (opcode == `NOT);
+    wire and_enable = alu_enable && (opcode == `AND || opcode == `ANDI);
+    wire or_enable = alu_enable && (opcode == `OR);
+    wire xor_enable = alu_enable && (opcode == `XOR);
+    wire add_enable = alu_enable && (opcode == `ADD || opcode == `ADDI);
+    wire sub_enable = alu_enable && (opcode == `SUB);
+    wire comp_enable = alu_enable && (opcode == `COMP);
+    wire lt_enable = alu_enable && (opcode == `LT);
+    wire eq_enable = alu_enable && (opcode == `EQ);
 
     // Instantiate the outputs for all logic components
     wire [WORD_SIZE-1:0] not_out;
