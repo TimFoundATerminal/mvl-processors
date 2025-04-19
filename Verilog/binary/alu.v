@@ -52,10 +52,7 @@ module not_gate(input wire a, input wire enable, output wire b);
 
     //Increment the gate counter for NOT gate only when enabled
     always @(posedge enable) begin
-        if (enable) begin
-            counter.not_count = counter.not_count + 1;
-            $display("Incrementing NOT gate count");
-        end
+        counter.not_count = counter.not_count + 1;
     end
 endmodule
 
@@ -65,7 +62,6 @@ module and_gate(input wire a, b, enable, output wire c);
     //Increment the gate counter for AND gate only when enabled
     always @(posedge enable) begin
         counter.and_count = counter.and_count + 1;
-        $display("Incrementing AND gate count");
     end
 endmodule
 
@@ -74,10 +70,7 @@ module or_gate(input wire a, b, input wire enable, output wire c);
 
     //Increment the gate counter for OR gate only when enabled
     always @(posedge enable) begin
-        if (enable) begin
-            counter.or_count = counter.or_count + 1;
-            $display("Incrementing OR gate count");
-        end
+        counter.or_count = counter.or_count + 1;
     end
 endmodule
 
@@ -86,10 +79,7 @@ module xor_gate(input wire a, b, input wire enable, output wire c);
 
     //Increment the gate counter for XOR gate only when enabled
     always @(posedge enable) begin
-        if (enable) begin
-            counter.xor_count = counter.xor_count + 1;
-            $display("Incrementing XOR gate count");
-        end
+        counter.xor_count = counter.xor_count + 1;
     end
 endmodule
 
