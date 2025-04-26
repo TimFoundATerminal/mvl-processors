@@ -154,6 +154,13 @@ module system_tb;
 
         // Save gate counts to file
         counter.save_counts("programs/program_gate_counts.csv");
+
+        // // Display the memory contents
+        // $display("\nMemory Contents:");
+        // // for (integer i = 0; i < uut.loader.MEM_SIZE; i = i + 1) begin
+        // for (integer i = 16; i < 20; i = i + 1) begin
+        //     $display("Addr=%0d Data=%b", i, uut.loader.memory[i]);
+        // end
         
         #100;
         $finish;

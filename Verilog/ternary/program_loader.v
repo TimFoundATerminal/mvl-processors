@@ -83,7 +83,7 @@ module program_loader (
                 2: begin // Write instruction to memory
                     mem_write <= 0;
                     if (mem_addr_compare) begin
-                        $display("Next address: %b", next_mem_addr[2*MEM_ADDR_SIZE-1:0]);
+                        // $display("Next address: %b", next_mem_addr[2*MEM_ADDR_SIZE-1:0]);
                         mem_addr <= next_mem_addr[2*MEM_ADDR_SIZE-1:0]; // Truncate to MEM_ADDR_SIZE number of trits
                         state <= 1;
                     end else begin

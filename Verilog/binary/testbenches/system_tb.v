@@ -85,7 +85,7 @@ module system_tb;
                 
                 // Display memory operations
                 if (uut.cpu.mem_write)
-                    $display("Memory Write: Addr=%h Data=%h",
+                    $display("Memory Write: Addr=%d Data=%d",
                             uut.cpu.mem_address, uut.cpu.mem_write_data);
                 
                 // Display ALU operations
@@ -119,6 +119,13 @@ module system_tb;
         //         $display("Mem[%0d]=%h", i, uut.ram.memory[i]);
         //     end
         // }
+
+         // Display the memory contents
+        $display("\nMemory Contents:");
+        // for (integer i = 0; i < uut.loader.MEM_SIZE; i = i + 1) begin
+        for (integer j = 0; j < 20; j = j + 1) begin
+            $display("Addr=%0d Data=%b", j, uut.ram.memory[j]);
+        end
 
         // Display gate counts - always show regardless of verbose setting
         counter.display_counts;
