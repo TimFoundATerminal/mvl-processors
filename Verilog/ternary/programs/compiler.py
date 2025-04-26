@@ -28,9 +28,9 @@ def int_to_balanced_ternary_to_binary(value):
     
     # Define the ternary digit encodings
     trit_encodings = {
-        -1: 0b11,  # _1
-        0: 0b00,   # _0
-        1: 0b01    # _1_
+        -1: _1, 
+        0: _0,
+        1: _1_ 
     }
     
     trit_names = {
@@ -277,6 +277,11 @@ class TernaryInstructionParser:
 
     def parse_line(self, line):
         """Parse a single line of assembly."""
+
+        # Check if the line is 3 semicolons (end of file)
+        if line.strip() == ';;;':
+            return ";;;"
+
         # Remove comments (everything after semicolon)
         line = line.split(';')[0].strip().replace(',', '')
         
@@ -333,7 +338,9 @@ class TernaryInstructionParser:
             with open(input_file, 'r') as f:
                 for line in f:
                     instruction = self.parse_line(line)
-                    if instruction is not None:
+                    if instruction == ";;;":
+                        break
+                    elif instruction is not None:
                         self.program_memory[self.instruction_count] = instruction
                         self.instruction_count += 1
                         
@@ -373,7 +380,6 @@ def test():
         print(f"Binary representation: {result['binary_representation']}")
         print(f"Binary value: {result['binary_value']}")
         print()
-
 
 if __name__ == "__main__":
     main()

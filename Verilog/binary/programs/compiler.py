@@ -135,6 +135,11 @@ class InstructionParser:
 
     def parse_line(self, line):
         """Parse a single line of assembly."""
+        
+        # Check if the line is 3 semicolons (end of file)
+        if line.strip() == ';;;':
+            return ";;;"
+        
         # Remove comments (everything after semicolon)
         line = line.split(';')[0].strip().replace(',', '')
         
@@ -191,7 +196,9 @@ class InstructionParser:
             with open(input_file, 'r') as f:
                 for line in f:
                     instruction = self.parse_line(line)
-                    if instruction is not None:
+                    if instruction == ";;;":
+                        break
+                    elif instruction is not None:
                         self.program_memory[self.instruction_count] = instruction
                         self.instruction_count += 1
                         
