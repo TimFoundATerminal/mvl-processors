@@ -118,7 +118,8 @@ module cpu(
     );
 
     // Memory interface
-    assign mem_address = do_fetch ? program_counter : reg_out1;
+    assign mem_address = do_fetch ? program_counter 
+        : (opcode == `STORE) ? (reg_out2 + small_immediate) : reg_out1;
     assign mem_write_data = reg_out1;
     assign mem_read = do_fetch || do_mem_load;
     assign mem_write = do_mem_store; 
