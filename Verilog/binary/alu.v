@@ -172,11 +172,12 @@ module ripple_carry_adder #(parameter WIDTH = 16)(
     input wire [WIDTH-1:0] a, 
     input wire [WIDTH-1:0] b, 
     input wire enable,
+    input wire carry_in,
     output wire [WIDTH-1:0] sum
 );
     wire [WIDTH:0] carry; // Extra bit for the carry out
 
-    assign carry[0] = 1'b0; // Initial carry is 0
+    assign carry[0] = carry_in; // Initial carry is the carry_in (used in subtractor)
 
     // Full adder chain
     genvar i;
@@ -192,6 +193,26 @@ module ripple_carry_adder #(parameter WIDTH = 16)(
             );
         end
     endgenerate
+endmodule
+
+module ripple_carry_subtractor #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a,
+    input wire [WIDTH-1:0] b,
+    input wire enable,
+    output wire [WIDTH-1:0] diff
+);
+    wire [WIDTH-1:0] b_complement;
+
+    // Perform 2's complement by inverting b and adding 1
+    binary_not #(WIDTH) not_b(b, enable, b_complement);
+
+    ripple_carry_adder #(WIDTH) adder(
+        .a(a),
+        .b(b_complement),
+        .enable(enable),
+        .carry_in(1'b1), // Add 1 to complete the 2's complement
+        .sum(diff)
+    );
 
 endmodule
 
@@ -232,8 +253,11 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
     binary_and #(WORD_SIZE) and_gate(input1, input2, and_enable, and_out);
     binary_or #(WORD_SIZE) or_gate(input1, input2, or_enable, or_out);
     binary_xor #(WORD_SIZE) xor_gate(input1, input2, xor_enable, xor_out);
-    // Insert others here
-    ripple_carry_adder #(WORD_SIZE) adder(input1, input2, add_enable, add_out);
+
+    // set ground to binary equivalent of 0
+    wire carry_in = 1'b0;
+    ripple_carry_adder #(WORD_SIZE) adder(input1, input2, add_enable, carry_in, add_out);
+    ripple_carry_subtractor #(WORD_SIZE) subtractor(input1, input2, sub_enable, sub_out);
 
     always @(posedge clock) begin
         if (alu_enable) begin
@@ -254,7 +278,7 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= add_out;
                 end
                 `SUB: begin
-                    alu_out <= input1 - input2;     // Needs to be implemented as a module
+                    alu_out <= sub_out;
                 end
                 `COMP: begin
                     alu_out <= (input1 == input2);  // Needs to be implemented as a module
