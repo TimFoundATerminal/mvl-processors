@@ -56,7 +56,7 @@ module program_loader (
                 
                 2: begin // Write instruction to memory
                     mem_write <= 0;
-                    if (mem_addr < 31) begin
+                    if (mem_addr < MEM_SIZE-1) begin
                         mem_addr <= mem_addr + 1;
                         state <= 1;
                     end else begin
