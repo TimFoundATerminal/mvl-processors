@@ -3,9 +3,9 @@ parameter WORD_SIZE = 16;
 parameter OPCODE_SIZE = 5;
 parameter BIG_IMM_SIZE = 8;
 parameter SMALL_IMM_SIZE = 5;
-parameter INS_ADDR_SIZE = 8; // TODO: understand this value more
+parameter INS_ADDR_SIZE = 8;
 
-parameter MEM_SIZE = 32;
+parameter MEM_SIZE = 128;
 parameter MEM_ADDR_SIZE = 5;
 
 parameter REG_NUM = 8;
