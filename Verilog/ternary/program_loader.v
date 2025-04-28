@@ -36,7 +36,7 @@ module program_loader (
     );
 
     wire mem_addr_compare;
-    ternary_less_than_comparator pl_compare(
+    ternary_less_than pl_compare(
         .input1(mem_addr_input),
         .input2({{(WORD_SIZE - MEM_ADDR_SIZE){`_0}}, {(MEM_ADDR_SIZE){`_1_}}}), // Largest address value
         .enable(1'b0),
