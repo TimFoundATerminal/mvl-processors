@@ -6,7 +6,7 @@ parameter SMALL_IMM_SIZE = 5;
 parameter INS_ADDR_SIZE = 8;
 
 parameter MEM_SIZE = 128;
-parameter MEM_ADDR_SIZE = 5;
+parameter MEM_ADDR_SIZE = 8;
 
 parameter REG_NUM = 8;
 parameter REG_ADDR_SIZE = 3;
@@ -23,7 +23,7 @@ parameter REG_ADDR_SIZE = 3;
 `define ANDI  5'b01100 // 12
 `define ADDI  5'b01101 // 13
 `define LT    5'b01110 // 14
-`define EQ   5'b01111 // 15
+`define EQ    5'b01111 // 15
 `define LUI   5'b10000 // 16
 `define LI    5'b10001 // 17
 `define BEQ   5'b10010 // 18
