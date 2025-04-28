@@ -71,6 +71,54 @@ module ternary_negation_1bit(
     end
 endmodule
 
+module ternary_pos_inverter_1bit(
+    input [1:0] a,
+    input wire enable,
+    output [1:0] pti_out
+);
+
+    `include "parameters.vh"
+
+    // Mapping of inputs to outputs for ternary negation gate
+    assign neg_out = (a == `_1) || (a == `_0) ? `_1_ : `_1;
+
+endmodule
+
+module ternary_neg_inverter_1bit(
+    input [1:0] a,
+    input wire enable,
+    output [1:0] nti_out
+);
+
+    `include "parameters.vh"
+
+    // Mapping of inputs to outputs for ternary negation gate
+    assign neg_out = (a == `_1_) || (a == `_0) ? `_1 : `_1_;
+
+endmodule
+
+// module ternary_equality_1trit(a, b, enable, eq_out);
+//     input [1:0] a, b; 
+//     input wire enable;  
+//     output [1:0] eq_out;     
+    
+//     // XOR and then negation to check equality
+//     wire [1:0] xor_out;
+//     ternary_xor_1bit xor_gate(
+//         .a(a),
+//         .b(b),
+//         .enable(enable),
+//         .xor_out(xor_out)
+//     );
+
+//     ternary_negation_1bit neg_gate(
+//         .a(xor_out),
+//         .enable(enable),
+//         .neg_out(eq_out)
+//     );
+
+// endmodule
+
 
 module ternary_comparator_1trit(a, b, lt_in, eq_in, enable, lt_out, eq_out);
     input [1:0] a, b;   // Single trit inputs (2 bits per trit)
@@ -95,6 +143,14 @@ module ternary_comparator_1trit(a, b, lt_in, eq_in, enable, lt_out, eq_out);
     
     // Output equal if previous trits were equal and current trits are equal
     assign eq_out = eq_in && is_equal;
+
+    // Increment the gate counters
+    always @(posedge enable) begin
+        counter.not_count = counter.not_count + 1;
+        counter.and_count = counter.and_count + 3;
+        counter.or_count = counter.or_count + 2;
+        counter.xor_count = counter.xor_count + 1;
+    end
 endmodule
 
 
@@ -547,7 +603,7 @@ module ternary_xor(
 endmodule
 
 
-module ternary_less_than_comparator(input1, input2, enable, result);
+module ternary_less_than(input1, input2, enable, result);
 
     `include "parameters.vh"
     
@@ -760,6 +816,118 @@ module ternary_ripple_carry_adder(input1, input2, enable, result);
     );
 endmodule
 
+module ternary_equality(input1, input2, enable, result);
+
+    `include "parameters.vh"
+    
+    input [2*WORD_SIZE-1:0] input1, input2;
+    input wire enable;
+    output result; // 1 if input1 == input2, 0 otherwise
+    
+    // We'll use the same approach as the less_than_comparator but only track equality
+    // For each trit position, we check if they're equal and propagate the result
+    wire eq_signal [0:WORD_SIZE];
+    
+    // Initialize - assume equal at the start
+    assign eq_signal[WORD_SIZE] = 1'b1;
+    
+    // Instantiate 9 comparators (one per trit) for trits 8 down to 0
+    // We'll reuse the ternary_comparator_1trit but only use the eq part
+    
+    // Start with the MSB (trit 8)
+    ternary_comparator_1trit comp8(
+        .a(input1[17:16]), 
+        .b(input2[17:16]),
+        .lt_in(1'b0),     // We don't care about lt result
+        .eq_in(eq_signal[WORD_SIZE]), 
+        .enable(enable),
+        .lt_out(),        // Unconnected
+        .eq_out(eq_signal[8])
+    );
+    
+    ternary_comparator_1trit comp7(
+        .a(input1[15:14]), 
+        .b(input2[15:14]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[8]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[7])
+    );
+    
+    ternary_comparator_1trit comp6(
+        .a(input1[13:12]), 
+        .b(input2[13:12]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[7]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[6])
+    );
+    
+    ternary_comparator_1trit comp5(
+        .a(input1[11:10]), 
+        .b(input2[11:10]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[6]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[5])
+    );
+    
+    ternary_comparator_1trit comp4(
+        .a(input1[9:8]), 
+        .b(input2[9:8]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[5]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[4])
+    );
+    
+    ternary_comparator_1trit comp3(
+        .a(input1[7:6]), 
+        .b(input2[7:6]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[4]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[3])
+    );
+    
+    ternary_comparator_1trit comp2(
+        .a(input1[5:4]), 
+        .b(input2[5:4]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[3]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[2])
+    );
+    
+    ternary_comparator_1trit comp1(
+        .a(input1[3:2]), 
+        .b(input2[3:2]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[2]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[1])
+    );
+    
+    ternary_comparator_1trit comp0(
+        .a(input1[1:0]), 
+        .b(input2[1:0]),
+        .lt_in(1'b0),
+        .eq_in(eq_signal[1]), 
+        .enable(enable),
+        .lt_out(),
+        .eq_out(eq_signal[0])
+    );
+    
+    // Final result - 1 if all trits are equal
+    assign result = eq_signal[0];
+endmodule
 
 /*
 *Main ALU module that instantiates all of the above components to perform the ALU operations
@@ -826,18 +994,25 @@ module ternary_alu(clock, opcode, input1, input2, alu_enable, alu_out);
         .result(xor_result)
     );
     
-    // Comparison implementation
-    wire ltc_output;
-    ternary_less_than_comparator comparator(
+    // Less than
+    wire lt_output;
+    ternary_less_than ternary_lt(
         .input1(input1),
         .input2(input2),
         .enable(lt_enable),
         .result(ltc_output)
     );
-    assign less_than_result = ltc_output ? `_1 : `_0; // Less than check
+    assign less_than_result = {{(WORD_SIZE-1){`_0}}, ltc_output};
 
     // Equality check
-    assign equal_result = (input1 == input2) ? `_1_ : `_0; // Equality check
+    wire eq_output;
+    ternary_equality ternary_eq(
+        .input1(input1),
+        .input2(input2),
+        .enable(eq_enable),
+        .result(eq_output)
+    );
+    assign equal_result = {{(WORD_SIZE-1){`_0}}, eq_output};
 
     // Instantiate the ternary ripple carry adder
     ternary_ripple_carry_adder adder(
