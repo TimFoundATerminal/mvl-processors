@@ -216,6 +216,75 @@ module ripple_carry_subtractor #(parameter WIDTH = 16)(
 
 endmodule
 
+module binary_equality #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a,
+    input wire [WIDTH-1:0] b,
+    input wire enable,
+    output wire [WIDTH-1:0] out
+);
+    wire [WIDTH:0] eq_chain;
+    
+    // Initialize: assume equal at the start
+    assign eq_chain[0] = 1'b1;
+    
+    genvar i;
+    generate
+        for (i = 0; i < WIDTH; i = i + 1) begin: eq_bit_loop
+            wire xor_result, eq_bit, and_result;
+            
+            xor_gate xg(a[i], b[i], enable, xor_result);
+            not_gate ng(xor_result, enable, eq_bit);
+            
+            and_gate ag(eq_chain[i], eq_bit, enable, eq_chain[i+1]);
+        end
+    endgenerate
+    
+    assign out = {{(WIDTH-1){1'b0}}, eq_chain[WIDTH-1]};
+endmodule
+
+module binary_less_than #(parameter WIDTH = 16)(
+    input wire [WIDTH-1:0] a,
+    input wire [WIDTH-1:0] b,
+    input wire enable,
+    output wire [WIDTH-1:0] out
+);
+    // This array holds the comparison results at each bit position
+    wire [WIDTH:0] comparison;
+    
+    // Default case: If all bits are equal, a is not less than b
+    assign comparison[WIDTH] = 1'b0;
+    
+    genvar i;
+    generate
+        for (i = WIDTH-1; i >= 0; i = i - 1) begin: bit_compare
+            // Temporary wires for bit-level operations
+            wire a_is_0, b_is_1, a_bit_lt_b;     // For checking current bit
+            wire bits_equal, prev_result_and;     // For handling equal bits
+            wire result_at_bit;                   // Final result at this bit
+            
+            // Check if a[i] = 0
+            not_gate not_a(b[i], enable, b_is_0);
+            
+            // Check if a[i] = 0 and b[i] = 1 (the case where a < b at this bit)
+            and_gate b_lt_a(b_is_0, a[i], enable, b_bit_lt_a);
+            
+            // Check if bits are equal
+            wire bit_xor;
+            xor_gate bits_xor(b[i], a[i], enable, bit_xor);
+            not_gate bits_eq(bit_xor, enable, bits_equal);
+            
+            // If current bits are equal, use the previous comparison result
+            and_gate prev_and(bits_equal, comparison[i+1], enable, prev_result_and);
+            
+            // Combine: a < b at this position if a[i] < b[i] or (bits equal and a < b from previous)
+            or_gate combine(b_bit_lt_a, prev_result_and, enable, comparison[i]);
+        end
+    endgenerate
+    
+    // The final comparison result is at bit 0
+    assign out = {{(WIDTH-1){1'b0}}, comparison[0]};
+endmodule
+
 
 module alu(clock, opcode, input1, input2, alu_enable, alu_out);
 
@@ -258,6 +327,8 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
     wire carry_in = 1'b0;
     ripple_carry_adder #(WORD_SIZE) adder(input1, input2, add_enable, carry_in, add_out);
     ripple_carry_subtractor #(WORD_SIZE) subtractor(input1, input2, sub_enable, sub_out);
+    binary_equality #(WORD_SIZE) equality(input1, input2, eq_enable, eq_out);
+    binary_less_than #(WORD_SIZE) less_than(input1, input2, lt_enable, lt_out);
 
     always @(posedge clock) begin
         if (alu_enable) begin
@@ -284,10 +355,10 @@ module alu(clock, opcode, input1, input2, alu_enable, alu_out);
                     alu_out <= (input1 == input2);  // Needs to be implemented as a module
                 end
                 `LT: begin
-                    alu_out <= (input1 < input2);   // Needs to be implemented as a module
+                    alu_out <= lt_out;   // Needs to be implemented as a module
                 end
                 `EQ: begin
-                    alu_out <= (input1 == input2);  // Needs to be implemented as a module
+                    alu_out <= eq_out;  // Needs to be implemented as a module
                 end
                 default: begin
                     alu_out <= 0; // Default case to avoid latches

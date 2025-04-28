@@ -10,7 +10,7 @@ module memory(clock, reset, read_enable, write_enable, address, data_in, data_ou
     input wire reset;
     input wire write_enable;
     input wire read_enable;
-    input wire [MEM_ADDR_SIZE-1:0] address;     // 5 bits for 32 locations
+    input wire [MEM_ADDR_SIZE-1:0] address;     // n bits for m locations
     input wire [WORD_SIZE-1:0] data_in;         // 16-bit data input
     output reg [WORD_SIZE-1:0] data_out;         // 16-bit data output
 
@@ -30,9 +30,11 @@ module memory(clock, reset, read_enable, write_enable, address, data_in, data_ou
         
         end else begin
             if (write_enable) begin
+                // $display("Writing to memory address %d: %d", address, data_in);
                 memory[address] <= data_in;
             end
             if (read_enable) begin
+                // $display("Reading from memory address %d: %d", address, memory[address]);
                 data_out <= memory[address];
             end
             // data_out remains the same if no read operation is initiated

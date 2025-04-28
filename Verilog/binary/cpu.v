@@ -25,7 +25,7 @@ module cpu(
     wire [MEM_ADDR_SIZE-1:0] program_counter;
     program_counter pc (
         .clock(clock),
-        .reset_enable(reset),  // may need to be connected to do_reset
+        .reset_enable(do_reset), 
         .update_enable(do_next),
         .value(pc_value),
         .out(program_counter)
@@ -39,7 +39,7 @@ module cpu(
         .clock(clock),
         .get_enable(do_reg_load),
         .set_enable(do_reg_store),
-        .reset_enable(reset),  // may need to be connected to do_reset
+        .reset_enable(do_reset),
         .num1(reg_dest),
         .num2(reg_src),
         .set_val(reg_val),
@@ -51,6 +51,7 @@ module cpu(
     wire [WORD_SIZE-1:0] instruction;
     fetch_instruction fetch (
         .clock(clock),
+        .instruction_address(mem_address),
         .instruction_memory(mem_read_data),
         .fetch_enable(do_fetch),
         .instruction(instruction)
@@ -75,6 +76,7 @@ module cpu(
     // Attach decoded register addresses to register file
     assign reg_dest = reg1;
     assign reg_src = reg2;
+
     assign reg_val = (opcode == `LOAD) ? mem_read_data 
         : (opcode == `MV) ? reg_out2
         : (opcode == `LUI) ? {big_immediate, {WORD_SIZE-BIG_IMM_SIZE{1'b0}}} // Zero the lower 8 bits after the big immediate
@@ -119,13 +121,13 @@ module cpu(
 
     // Memory interface
     assign mem_address = do_fetch ? program_counter 
-        : (opcode == `STORE) ? (reg_out2 + small_immediate) : reg_out1;
+        : (opcode == `STORE) || (opcode == `LOAD) ? (reg_out2 + small_immediate) 
+        : reg_out1;
     assign mem_write_data = reg_out1;
-    assign mem_read = do_fetch || do_mem_load;
-    assign mem_write = do_mem_store; 
+    assign mem_read = do_fetch || (do_mem_load & (opcode == `LOAD));
+    assign mem_write = do_mem_store || (opcode == `STORE); 
 
     // Branching
-    // wire branch = (opcode == `HALT) ? 1'b0 : (((opcode == `BEQ) && (reg_out1 == reg_out2)) || ((opcode == `BNE) && (reg_out1 != reg_out2)));
     wire branch = (((opcode == `BEQ) && (reg_out1[0] == 1'b1)) || ((opcode == `BNE) && (reg_out1[0] == 1'b0))); 
     assign pc_value = branch ? big_immediate : 1; // Add 1 to PC if not branching
 
