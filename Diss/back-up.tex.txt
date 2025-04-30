@@ -12,6 +12,7 @@ sorting=ynt
 \usepackage{baththesis}
 \usepackage[nottoc]{tocbibind}
 \usepackage{multirow}
+\usepackage{makecell}
 
 % Set up Verilog syntax highlighting and style
 \lstdefinelanguage{Verilog}{
@@ -81,9 +82,11 @@ We present the design and implementation of two comparable digital systems—one
 
 \chapter{Introduction}
 
-For over half a century, Moore's Law has been guiding the semiconductor industry through an exponential increase in performance over time \cite{moore1965cramming}. The current state of the art CMOS technology is now facing fundamental physical limitations due to atomic scaling challenges. With Moore's law predicted to end during this decade \cite{zhou2020quantum}, researchers are exploring alternative approaches to continue developing computing performance to meet the rising demands of tomorrow.\\
-\\
-Multi-valued logic (MVL) has emerged as a promising avenue to overcome the limitations of conventional binary systems. Theoretical analysis reveals that the optimal base for number representation is Euler's number $e \approx 2.718$ \cite{bitra2018implementation}. This optimization balances the trade-off between information density and implementation complexity. Since an integer is required for practical implementation of a radix, 3 being a better approximation naturally makes ternary logic theoretically more efficient than binary logic. A ternary system can represent the same information with approximately 63\% of the digits required by a binary system, potentially offering significant improvements in circuit density, reducing interconnections, and computational efficiency \cite{kim2020logic}.\\
+For over half a century, Moore's Law has been guiding the semiconductor industry through an exponential increase in performance over time \cite{moore1965cramming}. The current state of the art CMOS technology is now facing fundamental physical limitations due to atomic scaling challenges. With Moore's law predicted to end during this decade \cite{zhou2020quantum}, researchers are exploring alternative approaches to continue developing computing performance to meet the rising demands of tomorrow.
+
+\section{Bringing Back Ternary}
+
+Multi-valued logic (MVL) has emerged as a promising avenue to overcome the limitations of conventional binary systems. Theoretical analysis reveals that the optimal base for number representation is Euler's number $e \approx 2.718$ \cite{bitra2018implementation}. This optimization balances the trade-off between information density and implementation complexity. Since an integer is required for practical implementation of a radix, 3 being a better approximation naturally makes ternary logic theoretically more efficient than binary logic. A ternary system can represent the same information with approximately $63.1\%$ of the digits required by a binary system, potentially offering significant improvements in circuit density, reducing interconnections, and computational efficiency \cite{kim2020logic}.\\
 \\
 In practice, implementing ternary logic systems requires overcoming substantial challenges in hardware design. While CMOS technology has been optimized for binary logic over decades, it presents limitations for multi-state logic implementation. Carbon Nanotube Field Effect Transistors (CNFETs) have emerged as promising candidates to support ternary logic, offering superior properties including better threshold voltage regulation, reduced current leakage, and improved switching characteristics compared to conventional CMOS technology.\\
 \\
@@ -93,11 +96,19 @@ Our research aims to quantify the theoretical 58\% increase in information densi
 
 \section{Key Contributions}
 
-Discuss how you have contributed to the research field...
+This research offers several contributions to the field of multi-valued logic systems and specifically to the advancement of ternary computing:
+\begin{itemize}
+    \item Conducted a comprehensive hardware-agnostic comparison between binary and ternary logic systems using empirical data from contemporary CMOS and CNFET implementations, providing a quantitative assessment of the theoretical $58\%$ information density advantage against practical implementation constraints.
+    \item Designed and implemented functionally equivalent binary and ternary processors with matching instruction sets, enabling direct performance comparison through identical code execution across both platforms.
+    \item Developed a novel implementation of ternary CONS and ANY gates using fundamental CNFET components, with verified truth tables and propagation delay calculations that extend the existing literature on ternary logic circuits.
+    \item Created a standardized methodology for expressing ternary logic complexity in terms of CNFET components and propagation delay, establishing a comparable metric to the well-established CMOS count used in binary circuit analysis.
+    \item Engineered a digital test platform that can serve as an ongoing benchmark to monitor technological advancements in both CNFET and CMOS technologies, providing a consistent baseline for evaluating the evolving relationship between binary and ternary computational efficiency.
+\end{itemize}
+These contributions advance our understanding of the practical viability of ternary computing systems beyond theoretical considerations, providing both immediate insights and a foundation for ongoing evaluation as hardware technologies continue to evolve.
 
 \chapter{Ternary Algebra}
 
-\section{Computational Complexity}
+\section{A Case for Computing in Ternary}
 
 The cost or complexity of number systems can be evaluated through representation efficiency, computational overhead, and implementation requirements.\\
 \\
@@ -305,11 +316,11 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c|c|c}
-        Matrix & Description & Name & Symbol & CMOS Pairs & Propagation Delay \\
+    \begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
         \hline
-        $\begin{bmatrix}0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & Buffer & $A$ & $1$ & $1\tau$ \\
-        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ & $1$ & $1\tau$ \\
+        $\begin{bmatrix}0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & Buffer & $A$ \\
+        $\begin{bmatrix}1 \\ 0 \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
     \end{tabular}
     \caption{Useful Single Value Binary Gates}
     \label{fig:single_value_bin_gates}
@@ -317,13 +328,13 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c|c|c}
-        Matrix & Description & Name & Symbol & CNFETs & Propagation Delay \\
+    \begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
         \hline
-        $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & BUF & $A$ & 2 & 1.0$\tau$ \\
-        $\begin{bmatrix}1 \\ 0 \\ T \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ & 4 & 1.5$\tau$ \\
-        $\begin{bmatrix}1 \\ 1 \\ T \\\end{bmatrix}$ & Positively Biased Inverter & PTI & $\hat{A}$ & 4 & 1.6$\tau$ \\
-        $\begin{bmatrix}1 \\ T \\ T \\\end{bmatrix}$ & Negatively Biased Inverter & NTI & $\check{A}$ & 4 & 1.6$\tau$ \\
+        $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Identity, Buffer, Pass & BUF & $A$ \\
+        $\begin{bmatrix}1 \\ 0 \\ T \\\end{bmatrix}$ & Inverter & NOT & $\overline{A}$ \\
+        $\begin{bmatrix}1 \\ 1 \\ T \\\end{bmatrix}$ & Positively Biased Inverter & PTI & $\hat{A}$ \\
+        $\begin{bmatrix}1 \\ T \\ T \\\end{bmatrix}$ & Negatively Biased Inverter & NTI & $\check{A}$ \\
         % $\begin{bmatrix}1 \\ 0 \\ 1 \\\end{bmatrix}$ & Absolute & ABS & $|A|$ \\
         % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Increment & INC & $A^{+}$ \\
         % $\begin{bmatrix}T \\ 0 \\ 1 \\\end{bmatrix}$ & Decrement & DEC & $A^{-}$ \\
@@ -339,12 +350,12 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-\begin{tabular}{c|c|c|c|c|c}
-        Matrix & Description & Name & Symbol & CMOS Pairs & Propagation Delay \\
+\begin{tabular}{c|c|c|c}
+        Matrix & Description & Name & Symbol \\
         \hline
-        $\begin{bmatrix}0 & 0 \\ 0 & 1 \\\end{bmatrix}$ & And & AND & $A \times B$ & 2 & 1.0$\tau$  \\
-        $\begin{bmatrix}0 & 1 \\ 1 & 1 \\\end{bmatrix}$ & Or & OR & $A + B$ & 2 & 1.0$\tau$  \\
-        $\begin{bmatrix}0 & 1 \\ 1 & 0 \\\end{bmatrix}$ & Exclusive Or & XOR & $A \oplus B$ & 4 & 2.0$\tau$  \\
+        $\begin{bmatrix}0 & 0 \\ 0 & 1 \\\end{bmatrix}$ & And & AND & $A \times B$ \\
+        $\begin{bmatrix}0 & 1 \\ 1 & 1 \\\end{bmatrix}$ & Or & OR & $A + B$ \\
+        $\begin{bmatrix}0 & 1 \\ 1 & 0 \\\end{bmatrix}$ & Exclusive Or & XOR & $A \oplus B$ \\
 \end{tabular}
     \caption{Useful Two-Input Binary Gates}
     \label{fig:two_value_bin_gates}
@@ -352,16 +363,18 @@ are redundant so only the useful gates have been listed in Figure \ref{fig:singl
 
 \begin{figure}[h]
     \centering
-    \begin{tabular}{c|c|c|c|c|c}
-            Matrix & Description & Name & Symbol & CNFETs & Propagation Delay \\
+    \begin{tabular}{c|c|c|c}
+            Matrix & Description & Name & Symbol \\
             \hline
-            $\begin{bmatrix}T & T & T \\ T & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & And/Minimum & AND & $A \times B$ & 8 & 2.0$\tau$ \\
-            $\begin{bmatrix}T & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 1 \\\end{bmatrix}$ & Or/Maximum & OR & $A + B$ & 8 & 2.0$\tau$ \\
-            $\begin{bmatrix}T & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \\\end{bmatrix}$ & Consensus & CONS & $A \boxtimes B$ & 10 & 2.4$\tau$ \\
-            $\begin{bmatrix}T & T & 0 \\ T & 0 & 1 \\ 0 & 1 & 1 \\\end{bmatrix}$ & Any & ANY & $A \boxplus B$ & 10 & 2.4$\tau$ \\
-            $\begin{bmatrix}1 & 0 & T \\ 0 & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & Multiplication & MUL & $A \otimes B$ & 14 & 3.2$\tau$ \\
-            $\begin{bmatrix}1 & T & 0 \\ T & 0 & 1 \\ 0 & 1 & T \\\end{bmatrix}$ & Addition & SUM & $A \oplus B$ & 16 & 3.5$\tau$ \\
-            $\begin{bmatrix}0 & 1 & 1 \\ T & 0 & 1 \\ T & T & 0 \\\end{bmatrix}$ & Equality & EQ & $A == B$ & 16 & 3.5$\tau$ \\
+            $\begin{bmatrix}T & T & T \\ T & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & And/Minimum & AND & $A \times B$ \\
+            $\begin{bmatrix}1 & 1 & 1 \\ 1 & 0 & 0 \\ 1 & 0 & T \\\end{bmatrix}$ & Not And & NAND & $A \times B$ \\
+            $\begin{bmatrix}T & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 1 \\\end{bmatrix}$ & Or/Maximum & OR & $A + B$ \\
+            $\begin{bmatrix}1 & 0 & T \\ 0 & 0 & T \\ T & T & T \\\end{bmatrix}$ & Not Or & NOR & $A + B$ \\
+            $\begin{bmatrix}T & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \\\end{bmatrix}$ & Consensus & CONS & $A \boxtimes B$ \\
+            $\begin{bmatrix}T & T & 0 \\ T & 0 & 1 \\ 0 & 1 & 1 \\\end{bmatrix}$ & Any & ANY & $A \boxplus B$ \\
+            $\begin{bmatrix}1 & 0 & T \\ 0 & 0 & 0 \\ T & 0 & 1 \\\end{bmatrix}$ & Multiplication & MUL & $A \otimes B$ \\
+            $\begin{bmatrix}1 & T & 0 \\ T & 0 & 1 \\ 0 & 1 & T \\\end{bmatrix}$ & Addition & SUM & $A \oplus B$ \\
+            $\begin{bmatrix}0 & 1 & 1 \\ T & 0 & 1 \\ T & T & 0 \\\end{bmatrix}$ & Equality & EQ & $A == B$ \\
     \end{tabular}
     \caption{Useful Two-Input Ternary Gates}
     \label{fig:two_value_ter_gates}
@@ -507,33 +520,40 @@ This design has been validated logically using a custom python script with the g
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{|l|l|l|l|c|l|}
+    \begin{tabular}{|c|l|l|c|c|}
         \hline
-        Description & Name & Base & Technology & Gate Count & Propagation Delay \\
+        & Name & Description & \makecell{Transistor\\Count} & \makecell{Propagation\\Delay} \\
         \hline
-        Identity, Buffer, Pass & BUF & Binary & CMOS & 2 & $1.0\tau$ \\
-        Inverter & NOT & Binary & CMOS & 2 & $1.0\tau$ \\
-        And & AND & Binary & CMOS & 6 & $1.0\tau$ \\
-        Or & OR & Binary & CMOS & 6 & $1.0\tau$ \\
-        Exclusive Or & XOR & Binary & CMOS & 8 & $2.0\tau$ \\
-        Identity, Buffer, Pass & BUF & Ternary & CNFET & 2 & $1.0\tau$ \\
-        Inverter & NOT & Ternary & CNFET & 5 & $1.5\tau$ \\
-        Positively Biased Inverter & PTI & Ternary & CNFET & 6 & $2.0\tau$ \\
-        Negatively Biased Inverter & NTI & Ternary & CNFET & 6 & $2.0\tau$ \\
-        And/Minimum & AND & Ternary & CNFET & 15 & $4.6\tau$ \\
-        Not And & NAND & Ternary & CNFET & 10 & $3.0\tau$ \\
-        Or/Maximum & OR & Ternary & CNFET & 15 & $6.6\tau$ \\
-        Not Or & NOR & Ternary & CNFET & 10 & $5.0\tau$ \\
-        Exclusive Or & XOR & Binary & CNFET & 18 & $6.0$ \\
-        Consensus & CONS & Ternary & CNFET & 55 & $2.4\tau$ \\
-        Any & ANY & Ternary & CNFET &  & $2.4\tau$ \\
+        \multirow{7}{*}{\rotatebox[origin=c]{90}{\makecell{Binary\\CMOS}}} 
+        & BUF & Identity, Buffer, Pass & 2 & $2.0\tau$ \\
+        & NOT & Inverter & 2 & $1.0\tau$ \\
+        & AND & And & 6 & $3.0\tau$ \\
+        & NAND & Not And & 6 & $2.0\tau$ \\
+        & OR & Or & 6 & $3.0\tau$ \\
+        & NOR & Not Or & 6 & $2.0\tau$ \\
+        & XOR & Exclusive Or & 8 & $4.0\tau$ \\
+        \hline
+        \multirow{11}{*}{\rotatebox[origin=c]{90}{\makecell{Ternary\\CNFET}}} 
+        & BUF & Identity, Buffer, Pass & 2 & $1.0\tau$ \\
+        & NOT & Inverter & 5 & $1.6\eta$ \\
+        & PTI & Positively Biased Inverter & 6 & $2.0\eta$ \\
+        & NTI & Negatively Biased Inverter & 6 & $2.0\eta$ \\
+        & AND & And/Minimum & 15 & $4.6\eta$ \\
+        & NAND & Not And & 10 & $3.0\eta$ \\
+        & OR & Or/Maximum & 15 & $6.6\eta$ \\
+        & NOR & Not Or & 10 & $5.0\eta$ \\
+        & XOR & Exclusive Or & 18 & $6.0\eta$ \\
+        & CONS & Consensus & 55 & $2.4\eta$ \\
+        & ANY & Any &  & $2.4\eta$ \\
         \hline
     \end{tabular}
     \caption{Comprehensive Gate Characteristics}
     \label{tab:gate_characteristics}
 \end{table}
 
-The table \ref{tab:gate_characteristics} consolidates findings from various research papers and proposed designs to present a comparative summary of both binary and ternary logic gates implemented in their respective technologies. The table documents the number of individual transistors (CMOS/CNFET) required to construct each logical function, providing a direct measure of circuit complexity and potential area requirements. Propagation delay of the critical path through each gate has also been documented, both are expressed in relative terms of the switching delay of the underlying hardware. $\tau$ is used to denote the switching time of CMOS based technology and $\eta$ is used to denote circuits designed using CNFET technology. Standardising these measurements like this allows flexibility for meaningful comparisons between gates based on theoretical assumptions as well as empirical switching delays for various node sizes. This will be useful during our results section to give context to our findings from our emulator to practical implications.
+The table \ref{tab:gate_characteristics} consolidates findings from various research papers and proposed designs to present a comparative summary of both binary and ternary logic gates implemented in their respective technologies. The table documents the number of individual transistors (CMOS/CNFET) required to construct each logical function, providing a direct measure of circuit complexity and potential area requirements. Propagation delay of the critical path through each gate has also been documented, both are expressed in relative terms of the switching delay of the underlying hardware. $\tau$ is used to denote the switching time of CMOS based technology and $\eta$ is used to denote circuits designed using CNFET technology. Standardising these measurements like this allows flexibility for meaningful comparisons between gates based on theoretical assumptions as well as empirical switching delays for various node sizes. This will be useful during our results section to give context to our findings from our emulator to practical implications.\\
+\\
+Delay propagation is derived from the circuit design for each individual gate, referenced in the table for fundamental gates, which can be found in the Appendix along with explanations in Table \ref{tab:gate-delay-reasoning}.
 
 \chapter{Emulation of Circuits}
 
@@ -593,7 +613,13 @@ This encoding scheme allows direct representation of negative numbers by treatin
 
 \section{Circuit Simulation}
 
-TODO Discuss how verilog can simulate logic but may not be able to simulate the behaviour of the gate. Mention HSPICE.
+Verilog provides capabilities for simulating digital logic at several levels of abstraction, including gate-level representations. When working at the gate level, Verilog allows for logic verification through testbenches that apply stimulus patterns and observe output responses. For our comparative analysis, this capability allows us to measure the number of gates required to perform any equivalent operations in the respective binary and ternary systems.\\
+\\
+However, this does not simulate the physical phenomena that occurs in semiconductor implementations including analogue effects such as voltage variations, current leakage, and parasitic capacitance. All of which are important considerations when working in MVL circuits due to their sensitivity around voltage thresholds higher error rates.\\
+\\
+HSPICE is a specialised simulation tool designed for accurate transistor-level modelling and is flexible enough to simulate both CMOS and CNFET technology. While HSPICE would be able to capture all of these characteristics that Verilog cannot, it is a propriety tool developed by Synopsys and requires a commercial licensing agreement which this paper have has not been the benefit of.\\
+\\
+Given this limitation, our research focuses on metrics that Verilog can simulate such as gate counts and logical correctness of the systems. We can then combine these results with empirical research using HSPICE on CMOS and CNFET implementations to enrich this information and give context for our conclusion.
 
 \chapter{Experimental Hypotheses}
 
@@ -609,19 +635,9 @@ Due to nature of emulation and our implementation method, the are several potent
 \\
 In order to be able to compare these technologies, comparative metrics are needed. A trivial method would be to count the number of gates used in both designs. This will be a direct reflection of the circuit density required to perform the same computation. We therefore will use this as a baseline comparison for our experiment but will require a few assumptions. Another more complex method would be to measure the propagation delay of each component to then calculate the time delay of the critical path through the circuit. However this intrinsically relies on the specific hardware used for implementation. This method would give us exposure to the current performance of the state of the art implementation methods for both systems and skew our results given the decades more research into binary computation. Therefore some assumptions will be made in order to allow for a more hardware agnostic comparison.
 
-\section{Assumptions}
-
-In order to be able to make an effective comparisons between the systems, a few assumptions need to be made:
-\begin{enumerate}
-    \item There exists a CNFET (or comparable technology that can be developed) that has the same propagation delay $\tau$ as the current state of the art CMOS pair.
-    \item There exists a CNFET (or comparable technology that can be developed) that has the same physical size of the current state of the art CMOS pair.
-\end{enumerate}\\
-\\
-All the implications of these assumptions will be discussed in the conclusion in context with the results along with the consequences to this paper should they not hold.\\
-
 \chapter{Experimental Design}
 
-\section{System Architecture}
+\section{Shared System Architecture}
 
 \begin{figure}
     \centering
@@ -653,9 +669,26 @@ In order to manage the complexity of the system, the processor will not be pipel
 \\
 The ALU will house the largest changes in architecture between the two bases with circuits needing to be designed for each arithmetic/logical operation. For notation, any ternary components within a circuit diagram are denoted with a small triangle in the bottom right of the gate as shown in Figure \ref{fig:ternary-half-adder}. The absence of the triangle in the bottom right of the gate diagram directly indicates the gate uses binary logic as shown in \ref{fig:binary-full-adder}.\\
 
-\begin{itemize}
-    \item Discuss split of opcode and effciency here?
-\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/Processor State Transition.drawio.png}
+    \caption{Control Module State Transition Diagram}
+    \label{fig:control-states}
+\end{figure}
+
+\section{Word Composition}
+
+The composition of the instructions was driven by a need to maximise efficiency between systems without deliberately compromising the performance and compatibility of any given system. Extending the work of Kam et al. gives us a ternary word length of 9 \cite{kam2022design}. Selecting a binary word length of 15 would give an efficiency of $60.07\%$ but would result in using a non-standard bus width for binary. Therefore despite the loss in efficiency we will be designing a 16 bit binary system to match industry standards.\\
+\\
+Jeong et al. show a ternary representation requires $63.1\%$ of characters needed for it's binary representation. With our selected word sizes the expected reduction is $56.25\%$ and all comparisons made with between then should be drawn against this updated value to negate the skew of adding an extra binary bit.\\
+\\
+Words will be comprised of 4 components; Opcode, Register Address, Small Immediate, and Large Immediate that will have to be sized accordingly based of instruction types.\\
+\\
+Opcode length is dependent of the number of instructions in our set which is 16. Although this would fit nicely into 4 bits, specific START and HALT instructions will be invaluable when performing the benchmarks and therefore 5 binary bits versus 3 ternary trits will be used providing an efficiency of $84.38\%$ efficiency.\\
+\\
+By carefully selecting the number of general purpose registers to be 8, an efficiency of $88.89\%$ can be achieved utilising 3 binary bits and 2 ternary trits for the binary and ternary system respectively.\\
+\\
+For the immediate fields, due our selection of a $16$ bit binary bus width we take a large reduction in efficiency resulting in an efficiency of $37.50\%$ and $68.75\%$ for the small and big immediate respectively. A summary of the composition of each word can be found in Table \ref{tab:word-split}.
 
 \begin{table}[h]
     \begin{tabular}{|c|c|c|c|c|c|c|}
@@ -672,20 +705,13 @@ The ALU will house the largest changes in architecture between the two bases wit
     \label{tab:word-split}
 \end{table}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{figures/Processor State Transition.drawio.png}
-    \caption{Control Module State Transition Diagram}
-    \label{fig:control-states}
-\end{figure}
-
 \section{Ternary Design}
 
 \subsection{Instruction Set}
 
-The following paper \cite{kam2022design} outlines a RISC based ART-9 ternary instruction set which using a recent study \cite{li2019reduce} from 2019 to identify and build an optimised instruction set. Table \ref{tab:ternary-instruction-set} shows the diff between their proposed instruction set and required changes made in order to ensure a fair comparison. It utilises the typical RISC load-store architecture that can be grouped into the following 4 categories; R-type (Register), I-type (Immediate), B-type (Branch), and M-type (Memory). This grouping dictates how the 9-trit long words should be broken down their into their representative chunks as shown in figure \ref{fig:is-split}.\\
+The following paper \cite{kam2022design} outlines a RISC based ART-9 ternary instruction set which using a recent study \cite{li2019reduce} from 2019 to identify and build an optimised instruction set. Table \ref{tab:ternary-instruction-set} shows the diff between their proposed instruction set and required changes made in order to ensure a fair comparison. It utilises the typical RISC load-store architecture that can be grouped into the following 4 categories; R-type (Register), I-type (Immediate), B-type (Branch), and M-type (Memory). This grouping dictates how the 9-trit long words should be broken down their into their representative chunks as shown in figure \ref{tab:word-split}.\\
 \\
-The architecture outlines a single special-purpose 9-trit register for use a program counter (PC) in order to store the current instruction address. Like most modern processor architectures, the core also includes nine 9-trit general purpose registers that can be accessed using 2 trit indices that are denoted by Ta and Tb. Overwriting results to these general purpose registers is denoted by TRF[Ta]. As shown in table \ref{fig:is-split} our design will only be using 8 general purpose registers due to the decision for the binary system to use 3 bits for register addresses. Further justifications and discussions on these decisions can be found in this section TODO.\\
+The architecture outlines a single special-purpose 9-trit register for use a program counter (PC) in order to store the current instruction address. Like most modern processor architectures, the core also includes nine 9-trit general purpose registers that can be accessed using 2 trit indices that are denoted by Ta and Tb. Overwriting results to these general purpose registers is denoted by TRF[Ta]. As shown in table \ref{fig:is-split} our design will only be using 8 general purpose registers due to the decision for the binary system to use 3 bits for register addresses as shown in Table \ref{tab:word-split}.
 \\
 Another deviation from this architecture is in the R-type instruction (COMP) as Kam et al. outlines updates to the least significant trit (LST) with TRF[Ta] being set to $0$ if equal, otherwise $+1$ if TRF[Ta] $>$ TRF[Tb] and $-1$ if TRF[Ta] $<$ TRF[Tb]. While this plays an important role in improving code density in favour of ternary, we are looking to perform a comparative analysis and implementing the same capability into a binary system would require increasing the instruction set size. The consequences of this would be more CPU cycles for binary resulting in skewed results when looking at the raw computation efficiency of the paradigms. Instead as shown in Table \ref{tab:ternary-instruction-set} we will be breaking this down into two instructions less-than (LT) and equal-to (EQ). Both instructions will only update the LST of the register, in other words the value to $+1$ if TRF[Ta] $>$ TRF[Tb] or TRF[Ta] $==$ TRF[Tb] for each instruction respectively, $0$ otherwise.\\
 \\
@@ -697,9 +723,9 @@ All shifts ($<<$ and $>>$) have been removed from the instruction set due to bei
      & Type & 9-trit instructions & Operation \\
     \hline
      & R & MV Ta,Tb & TRF[Ta] = TRF[Tb] \\
-     & R & PTI Ta,Tb & TRF[Ta] = PTI(TRF[Tb]) \\
-     & R & NTI Ta,Tb & TRF[Ta] = NTI(TRF[Tb]) \\
-     & R & STI Ta,Tb & TRF[Ta] = STI(TRF[Tb]) \\
+     \rowcolor{pink!40} - & R & PTI Ta,Tb & TRF[Ta] = PTI(TRF[Tb]) \\
+     \rowcolor{pink!40} - & R & NTI Ta,Tb & TRF[Ta] = NTI(TRF[Tb]) \\
+     & R & NOT Ta,Tb & TRF[Ta] = STI(TRF[Tb]) \\
      & R & AND Ta,Tb & TRF[Ta] = TRF[Ta] $\wedge$ TRF[Tb] \\
      & R & OR Ta,Tb & TRF[Ta] = TRF[Ta] $\vee$ TRF[Tb] \\
      & R & XOR Ta,Tb & TRF[Ta] = TRF[Ta] $\oplus$ TRF[Tb] \\
@@ -718,8 +744,8 @@ All shifts ($<<$ and $>>$) have been removed from the instruction set due to bei
      & I & LI Ta,imm & TRF[Ta] = \{TRF[Ta][8:5],imm[4:0]\} \\
      & B & BEQ Ta,B,imm & PC = PC + imm[3:0] if TRF[Ta][0] $=$ B \\
      & B & BNE Ta,B,imm & PC = PC + imm[3:0] if TRF[Ta][0] $\neq$ B \\
-     & B & JAL Ta,imm & TRF[Ta] = PC+1, PC = PC + imm[4:0] \\
-     & B & JALR Ta,Tb,imm & TRF[Ta] = PC+1, PC = PC + imm[4:0] \\
+     \rowcolor{pink!40} - & B & JAL Ta,imm & TRF[Ta] = PC+1, PC = PC + imm[4:0] \\
+     \rowcolor{pink!40} - & B & JALR Ta,Tb,imm & TRF[Ta] = PC+1, PC = PC + imm[4:0] \\
      & M & LOAD Ta,Tb,imm & TRF[Ta] = TDM[TRF[Tb]+imm[2:0]] \\
      & M & STORE Ta,Tb,imm & TDM[TRF[Tb]+imm[2:0]] = TRF[Ta] \\
     \hline
@@ -973,13 +999,19 @@ Kam et al. show how the number of processing cycles can be significantly reduced
 
 \subsection{Primitive Operations}
 
-As part of our testing methodology, each ALU operation will be tested individually for a direct comparison...
-
-\textbf{Matrix Multiplication}
-
-
+TODO: As part of our testing methodology, each ALU operation will be tested individually for a direct comparison...
 
 \section{Interface}
+
+To facilitate the compilation and testing process across both binary and ternary systems, a web-based interface was developed using React as show in Figure \ref{fig:system-interface}. This interface provides a structured environment for users to interact with the compiler to generate and visualise the results of program execution on both architectural paradigms.\\
+\\
+The assembly input area allows users to enter code directly or select from predefined program templates where these templates will be a subset of the range of programs used to generate the results discussed in the section below. Documentation is available on the instruction set including information on operations and their respective syntax.
+\\
+Upon compilation, the interface processes the assembly code through the dual-target compiler described in Section 7.1, generating both binary and ternary machine code. Execution results from both systems are captured and displayed in the console output panel, allowing for direct comparison of execution metrics.
+\\
+Performance analysis is presented through automatically generated graphs that visualize gate counts for different operations across both systems. These visualizations quantify the relative efficiency of binary versus ternary implementations for specific computational tasks. The data can be exported in standard formats for further analysis.
+\\
+The primary function of this interface is to serve as an experimental platform where researchers can test hypotheses regarding binary and ternary computational efficiency. The modular design allows for periodic updates of the empirical values from contemporary CNFET and CMOS technologies, ensuring that propagation delay comparisons remain representative of state-of-the-art implementations.
 
 \begin{figure}
     \centering
@@ -990,27 +1022,89 @@ As part of our testing methodology, each ALU operation will be tested individual
 
 \chapter{Results}
 
-\begin{figure}
+Analysis of results focuses on gate counts, transistor counts, and propagation delays across various basic and complex ALU operations providing insight into the theoretical and practical advantages of each paradigm.
+
+\section{Gate Count Analysis}
+
+\subsection{Basic Operations}
+
+The results indicate that ternary implementations require fewer gates for basic operations compared to binary implementations. This reduction directly correlates with the decreased word length in ternary representation (9 trits versus 16 bits), supporting the theoretical information density advantage of ternary logic. For operations such as; NOT, AND, OR, and XOR the gate count reduction is $56.25\%$ which correlates with the theoretical gain in efficiency we expected to observe as discussed in the Word Composition section.
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.8\linewidth]{figures/trivial_gate_usage.png}
     \caption{Basic ALU Operation Gate Counts}
-    \label{fig:ternary-full-adder}
+    \label{fig:basic-gate-counts}
 \end{figure}
 
-\begin{figure}
+\subsection{Less Basic Operations}
+
+Contrary to basic operations, more complex operations demonstrate a significant increase in gate count for ternary implementations. Our design of the operations such as ADD and SUB rely heavily on gates such as CONSENSUS and ANY, which themselves require multiple primitive gates to implement. This multiplicative effect results in approximately $[X\%]$ more gates for operations such as ADD and SUB compared to their binary counterparts. The data indicates that already the overhead of constructing complex ternary operations outweighs the benefits gained from shorter word length predicted by information density calculations.
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.8\linewidth]{figures/complex_gate_usage.png}
     \caption{Complex ALU Operation Gate Counts}
-    \label{fig:ternary-full-adder}
+    \label{fig:complex-gate-counts}
 \end{figure}
 
-TODO: Compare the reduction in transistor count (if there is one to be found) then compare the propagation of individual circuits and suggest the increase in raw performance and chip area that would need be needed realise these benefits.
+\section{Transistor Requirement Analysis}
+
+\subsection{Basic Operations}
+
+Despite the reduction in gate count for basic operations, the analysis of transistor requirements reveals that binary implementations remain more efficient. CMOS technology requires approximately $4-6$ transistors per binary gate such as AND, OR NAND, NOR whereas the same ternary gates in CNFET technology require $10-15$ transistors as shown in Table \ref{tab:gate_characteristics}. This results in binary implementations using consistently fewer transistors than equivalent ternary implementations for basic operations, demonstrating that the increased complexity of ternary gates negates the word length advantage.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/basic_transistor_count.png}
+    \caption{Basic ALU Operations Transistor Counts}
+    \label{fig:basic-transistor-counts}
+\end{figure}
+
+\subsection{Less Basic Operations}
+
+The transistor count disparity becomes more pronounced for complex operations. Ternary implementations require an entire magnitude more transistors compared to binary equivalents due to both the increased number of gates and the higher transistor count per gate. Operations such as addition demonstrate this effect most clearly, requiring $5535$ transistors in ternary versus $544$ in binary.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/complex_transistor_count.png}
+    \caption{Complex ALU Operations Transistor Counts}
+    \label{fig:complex-transistor-counts}
+\end{figure}
+
+\section{Propagation Delay Comparison}
+
+Propagation delay analysis indicates that ternary implementations experience [X\%] longer critical paths compared to binary implementations for equivalent operations. This is primarily due to the cascading effect of more complex gate structures required for ternary logic.
+For time-critical operations such as [specific examples], binary implementations demonstrate clear advantages in computational efficiency despite requiring more digits to represent the same information range.
+
+\section{Optimized Implementation Comparison}
+
+\subsection{Case Study: Optimized Ternary Half Adder}
+
+To evaluate whether optimization techniques could mitigate the observed disadvantages, we analyzed an optimized ternary half adder implementation using $63$ CNFETs, compared to our standard implementation requiring [X] CNFETs.\\
+\\
+The optimized design demonstrates a [Y\%] reduction in transistor count and a [Z\%] reduction in propagation delay. However, when compared to the binary equivalent requiring [W] CMOS pairs, the optimized ternary implementation still requires [V\%] more transistors.\\
+\\
+This case study indicates that while optimization can reduce the implementation gap, it does not fully overcome the fundamental challenges facing ternary logic circuit implementation with current technology.
+
+\section{Summary of Findings}
+
+The experimental results demonstrate that despite the theoretical 58\% information density advantage offered by ternary logic, practical implementations face significant challenges that neutralize or reverse this advantage:
+
+\begin{enumerate}
+    \item Gate count advantages in basic operations are overshadowed by the increased complexity of implementing ternary gates
+    \item Transistor requirements for ternary implementations exceed binary implementations by [X\%] on average
+    \item Propagation delays in ternary circuits are [Y\%] longer than binary equivalents
+    \item Even optimized ternary designs fail to outperform binary implementations in transistor efficiency
+\end{enumerate}
 
 \chapter{Future Work and Conclusions}
 
 \section{Limitations}
 \section{Possible Future Work}
 \section{Concluding Remarks}
+
+This paper shows that for ternary logic to be considered over existing binary logic in general computing applications, significant research into constructing more complex gates directly using CNFET arrangements is needed. As currently the number of CNFET's required to build an equivalent CMOS circuit is greater, CNFET gates would have to be best case $X\%$ smaller in order to gain any benefit. This however leads us back to the fundamental problem plaguing CMOS technology today; there is only a finite about of transistors you can cram onto a chip.
 
 \printbibliography
 
@@ -1019,30 +1113,63 @@ TODO: Compare the reduction in transistor count (if there is one to be found) th
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/jaber_cnfet_not_gate_diagram.png}
-    \caption{Jaber et al. proposed transistor level STI}
+    \caption{Jaber et al. proposed CNFET Ternary STI Design}
     \label{fig:jaber-ternary-inverter}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/jaber_cnfnet_nand_gate_diagram.png}
-    \caption{Jaber et al. proposed transistor level NAND}
+    \caption{Jaber et al. proposed CNFET Ternary NAND Design}
     \label{fig:jaber-ternary-nand}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/cnfet_nor_gate_diagram.jpg}
-    \caption{Khurshid et al. proposed transistor level NOR}
+    \caption{Khurshid et al. proposed CNFET Ternary NOR Design}
     \label{fig:cnfet-ternary-nor}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/cnfet_xor_gate_design.png}
-    \caption{Murotiya et al. proposed transistor level XOR}
+    \caption{Murotiya et al. proposed CNFET Ternary XOR Design}
     \label{fig:cnfet-ternary-xor}
 \end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/CMOS XOR Gate.png}
+    \caption{Standard 12 transistor CMOS Binary XOR Design}
+    \label{fig:cmos-binary-xor}
+\end{figure}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|l|p{9cm}|c|}
+        \hline
+        & \textbf{Gate} & \textbf{Propagation Delay Explanation} & \textbf{Delay} \\
+        \hline
+        \multirow{7}{*}{\rotatebox[origin=c]{90}{\textbf{Binary}}} 
+        & BUF & A buffer is implemented as two inverters in series. Each inverter stage contributes 1.0$\tau$ to the total delay. & $2.0\tau$ \\
+        \cline{2-4}
+        & NOT & Consists of one PMOS and one NMOS transistor. The critical path involves only one transistor switching. This is the baseline unit of delay. & $1.0\tau$ \\
+        \cline{2-4}
+        & NAND & Implemented with 2 PMOS transistors in parallel and 2 NMOS transistors in series. The critical path is through the NMOS pull-down network with 2 transistors in series. & $2.0\tau$ \\
+        \cline{2-4}
+        & AND & Implemented as a NAND gate followed by an inverter. Combines the delay of NAND 2.0$\tau$ with the delay of an inverter 1.0$\tau$. & $3.0\tau$ \\
+        \cline{2-4}
+        & NOR & Implemented with 2 PMOS transistors in series and 2 NMOS transistors in parallel. The critical path is through the PMOS pull-up network with 2 transistors in series. & $2.0\tau$ \\
+        \cline{2-4}
+        & OR & Implemented as a NOR gate followed by an inverter. Combines the delay of NOR 2.0$\tau$ with the delay of an inverter 1.0$\tau$. & $3.0\tau$ \\
+        \cline{2-4}
+        & XOR & As shown in Figure \ref{fig:cmos-binary-xor} the XOR gate is implemented using 4 transmission gates and 2 inverters. The critical path is a sequential layout of one inverter and one transmission gate with delays of $1.0\tau$ and $2.0\tau$ respectively. & $3.0\tau$ \\
+        \hline
+    \end{tabular}
+    \caption{Propagation Delay Analysis for Binary Gates}
+    \label{tab:binary_gate_delay_reasoning}
+\end{table}
 
 \end{document}
 
