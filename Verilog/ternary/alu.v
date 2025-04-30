@@ -4,14 +4,12 @@ module gate_counter_top;
     integer and_count = 0;
     integer or_count = 0;
     integer xor_count = 0;
-    integer any_count = 0;
-    integer consensus_count = 0;
     
     // Task to display counts
     task display_counts;
     begin
-        $display("Gate counts: NOT=%0d, AND=%0d, OR=%0d, XOR=%0d, ANY=%0d, CONSENSUS=%0d", 
-                 not_count, and_count, or_count, xor_count, any_count, consensus_count);
+        $display("Gate counts: NOT=%0d, AND=%0d, OR=%0d, XOR=%0d", 
+                 not_count, and_count, or_count, xor_count);
     end
     endtask
 
@@ -35,8 +33,6 @@ module gate_counter_top;
             $fwrite(file, "AND,%0d\n", and_count);
             $fwrite(file, "OR,%0d\n", or_count);
             $fwrite(file, "XOR,%0d\n", xor_count);
-            $fwrite(file, "ANY,%0d\n", any_count);
-            $fwrite(file, "CONSENSUS,%0d\n", consensus_count);
             
             // Close the file
             $fclose(file);
@@ -300,7 +296,9 @@ module ternary_any_1bit(
 
     // Increment the gate counter for ANY gate
     always @(posedge enable) begin
-        counter.any_count = counter.any_count + 1;
+        counter.not_count = counter.not_count + 2;
+        counter.and_count = counter.and_count + 1;
+        counter.or_count = counter.or_count + 2;
     end
 
 endmodule
@@ -338,7 +336,9 @@ module ternary_consensus_1bit(
 
     // Increment the gate counter for CONSENSUS gate
     always @(posedge enable) begin
-        counter.consensus_count = counter.consensus_count + 1;
+        counter.not_count = counter.not_count + 2;
+        counter.and_count = counter.and_count + 1;
+        counter.or_count = counter.or_count + 2;
     end
 
 endmodule
