@@ -72,7 +72,7 @@ module system_tb;
             // Display register values on each clock cycle
             @(posedge clock);
             if (VERBOSE) begin
-                $display("PC=%2d, State=%1d", uut.cpu.program_counter, uut.cpu.ctrl.state);
+                $display("State=%1d, PC=%2d", uut.cpu.ctrl.state, uut.cpu.program_counter);
                 // $display("Time=%0t PC=%0d", $time, uut.cpu.program_counter);
                 $display("R0=%3d R1=%3d R2=%3d R3=%3d R4=%3d R5=%3d", 
                     r0, 
@@ -87,10 +87,25 @@ module system_tb;
                 if (uut.cpu.mem_write)
                     $display("Memory Write: Addr=%d Data=%d",
                             uut.cpu.mem_address, uut.cpu.mem_write_data);
+
+                if (uut.cpu.mem_read)
+                    $display("Memory Read: Addr=%d Data=%d",
+                            uut.cpu.mem_address, uut.cpu.mem_read_data);
+
+                // Display register operations
+                if (uut.cpu.do_reg_store)
+                    $display("Register Write: Addr=%d Data=%d",
+                            uut.cpu.reg_dest, uut.cpu.reg_val);
+
+                if (uut.cpu.do_reg_load)
+                    $display("Register Read: Addr=%d Data=%d",
+                            uut.cpu.reg_src, uut.cpu.reg_out1);
                 
                 // Display ALU operations
                 if (uut.cpu.state == 4)  // Write Back state
                     $display("ALU Result=%d", uut.cpu.alu_out);
+
+                $display("-------------------------------------------");
             end
                 
             // Check if program counter has stopped changing
@@ -122,8 +137,7 @@ module system_tb;
 
          // Display the memory contents
         $display("\nMemory Contents:");
-        // for (integer i = 0; i < uut.loader.MEM_SIZE; i = i + 1) begin
-        for (integer j = 0; j < 20; j = j + 1) begin
+        for (integer j = 0; j < 16; j = j + 1) begin
             $display("Addr=%0d Data=%b", j, uut.ram.memory[j]);
         end
 

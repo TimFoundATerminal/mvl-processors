@@ -13,7 +13,7 @@ del /f main.vvp
 cd ../
 
 REM Compile the Verilog files
-iverilog -o testbenches/main.vvp -Psystem_tb.VERBOSE=0 program_counter.v registers.v fetch_instruction.v decode_instruction.v alu.v control.v memory.v cpu.v program_loader.v machine.v testbenches/system_tb.v
+iverilog -o testbenches/main.vvp -Psystem_tb.VERBOSE=1 program_counter.v registers.v fetch_instruction.v decode_instruction.v alu.v control.v memory.v cpu.v program_loader.v machine.v testbenches/system_tb.v
 
 REM Run the simulation
 vvp testbenches/main.vvp

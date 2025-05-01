@@ -169,6 +169,7 @@ def main():
         ("NAND", NAND),
         ("NOR", NOR),
         ("Consensus", consensus_gate),
+        ("Any", any_gate),
     ]
     
     # Generate and print truth tables for monadic gates
@@ -199,13 +200,21 @@ def consensus_gate(a, b):
 def any_gate(a, b):
     """ Consensus gate class to allow for dynamic gate creation """
 
-    pos_a = PTI(a)
-    pos_b = PTI(b)
+    n_a = NTI(a)
+    n_b = NTI(b)
 
-    p_result = STI(NOR(pos_a, pos_b))
-    n_result = STI(NAND(a, b))
+    _a = STI(a)
+    _b = STI(b)
 
-    result = STI(NOR(p_result, n_result))
+    p_a = PTI(a)
+    p_b = PTI(b)
+
+    result = NAND(n_a, b) # interesting case
+    # result = NAND(n_a, _b) # interesting case
+    # result = NAND(a, n_b) # interesting case
+    # result = NAND(_a, n_b) # interesting case
+    # result = NAND(p_a, n_b) # interesting case
+    # result = NAND(n_a, p_b) # interesting case
 
     return result
 
